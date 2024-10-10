@@ -116,6 +116,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
+            android:layout_marginBottom="20dp"
             android:background="@drawable/custonlinear01_home"
             android:orientation="horizontal">
 
@@ -154,8 +155,17 @@
 
         </LinearLayout>
 
+            <FrameLayout
+                android:id="@+id/fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:layout_editor_absoluteX="1dp"
+                tools:layout_editor_absoluteY="1dp" />
 
-    </LinearLayout>
+
+        </LinearLayout>
+
     </FrameLayout>
 
 </LinearLayout>

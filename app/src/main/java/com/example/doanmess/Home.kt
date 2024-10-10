@@ -36,6 +36,12 @@ class Home : AppCompatActivity() {
             CustomButtonToInactive(btnAllchat)
             CustomButtonToInactive(btnContact)
         }
+
+        val fragment_ChatAll = AllChatFra.newInstance()
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, fragment_ChatAll)
+        transaction.commit()
+
     }
 
 
