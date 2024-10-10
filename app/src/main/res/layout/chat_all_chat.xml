@@ -42,7 +42,7 @@
                 android:layout_weight="9"
                 android:fontFamily="sans-serif-medium"
                 android:text="Your Text Here"
-                android:textColor="#000000"
+                android:textColor="#605656"
                 android:textSize="17sp"
                 android:textStyle="normal" />
 

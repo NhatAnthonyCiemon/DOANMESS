@@ -15,18 +15,21 @@ class AllChatFra : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         list = listOf(
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn A", message = "Hello", time = "10:00", status = true),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn B", message = "Hi", time = "11:00", status = false),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn C", message = "Hey", time = "12:00", status = true),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn D", message = "Haha", time = "13:00", status = false),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn E", message = "Hehe", time = "14:00", status = true),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn F", message = "Hoho", time = "15:00", status = false),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn G", message = "Huhu", time = "16:00", status = true),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn H", message = "Haha", time = "17:00", status = false),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn I", message = "Hehe", time = "18:00", status = true),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn K", message = "Hoho", time = "19:00", status = false),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn L", message = "Huhu", time = "20:00", status = true),
-            DataMess(avatar = R.drawable.avatar_placeholder_allchat, name = "Nguyễn Văn M", message = "Haha", time = "21:00", status = false)
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn A", "Hello", "10:00", true, false),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn B", "Hi", "10:00", false, true),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn C", "Hello", "10:00", false, true),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn D", "Hi", "10:00", false, false),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn E", "Hello", "10:00", false, true),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn F", "Hi", "10:00", true, false),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn G", "Hello", "10:00", false, false),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn H", "Hi", "10:00", false, true),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn I", "Hello", "10:00", false, true),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn J", "Hi", "10:00", true, false),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn K", "Hello", "10:00", false, true),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn L", "Hi", "10:00", false, true),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn M", "Hello", "10:00", false, false),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn N", "Hi", "10:00", true, true),
+            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn O", "Hello", "10:00", false, false),
         )
     }
 
