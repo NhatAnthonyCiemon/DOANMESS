@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.view.View
+import androidx.fragment.app.Fragment
 
 class Home : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,11 +26,13 @@ class Home : AppCompatActivity() {
             CustomButtonToActive(btnAllchat)
             CustomButtonToInactive(btnContact)
             CustomButtonToInactive(btnInfo)
+            ChangeFragment(AllChatFra.newInstance())
         }
         btnContact.setOnClickListener {
             CustomButtonToActive(btnContact)
             CustomButtonToInactive(btnAllchat)
             CustomButtonToInactive(btnInfo)
+            ChangeFragment(ContactsFragment.newInstance())
         }
         btnInfo.setOnClickListener {
             CustomButtonToActive(btnInfo)
@@ -37,10 +40,11 @@ class Home : AppCompatActivity() {
             CustomButtonToInactive(btnContact)
         }
 
-        val fragment_ChatAll = AllChatFra.newInstance()
+        ChangeFragment(AllChatFra.newInstance())
+/*        val fragment_ChatAll = AllChatFra.newInstance()
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, fragment_ChatAll)
-        transaction.commit()
+        transaction.commit()*/
 
     }
 
@@ -52,6 +56,11 @@ class Home : AppCompatActivity() {
 
     fun CustomButtonToInactive(view: View) {
         view.background = getDrawable(R.drawable.custonlinear01_home)
+    }
+    fun ChangeFragment(fragment :Fragment){
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, fragment)
+        transaction.commit()
     }
 
 }
