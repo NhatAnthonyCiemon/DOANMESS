@@ -49,13 +49,14 @@ class Home : AppCompatActivity() {
     }
 
 
-        fun CustomButtonToActive(view: View) {
+    fun CustomButtonToActive(view: View) {
         view.background = getDrawable(R.drawable.custombtn02_home)
         (view as? Button)?.setTextColor(getColor(R.color.white))
     }
 
     fun CustomButtonToInactive(view: View) {
         view.background = getDrawable(R.drawable.custonlinear01_home)
+        (view as? Button)?.setTextColor(getColor(R.color.xam))
     }
     fun ChangeFragment(fragment :Fragment){
         val transaction = supportFragmentManager.beginTransaction()
