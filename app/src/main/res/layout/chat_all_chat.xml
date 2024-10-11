@@ -3,21 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+
+    android:elevation="0dp"
     android:orientation="horizontal"
     android:paddingTop="13dp"
     android:paddingBottom="13dp">
 
 
     <androidx.cardview.widget.CardView
+        android:elevation="0dp"
+        android:background="@drawable/balnk"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginRight="25dp"
-        app:cardCornerRadius="1000dp">
+        app:cardCornerRadius="60dp">
 
         <ImageView
+            android:elevation="0dp"
             android:id="@+id/imgAvatar"
             android:layout_width="80dp"
+            android:layout_gravity="center"
             android:layout_height="80dp"
             android:scaleType="fitXY"
             app:srcCompat="@drawable/avatar_placeholder_allchat" />
