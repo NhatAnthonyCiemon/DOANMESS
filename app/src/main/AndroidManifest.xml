@@ -16,6 +16,9 @@
             android:name=".ChatAll"
             android:exported="false" />
         <activity
+            android:name=".Login"
+            android:exported="false" />
+        <activity
             android:name=".Home"
             android:exported="true" >
                       <intent-filter>
