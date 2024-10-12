@@ -13,6 +13,9 @@
         android:theme="@style/Theme.DOANMESS"
         tools:targetApi="31">
         <activity
+            android:name=".SignUp"
+            android:exported="false" />
+        <activity
             android:name=".ChatAll"
             android:exported="false" />
         <activity
@@ -20,8 +23,8 @@
             android:exported="false" />
         <activity
             android:name=".Home"
-            android:exported="true" >
-                      <intent-filter>
+            android:exported="true">
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -30,11 +33,14 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
-  <!--          <intent-filter>
+
+            <!--
+                <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+            </intent-filter>
+            -->
         </activity>
     </application>
 

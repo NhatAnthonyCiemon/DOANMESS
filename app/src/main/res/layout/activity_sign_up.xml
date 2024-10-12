@@ -7,11 +7,11 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:orientation="vertical"
-    tools:context=".Login">
+    tools:context=".SignUp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="490dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="horizontal">
 
@@ -22,7 +22,6 @@
             android:layout_weight="1"
             android:paddingStart="30dp"
             android:paddingTop="40dp"
-            android:text="WELCOME BACK"
             android:textSize="34sp" />
 
         <FrameLayout
@@ -51,7 +50,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="480dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="1"
         android:orientation="vertical"
@@ -60,34 +59,29 @@
 
         <TextView
             android:id="@+id/textView2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="384dp"
+            android:layout_height="68dp"
             android:layout_gravity="center"
             android:paddingBottom="16dp"
-            android:text="Login"
+            android:text="Create Account"
+            android:textAlignment="center"
             android:textColor="#000000"
             android:textSize="48sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Please sign in to continue"
-            android:textSize="24sp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
         android:paddingTop="20dp">
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="70dp">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
 
             <ImageView
                 android:id="@+id/imageView5"
@@ -110,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="110dp"
                 android:layout_marginTop="5dp"
-                android:text="EMAIL" />
+                android:text="FULL NAME" />
 
             <EditText
                 android:id="@+id/editTextTextEmailAddress"
@@ -120,7 +114,7 @@
                 android:layout_marginStart="10dp"
                 android:ems="10"
                 android:inputType="textEmailAddress"
-                android:text="user123@gmail.com"
+                android:text="User Name"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -128,7 +122,43 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="70dp">
+            android:layout_height="70dp"
+            android:layout_marginBottom="10dp">
+
+            <ImageView
+                android:id="@+id/imageView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/background_email_input" />
+
+            <ImageView
+                android:id="@+id/imageView6"
+                android:layout_width="28dp"
+                android:layout_height="26dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="70dp"
+                app:srcCompat="@drawable/email" />
+
+            <EditText
+                android:id="@+id/editTextTextEmailAddress2"
+                android:layout_width="209dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="10dp"
+                android:ems="10"
+                android:inputType="textEmailAddress"
+                android:text="EMAIL"
+                android:textColor="#737373"
+                android:textSize="12sp"
+                android:textStyle="normal" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginBottom="10dp">
 
             <ImageView
                 android:id="@+id/imageView5"
@@ -147,7 +177,7 @@
 
             <EditText
                 android:id="@+id/editTextTextEmailAddress"
-                android:layout_width="206dp"
+                android:layout_width="207dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
@@ -160,26 +190,53 @@
 
         </FrameLayout>
 
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="186dp"
-            android:layout_height="17dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/forgotpass" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <ImageView
+                android:id="@+id/imageView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/background_email_input" />
+
+            <ImageView
+                android:id="@+id/imageView6"
+                android:layout_width="28dp"
+                android:layout_height="26dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="70dp"
+                app:srcCompat="@drawable/password" />
+
+            <EditText
+                android:id="@+id/editTextTextEmailAddress"
+                android:layout_width="204dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="10dp"
+                android:ems="10"
+                android:inputType="textEmailAddress"
+                android:text="CONFIRM PASSWORD"
+                android:textColor="#737373"
+                android:textSize="12sp"
+                android:textStyle="normal" />
+
+        </FrameLayout>
 
         <Button
             android:id="@+id/button3"
-            android:layout_width="142dp"
-            android:layout_height="57dp"
+            android:layout_width="152dp"
+            android:layout_height="54dp"
             android:layout_gravity="end"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="30dp"
-            android:background="@drawable/loginbutton" />
+            android:background="@drawable/signupbutton" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="100dp"
             android:orientation="horizontal">
 
             <TextView
@@ -187,8 +244,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
                 android:layout_weight="1"
-                android:text="Don't have an account?"
+                android:text="Already have an account?"
                 android:textAlignment="viewEnd" />
 
             <Button
@@ -196,11 +254,11 @@
                 android:layout_width="10dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginEnd="60dp"
+                android:layout_marginEnd="70dp"
                 android:layout_weight="1"
                 android:background="#00FFFFFF"
                 android:paddingLeft="5dp"
-                android:text="Sign up"
+                android:text="Sign in"
                 android:textAlignment="textStart"
                 android:textColor="#F89324" />
 
