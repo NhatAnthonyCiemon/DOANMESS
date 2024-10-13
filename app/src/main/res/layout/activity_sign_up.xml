@@ -107,16 +107,16 @@
                 android:text="FULL NAME" />
 
             <EditText
-                android:id="@+id/editTextTextEmailAddress"
+                android:id="@+id/etFullName"
                 android:layout_width="210dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
-                android:inputType="textEmailAddress"
+                android:inputType="textPersonName"
                 android:text="User Name"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textColor="#6B6B6B"
+                android:textSize="12sp" />
 
         </FrameLayout>
 
@@ -141,7 +141,7 @@
                 app:srcCompat="@drawable/email" />
 
             <EditText
-                android:id="@+id/editTextTextEmailAddress2"
+                android:id="@+id/etEmail"
                 android:layout_width="209dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -176,13 +176,13 @@
                 app:srcCompat="@drawable/password" />
 
             <EditText
-                android:id="@+id/editTextTextEmailAddress"
+                android:id="@+id/etPassword"
                 android:layout_width="207dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
-                android:inputType="textEmailAddress"
+                android:inputType="textVisiblePassword"
                 android:text="PASSWORD"
                 android:textColor="#737373"
                 android:textSize="12sp"
@@ -211,13 +211,13 @@
                 app:srcCompat="@drawable/password" />
 
             <EditText
-                android:id="@+id/editTextTextEmailAddress"
+                android:id="@+id/etConfirmPassword"
                 android:layout_width="204dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
-                android:inputType="textEmailAddress"
+                android:inputType="textVisiblePassword"
                 android:text="CONFIRM PASSWORD"
                 android:textColor="#737373"
                 android:textSize="12sp"
@@ -226,7 +226,7 @@
         </FrameLayout>
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/btnSignUp"
             android:layout_width="152dp"
             android:layout_height="54dp"
             android:layout_gravity="end"
@@ -250,7 +250,7 @@
                 android:textAlignment="viewEnd" />
 
             <Button
-                android:id="@+id/button4"
+                android:id="@+id/btnSignIn"
                 android:layout_width="10dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
