@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:orientation="vertical"
-    tools:context=".FriendRequest">
+    tools:context=".Block">
 
 
     <FrameLayout
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"
             android:layout_marginEnd="50dp"
-            android:text="Friend Requests"
+            android:text="Blocklist"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold" />
