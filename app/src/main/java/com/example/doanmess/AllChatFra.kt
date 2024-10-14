@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.createuiproject.MainChat
 
 class AllChatFra : Fragment() {
     // TODO: Rename and change types of parameters
@@ -43,7 +44,7 @@ class AllChatFra : Fragment() {
         adapter.setOnItemClickListener(object: Chat_AllChatAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
                 //code để chuyển đến màn hình chat
-                val intent = Intent(requireActivity(), MainActivity::class.java)
+                val intent = Intent(requireActivity(), MainChat::class.java)
                 startActivity(intent)
             }
         })
