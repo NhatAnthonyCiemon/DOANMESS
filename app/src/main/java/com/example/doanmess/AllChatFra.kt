@@ -42,6 +42,7 @@ class AllChatFra : Fragment() {
         val adapter = Chat_AllChatAdapter(list)
         adapter.setOnItemClickListener(object: Chat_AllChatAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
+                //code để chuyển đến màn hình chat
                 val intent = Intent(requireActivity(), MainActivity::class.java)
                 startActivity(intent)
             }
