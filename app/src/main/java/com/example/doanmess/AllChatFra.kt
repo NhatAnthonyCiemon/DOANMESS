@@ -1,4 +1,5 @@
 package com.example.doanmess
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -39,7 +40,14 @@ class AllChatFra : Fragment() {
         val view= inflater.inflate(R.layout.fragment_all_chat, container, false)
         val recyclerView = view.findViewById<RecyclerView>(R.id.RVChat_AllChat)
         val adapter = Chat_AllChatAdapter(list)
+        adapter.setOnItemClickListener(object: Chat_AllChatAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                val intent = Intent(requireActivity(), MainActivity::class.java)
+                startActivity(intent)
+            }
+        })
         recyclerView.adapter = adapter
+
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
         return view

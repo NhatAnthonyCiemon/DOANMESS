@@ -8,13 +8,25 @@ import android.view.LayoutInflater
 
 
 class Chat_AllChatAdapter(var list: List<DataMess>): RecyclerView.Adapter<Chat_AllChatAdapter.MessHolder>() {
-    inner class MessHolder(itemview: View) : RecyclerView.ViewHolder(itemview) {
-
+    inner class MessHolder(itemview: View,clickListener: OnItemClickListener) : RecyclerView.ViewHolder(itemview) {
+        init {
+            itemView.setOnClickListener {
+                clickListener.onItemClick(adapterPosition)
+            }
+        }
+    }
+    private lateinit var listener: OnItemClickListener
+    interface OnItemClickListener {
+        fun onItemClick(position: Int)
+    }
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.listener = listener
     }
     override fun getItemViewType(position: Int): Int {
         val item = list[position]
         return if (item.status) 1 else 0
     }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val view = if (viewType == 1) {
@@ -23,7 +35,7 @@ class Chat_AllChatAdapter(var list: List<DataMess>): RecyclerView.Adapter<Chat_A
             layoutInflater.inflate(R.layout.chat_all_chat, parent, false)
         }
         view.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        return MessHolder(view)
+        return MessHolder(view, listener)
     }
 
     override fun onBindViewHolder(holder: MessHolder, position: Int) {
