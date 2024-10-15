@@ -3,37 +3,47 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingVertical="13dp">
 
     <!-- User profile image -->
-    <ImageView
-        android:id="@+id/userImage"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/avatar_placeholder_allchat" />
+
 
     <!-- Online status dot -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/userImageCard"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:cardCornerRadius="@android:dimen/app_icon_size"
+        app:cardElevation="0dp"
+        >
+        <ImageView
+            android:id="@+id/userImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/avatar_placeholder_allchat" />
+    </androidx.cardview.widget.CardView>
     <View
         android:id="@+id/onlineStatus"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginBottom="5dp"
         android:layout_marginRight="5dp"
-        android:layout_alignEnd="@id/userImage"
-        android:layout_alignBottom="@id/userImage"
+        android:layout_alignEnd="@id/userImageCard"
+        android:layout_alignBottom="@id/userImageCard"
         android:background="@drawable/online_dot" />
     <!--android:visibility="gone"-->
     <TextView
         android:id="@+id/userName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/userImage"
+        android:layout_alignTop="@+id/userImageCard"
 
         android:layout_marginStart="18dp"
         android:layout_marginTop="26dp"
 
         android:layout_marginBottom="0dp"
-        android:layout_toEndOf="@+id/userImage"
+        android:layout_toEndOf="@+id/userImageCard"
         android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical"
         android:text="Your Text Here"

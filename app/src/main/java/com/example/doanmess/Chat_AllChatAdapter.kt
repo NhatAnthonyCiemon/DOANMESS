@@ -1,10 +1,12 @@
 package com.example.doanmess
+import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.ImageView
 import android.widget.TextView
 import android.view.LayoutInflater
+import com.example.createuiproject.MainChat
 
 
 class Chat_AllChatAdapter(var list: List<DataMess>): RecyclerView.Adapter<Chat_AllChatAdapter.MessHolder>() {
@@ -12,6 +14,7 @@ class Chat_AllChatAdapter(var list: List<DataMess>): RecyclerView.Adapter<Chat_A
         init {
             itemView.setOnClickListener {
                 clickListener.onItemClick(adapterPosition)
+                notifyDataSetChanged()
             }
         }
     }

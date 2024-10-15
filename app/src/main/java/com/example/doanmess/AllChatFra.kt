@@ -1,10 +1,12 @@
 package com.example.doanmess
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.createuiproject.MainChat
@@ -12,6 +14,7 @@ import com.example.createuiproject.MainChat
 class AllChatFra : Fragment() {
     // TODO: Rename and change types of parameters
     private var list: MutableList<DataMess> = mutableListOf()
+    lateinit var atvtContext : Context
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         list = mutableListOf(
@@ -32,6 +35,7 @@ class AllChatFra : Fragment() {
             DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn O", "Hello", "10:00", false, false),
         )
         list.add(DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn P", "Hi", "10:00", false, true))
+        atvtContext = requireActivity()
     }
 
     override fun onCreateView(
@@ -44,7 +48,7 @@ class AllChatFra : Fragment() {
         adapter.setOnItemClickListener(object: Chat_AllChatAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
                 //code để chuyển đến màn hình chat
-                val intent = Intent(requireActivity(), MainChat::class.java)
+                val intent = Intent(atvtContext, MainChat::class.java)
                 startActivity(intent)
             }
         })
@@ -52,6 +56,10 @@ class AllChatFra : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
+        view.findViewById<Button>(R.id.button).setOnClickListener({
+            val intent = Intent(atvtContext, CreateGroup::class.java)
+            startActivity(intent)
+        })
         return view
     }
 
