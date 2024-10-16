@@ -9,13 +9,15 @@
     android:paddingHorizontal="10dp"
     android:paddingVertical="5dp"
     android:background="@drawable/custonlinear01_home"
-    android:layout_marginRight="10dp">
+    android:layout_marginRight="10dp"
+    android:layout_marginBottom="10dp"
+    android:layout_marginTop="20dp">
 
 
     <TextView
         android:paddingLeft="5dp"
         android:id="@+id/userName"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
         android:layout_height="wrap_content"

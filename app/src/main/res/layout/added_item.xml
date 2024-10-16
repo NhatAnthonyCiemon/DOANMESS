@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:background="#E8E8E8"
-    android:paddingHorizontal="20dp"
+    android:background="#F4F4F4"
+    android:paddingHorizontal="8dp"
     android:paddingVertical="5dp">
 
     <androidx.cardview.widget.CardView
@@ -34,7 +34,7 @@
         android:textColor="#605656"
         android:textSize="19sp"
         android:textStyle="normal"
-        android:layout_marginLeft="20dp"/>
+        android:layout_marginLeft="10dp"/>
 
     <LinearLayout
         android:id="@+id/addBtn"
@@ -49,7 +49,7 @@
         <ImageView
             android:layout_width="15dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="2dp"
             android:src="@drawable/baseline_check_24"
             />
 

@@ -24,6 +24,11 @@ class CreateGroup : AppCompatActivity() {
         setContentView(R.layout.activity_create_group)
         enableEdgeToEdge()
 
+        add.add(GroupAdd("conchocuaduynhan", R.drawable.avatar_placeholder_allchat, false))
+        add.add(GroupAdd("conglonogcuaduylannnnnn", R.drawable.avatar_placeholder_allchat, false))
+        add.add(GroupAdd("Group 3", R.drawable.avatar_placeholder_allchat, false))
+        add.add(GroupAdd("Group 4", R.drawable.avatar_placeholder_allchat, false))
+        add.add(GroupAdd("Group 5", R.drawable.avatar_placeholder_allchat, false))
         add.add(GroupAdd("Group 1", R.drawable.avatar_placeholder_allchat, false))
         add.add(GroupAdd("Group 2", R.drawable.avatar_placeholder_allchat, false))
         add.add(GroupAdd("Group 3", R.drawable.avatar_placeholder_allchat, false))

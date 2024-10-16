@@ -40,6 +40,10 @@ class GroupAddedAdapter(
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.setText(list[position].name)
+/*        holder.nameView.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )*/
     }
 
 
