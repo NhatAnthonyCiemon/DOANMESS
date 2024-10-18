@@ -1,14 +1,13 @@
 package com.example.doanmess
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -17,8 +16,9 @@ class CreateGroup : AppCompatActivity() {
     private lateinit var addedRv: RecyclerView
     private lateinit var adapterAdd: GroupAddAdapter
     private lateinit var adapterAdded: GroupAddedAdapter
-    lateinit var filterSearch : EditText
-    lateinit var searchBtn : ImageButton
+    private lateinit var filterSearch : EditText
+    private lateinit var searchBtn : ImageButton
+    private lateinit var cancelBtn: Button
     private var originAdd =  mutableListOf<GroupAdd>()
     private var add = mutableListOf<GroupAdd>()
     private val added = mutableListOf<GroupAdded>()
@@ -67,6 +67,13 @@ class CreateGroup : AppCompatActivity() {
 
         filterSearch = findViewById(R.id.filter_search)
         searchBtn = findViewById(R.id.search_btn)
+
+        cancelBtn = findViewById(R.id.cancelBtn)
+        cancelBtn.setOnClickListener({
+            val i = Intent(this, Home::class.java)
+            startActivity(i)
+        })
+
         searchBtn.setOnClickListener({
             if(filterSearch.text.isEmpty()) {
                 add= originAdd.toMutableList()
