@@ -1,174 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:background="@color/white"
+    android:paddingBottom="5dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".Home">
 
-    <FrameLayout
+    <ImageView
+        android:id="@+id/imageView9"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-       >
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/top" />
 
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:scaleType="fitXY"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            app:srcCompat="@drawable/top" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="30dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="10dp">
 
-        <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:layout_marginTop="30dp"
-        android:padding="5dp">
-
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="vertical">
-
-                <!-- Hello Text -->
-                <TextView
-                    android:id="@+id/txtGreeting"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="15dp"
-                    android:text="Hello,"
-                    android:textColor="#808080"
-                    android:textSize="18sp" />
-
-                <!-- Name Text -->
-                <TextView
-                    android:id="@+id/txtName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Duy Lam"
-                    android:textColor="#000000"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-
-                <androidx.cardview.widget.CardView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
-                    app:cardCornerRadius="100dp">
+                    android:gravity="center_vertical"
+                    android:layout_marginLeft="20dp"
+                    android:orientation="vertical">
 
-                    <ImageButton
-                        android:id="@+id/btnSearch"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:background="@drawable/custombtn01_home"
-                        android:contentDescription="Search button"
-                        android:scaleType="fitXY"
-                        app:srcCompat="@drawable/search" />
-                </androidx.cardview.widget.CardView>
+                    <!-- Hello Text -->
 
-                <androidx.cardview.widget.CardView
+                    <!-- Name Text -->
+                    <TextView
+                        android:id="@+id/txtGreeting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="Hello,"
+                        android:textColor="#808080"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/txtName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Duy Lam"
+                        android:textColor="#000000"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="100dp">
+                    android:orientation="horizontal">
 
-                    <ImageButton
-                        android:id="@+id/btnMore"
 
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:background="@drawable/custombtn01_home"
-                        android:contentDescription="Search button"
-                        android:scaleType="fitXY"
-                        app:srcCompat="@drawable/moreicon" />
-                </androidx.cardview.widget.CardView>
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="15dp"
+                        app:cardCornerRadius="100dp">
+
+                        <ImageButton
+                            android:id="@+id/btnSearch"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:background="@drawable/custombtn01_home"
+                            android:contentDescription="Search button"
+                            android:scaleType="fitXY"
+                            app:srcCompat="@drawable/search" />
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="100dp">
+
+                        <ImageButton
+                            android:id="@+id/btnMore"
+
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:background="@drawable/custombtn01_home"
+                            android:contentDescription="Search button"
+                            android:scaleType="fitXY"
+                            app:srcCompat="@drawable/moreicon" />
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/custonlinear01_home"
-            android:orientation="horizontal">
-
-
-            <Button
-                android:id="@+id/btnAllchat"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/custombtn02_home"
-                android:stateListAnimator="@null"
-                android:text="All Chat"
-                android:textColor="#fff" />
-
-            <Button
-                android:id="@+id/btnContact"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="20dp"
                 android:background="@drawable/custonlinear01_home"
-                android:elevation="0dp"
-                android:stateListAnimator="@null"
-                android:text="Contact"
-                android:textColor="#a3a3a3" />
-
-            <Button
-                android:id="@+id/btnInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/custonlinear01_home"
-                android:stateListAnimator="@null"
-                android:text="Info"
-                android:textColor="#a3a3a3" />
+                android:orientation="horizontal">
 
 
-        </LinearLayout>
+                <Button
+                    android:id="@+id/btnAllchat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/custombtn02_home"
+                    android:stateListAnimator="@null"
+                    android:text="All Chat"
+                    android:textColor="#fff" />
+
+                <Button
+                    android:id="@+id/btnContact"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/custonlinear01_home"
+                    android:elevation="0dp"
+                    android:stateListAnimator="@null"
+                    android:text="Contact"
+                    android:textColor="#a3a3a3" />
+
+                <Button
+                    android:id="@+id/btnInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/custonlinear01_home"
+                    android:stateListAnimator="@null"
+                    android:text="Info"
+                    android:textColor="#a3a3a3" />
+
+
+            </LinearLayout>
 
             <FrameLayout
-                android:clipChildren="false"
                 android:id="@+id/fragment_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
+                android:clipChildren="false"
                 tools:layout_editor_absoluteX="1dp"
                 tools:layout_editor_absoluteY="1dp" />
 
 
         </LinearLayout>
 
-    </FrameLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

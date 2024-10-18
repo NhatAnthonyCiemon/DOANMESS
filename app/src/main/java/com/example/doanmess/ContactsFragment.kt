@@ -1,10 +1,12 @@
 package com.example.doanmess
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -16,11 +18,11 @@ class ContactsFragment : Fragment() {
 
     private var list: MutableList<Contact> = mutableListOf()
     lateinit var recyclerView: RecyclerView
-
     lateinit var searchBtn : ImageButton
     lateinit var searchFilter: EditText
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         list = mutableListOf(
             Contact(R.drawable.avatar_placeholder_allchat, "conchocuaduynhan", true),
             Contact(R.drawable.avatar_placeholder_allchat, "conglongcuaduylan", false),
@@ -52,8 +54,11 @@ class ContactsFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         searchBtn = view.findViewById(R.id.search_btn)
         searchFilter = view.findViewById(R.id.filter_search)
+
+
+
         searchBtn.setOnClickListener({
-            var filter = searchFilter.text.toString()
+            val filter = searchFilter.text.toString()
             if(filter.isEmpty()){
                 adapter.changeList(list)
 
@@ -67,7 +72,13 @@ class ContactsFragment : Fragment() {
         })
         return view
     }
-
+    fun focusSearch() {
+        if(::searchFilter.isInitialized){
+            searchFilter.requestFocus()
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(searchFilter, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
     companion object {
         @JvmStatic
         fun newInstance() =

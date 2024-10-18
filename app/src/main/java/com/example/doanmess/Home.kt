@@ -1,15 +1,22 @@
 package com.example.doanmess
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.view.View
+import android.widget.ImageButton
 import androidx.fragment.app.Fragment
 
 class Home : AppCompatActivity() {
+    lateinit var btnAllchat: Button
+    lateinit var btnContact: Button
+    lateinit var btnInfo: Button
+    lateinit var btnSearch: ImageButton
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -19,9 +26,10 @@ class Home : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val btnAllchat = findViewById<Button>(R.id.btnAllchat)
-        val btnContact = findViewById<Button>(R.id.btnContact)
-        val btnInfo = findViewById<Button>(R.id.btnInfo)
+        btnAllchat = findViewById<Button>(R.id.btnAllchat)
+        btnContact = findViewById<Button>(R.id.btnContact)
+        btnInfo = findViewById<Button>(R.id.btnInfo)
+        btnSearch = findViewById<ImageButton>(R.id.btnSearch)
         btnAllchat.setOnClickListener {
             CustomButtonToActive(btnAllchat)
             CustomButtonToInactive(btnContact)
@@ -39,12 +47,16 @@ class Home : AppCompatActivity() {
             CustomButtonToInactive(btnAllchat)
             CustomButtonToInactive(btnContact)
         }
+        btnSearch.setOnClickListener {
+            CustomButtonToActive(btnContact)
+            CustomButtonToInactive(btnAllchat)
+            CustomButtonToInactive(btnInfo)
+            val fragment_Contact = ContactsFragment.newInstance()
+            ChangeFragment(fragment_Contact)
+            fragment_Contact.focusSearch()
+        }
 
         ChangeFragment(AllChatFra.newInstance())
-/*        val fragment_ChatAll = AllChatFra.newInstance()
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, fragment_ChatAll)
-        transaction.commit()*/
 
     }
 
@@ -61,7 +73,7 @@ class Home : AppCompatActivity() {
     fun ChangeFragment(fragment :Fragment){
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.fragment_container, fragment)
-        transaction.commit()
+        transaction.commitNow()
     }
 
 }
