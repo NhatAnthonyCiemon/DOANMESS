@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class GroupAddAdapter(
-    private var list: MutableList<GroupAdd>, private val onItemClicked: (Int) -> Unit) : RecyclerView.Adapter<GroupAddAdapter.MyViewHolder>() {
+    private var list: MutableList<GroupAdd>, private val onItemClicked: (String, String) -> Unit) : RecyclerView.Adapter<GroupAddAdapter.MyViewHolder>() {
 
     inner class MyViewHolder : RecyclerView.ViewHolder {
         var imgView : ImageView
@@ -23,15 +23,7 @@ class GroupAddAdapter(
             imgView = itemView.findViewById(R.id.userImage)
             nameView = itemView.findViewById(R.id.userName)
             addBtn = itemView.findViewById(R.id.addBtn)
-            addBtn.setOnClickListener({
-                if(list[adapterPosition].added == false) {
-                    list[adapterPosition].added = true
-                    onItemClicked(adapterPosition)
-                    notifyDataSetChanged()
-                }
 
-
-            })
         }
 
     }
@@ -60,7 +52,20 @@ class GroupAddAdapter(
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.setText(list[position].name)
         holder.imgView.setImageResource(list[position].image)
+        holder.addBtn.setOnClickListener({
+            if(list[position].added == false) {
+                list[position].added = true
+                onItemClicked(list[position].id, list[position].name)
+                notifyDataSetChanged()
+            }
+
+
+        })
     }
 
+    fun changeList(newList: MutableList<GroupAdd>) {
+        list = newList
+        notifyDataSetChanged()
+    }
 
 }

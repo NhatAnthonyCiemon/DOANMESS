@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class GroupAddedAdapter(
-    private var list: MutableList<GroupAdded>, private val onItemClicked: (Int) -> Unit) : RecyclerView.Adapter<GroupAddedAdapter.MyViewHolder>() {
+    private var list: MutableList<GroupAdded>, private val onItemClicked: (String) -> Unit) : RecyclerView.Adapter<GroupAddedAdapter.MyViewHolder>() {
 
     inner class MyViewHolder : RecyclerView.ViewHolder {
         var nameView : TextView
@@ -22,7 +22,7 @@ class GroupAddedAdapter(
             nameView = itemView.findViewById(R.id.userName)
             deleteBtn = itemView.findViewById(R.id.deleteBtn)
             deleteBtn.setOnClickListener({
-                onItemClicked(adapterPosition)
+                onItemClicked(list[adapterPosition].id)
                 notifyDataSetChanged()
             })
         }

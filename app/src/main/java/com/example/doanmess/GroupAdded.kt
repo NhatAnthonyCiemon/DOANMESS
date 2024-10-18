@@ -2,10 +2,10 @@ package com.example.doanmess
 
 class GroupAdded {
     var name: String = ""
-    var positionAdded : Int =0
+    var id : String = ""
     constructor() {}
-    constructor(name: String,  positionAdded: Int) {
+    constructor(name: String,  id: String) {
         this.name = name
-        this.positionAdded = positionAdded
+        this.id = id
     }
 }

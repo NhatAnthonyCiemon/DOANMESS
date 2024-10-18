@@ -42,4 +42,9 @@ class ContactsAdapter(var contactList:  List<Contact>) : RecyclerView.Adapter<Co
             holder.onlineDot.visibility = View.INVISIBLE
         }
     }
+
+    fun changeList(filteredList: List<Contact>) {
+        contactList = filteredList
+        notifyDataSetChanged()
+    }
 }

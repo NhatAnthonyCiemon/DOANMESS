@@ -5,6 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -13,6 +16,9 @@ class ContactsFragment : Fragment() {
 
     private var list: MutableList<Contact> = mutableListOf()
     lateinit var recyclerView: RecyclerView
+
+    lateinit var searchBtn : ImageButton
+    lateinit var searchFilter: EditText
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         list = mutableListOf(
@@ -41,8 +47,24 @@ class ContactsFragment : Fragment() {
         // Inflate the layout for this fragment
         var view:View = inflater.inflate(R.layout.fragment_contacts, container, false)
         recyclerView=view.findViewById(R.id.recyclerViewContact)
-        recyclerView.adapter = ContactsAdapter(list)
+        val adapter = ContactsAdapter(list)
+        recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        searchBtn = view.findViewById(R.id.search_btn)
+        searchFilter = view.findViewById(R.id.filter_search)
+        searchBtn.setOnClickListener({
+            var filter = searchFilter.text.toString()
+            if(filter.isEmpty()){
+                adapter.changeList(list)
+
+            }
+            else{
+                val filterLowerCase = filter.toLowerCase()
+                val filteredList = list.filter { it.name.toLowerCase().contains(filterLowerCase) }
+                adapter.changeList(filteredList)
+            }
+
+        })
         return view
     }
 
