@@ -36,6 +36,17 @@ class AllChatFra : Fragment() {
         )
         list.add(DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn P", "Hi", "10:00", false, true))
         atvtContext = requireActivity()
+
+        //when click in any item of the chat, it will navigate to the chat screen
+        val adapter = Chat_AllChatAdapter(list)
+        adapter.setOnItemClickListener(object: Chat_AllChatAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                //code để chuyển đến
+                val intent = Intent(atvtContext, MainChat::class.java)
+                startActivity(intent)
+            }
+        })
+
     }
 
     override fun onCreateView(

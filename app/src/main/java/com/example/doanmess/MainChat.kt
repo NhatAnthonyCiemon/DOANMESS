@@ -1,12 +1,16 @@
 package com.example.createuiproject
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.doanmess.InforChat
 import com.example.doanmess.R
 
 class MainChat : AppCompatActivity() {
@@ -42,5 +46,29 @@ class MainChat : AppCompatActivity() {
         val inputBarLayoutParams = inputBar.layoutParams
         inputBarLayoutParams.width = (screenHeight * 0.70).toInt()
         inputBar.layoutParams = inputBarLayoutParams
+
+        // set on click listener for the back button to navigate back to the home activity
+        findViewById<ImageButton>(R.id.back_button).setOnClickListener {
+            finish()
+        }
+
+        //set on click listener for the info button to navigate to the user info activity
+        findViewById<ImageButton>(R.id.info_button).setOnClickListener {
+            // Navigate to user info activity
+            val intent = Intent(this, InforChat::class.java)
+            startActivity(intent)
+        }
+
+        //set on click listener for the name_layout to navigate to the user infor activity
+        findViewById<LinearLayout>(R.id.name_layout).setOnClickListener {
+            // Navigate to user info activity
+            val intent = Intent(this, InforChat::class.java)
+            startActivity(intent)
+        }
+
+        // set on click listener for the mic button to start voice recording
+        findViewById<ImageView>(R.id.mic_button).setOnClickListener {
+            // Start voice recording
+        }
     }
 }
