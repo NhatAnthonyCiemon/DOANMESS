@@ -364,4 +364,16 @@
     </FrameLayout>
   </LinearLayout>
 
+  <ImageView
+      android:id="@+id/imgBack"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentTop="true"
+      android:layout_marginStart="21dp"
+      android:layout_marginLeft="10dp"
+      android:layout_marginTop="13dp"
+      android:scaleType="fitCenter"
+      app:srcCompat="@drawable/arrow_back" />
+
 </RelativeLayout>
