@@ -1,24 +1,20 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:layout_height="match_parent"
+
     tools:context=".AllChatFra">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RVChat_AllChat"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginRight="-5dp"
-        android:layout_marginBottom="25dp"
-        android:contentDescription="Nút bấm để thực hiện hành động"
-        android:layout_gravity="bottom|end"
-        android:background="@drawable/btn_addgroup"
 
-        />
+
 </FrameLayout>

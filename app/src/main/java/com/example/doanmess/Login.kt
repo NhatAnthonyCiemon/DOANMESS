@@ -43,6 +43,9 @@ class Login : AppCompatActivity() {
                 if (email == "user123@gmail.com" && password == "123456") {
                     Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
                     // Chuyển tới activity chính sau khi đăng nhập thành công
+                    val intent = Intent(this, Home::class.java)
+                    startActivity(intent)
+                    finish()
                 } else {
                     Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
                 }

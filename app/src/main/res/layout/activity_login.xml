@@ -119,8 +119,8 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
+                android:hint="user123@gmail.com"
                 android:inputType="textEmailAddress"
-                android:text="user123@gmail.com"
                 android:textColor="#646464"
                 android:textSize="12sp" />
 
@@ -152,8 +152,8 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
+                android:hint="PASSWORD"
                 android:inputType="textVisiblePassword"
-                android:text="PASSWORD"
                 android:textColor="#737373"
                 android:textSize="12sp"
                 android:textStyle="normal" />

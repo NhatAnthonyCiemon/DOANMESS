@@ -113,8 +113,8 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
+                android:hint="User Name"
                 android:inputType="textPersonName"
-                android:text="User Name"
                 android:textColor="#6B6B6B"
                 android:textSize="12sp" />
 
@@ -147,8 +147,8 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
+                android:hint="EMAIL"
                 android:inputType="textEmailAddress"
-                android:text="EMAIL"
                 android:textColor="#737373"
                 android:textSize="12sp"
                 android:textStyle="normal" />
@@ -182,8 +182,8 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
+                android:hint="PASSWORD"
                 android:inputType="textVisiblePassword"
-                android:text="PASSWORD"
                 android:textColor="#737373"
                 android:textSize="12sp"
                 android:textStyle="normal" />
@@ -217,8 +217,8 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="10dp"
                 android:ems="10"
+                android:hint="CONFIRM PASSWORD"
                 android:inputType="textVisiblePassword"
-                android:text="CONFIRM PASSWORD"
                 android:textColor="#737373"
                 android:textSize="12sp"
                 android:textStyle="normal" />

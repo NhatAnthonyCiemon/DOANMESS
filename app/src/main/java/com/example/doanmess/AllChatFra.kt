@@ -1,51 +1,49 @@
 package com.example.doanmess
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.createuiproject.MainChat
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.auth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.database
+import com.google.firebase.firestore.firestore
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class AllChatFra : Fragment() {
     // TODO: Rename and change types of parameters
     private var list: MutableList<DataMess> = mutableListOf()
     lateinit var atvtContext : Context
+    private lateinit var auth: FirebaseAuth
+    private var User: FirebaseUser? =null
+    val dbfirestore = Firebase.firestore
+    val adapter: Chat_AllChatAdapter = Chat_AllChatAdapter(list)
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        list = mutableListOf(
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn A", "Hello", "10:00", true, false),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn B", "Hi", "10:00", false, true),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn C", "Hello", "10:00", false, true),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn D", "Hi", "10:00", false, false),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn E", "Hello", "10:00", false, true),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn F", "Hi", "10:00", true, false),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn G", "Hello", "10:00", false, false),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn H", "Hi", "10:00", false, true),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn I", "Hello", "10:00", false, true),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn J", "Hi", "10:00", true, false),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn K", "Hello", "10:00", false, true),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn L", "Hi", "10:00", false, true),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn M", "Hello", "10:00", false, false),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn N", "Hi", "10:00", true, true),
-            DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn O", "Hello", "10:00", false, false),
-        )
-        list.add(DataMess(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn P", "Hi", "10:00", false, true))
         atvtContext = requireActivity()
+        auth = Firebase.auth
+        User = auth.currentUser
 
-        //when click in any item of the chat, it will navigate to the chat screen
-        val adapter = Chat_AllChatAdapter(list)
-        adapter.setOnItemClickListener(object: Chat_AllChatAdapter.OnItemClickListener {
-            override fun onItemClick(position: Int) {
-                //code để chuyển đến
-                val intent = Intent(atvtContext, MainChat::class.java)
-                startActivity(intent)
-            }
-        })
 
     }
 
@@ -67,11 +65,80 @@ class AllChatFra : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
-        view.findViewById<Button>(R.id.button).setOnClickListener({
-            val intent = Intent(atvtContext, CreateGroup::class.java)
-            startActivity(intent)
-        })
+
+
+
+        Firebase.database.getReference("users").child(User?.uid.toString())
+            .addValueEventListener(object : ValueEventListener {
+                @SuppressLint("NotifyDataSetChanged")
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (childSnapshot in snapshot.children) {
+                            for(smallchildSnapshot in childSnapshot.children) {
+                                val content =
+                                    smallchildSnapshot.child("Content").getValue(String::class.java)
+
+                                val recvId =
+                                    smallchildSnapshot.child("RecvId").getValue(String::class.java)
+                                val sendId =
+                                    smallchildSnapshot.child("SendId").getValue(String::class.java)
+                                val status =
+                                    smallchildSnapshot.child("Status").getValue(Boolean::class.java)
+
+                                val time = convertTimestampToString(
+                                    smallchildSnapshot.child("Time").getValue(Long::class.java)
+                                        ?.toLong()!!
+                                )
+
+                                if(User?.uid.toString() == sendId) {
+                                    dbfirestore.collection("users").document(recvId.toString())
+                                        .get()
+                                        .addOnSuccessListener { document ->
+                                            if (document != null) {
+                                                val name = document.data?.get("Name").toString()
+                                                list.add(DataMess(R.drawable.avatar_placeholder_allchat, name, content.toString(), time, status!!, true))
+                                                adapter.notifyDataSetChanged()
+                                            } else {
+                                                Log.d("exist", "No such document")
+                                            }
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            Log.d("exist", "get failed with ", exception)
+                                        }
+                                }
+                                else{
+                                    dbfirestore.collection("users").document(sendId.toString())
+                                        .get()
+                                        .addOnSuccessListener { document ->
+                                            if (document != null) {
+                                                val name = document.data?.get("Name").toString()
+                                                list.add(DataMess(R.drawable.avatar_placeholder_allchat, name, content.toString(), time, status!!, false))
+                                                adapter.notifyDataSetChanged()
+                                            } else {
+                                                Log.d("exist", "No such document")
+                                            }
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            Log.d("exist", "get failed with ", exception)
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(atvtContext, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+
         return view
+    }
+    fun convertTimestampToString(timestamp: Long): String {
+        val sdf = SimpleDateFormat("E HH:mm", Locale.getDefault())
+        val date = Date(timestamp)
+        return sdf.format(date)
     }
 
     companion object {
