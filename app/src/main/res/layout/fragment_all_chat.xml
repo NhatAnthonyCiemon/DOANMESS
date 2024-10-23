@@ -16,15 +16,5 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="32dp"
-        android:background="@drawable/btn_addgroup"
 
-        android:contentDescription="Nút bấm để thực hiện hành động"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 </FrameLayout>

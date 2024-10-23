@@ -43,9 +43,9 @@
 
             <TextView
                 android:id="@+id/txtName"
-                android:layout_width="wrap_content"
+                android:layout_width="3dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="9"
+                android:layout_weight="8"
                 android:fontFamily="sans-serif-medium"
                 android:text="Your Text Here"
                 android:textColor="#605656"
@@ -54,10 +54,11 @@
 
             <TextView
                 android:id="@+id/txtTime"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
+                android:layout_weight="2"
+                android:gravity="right"
                 android:text="TextView" />
         </LinearLayout>
 

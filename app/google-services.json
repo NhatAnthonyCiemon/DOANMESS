@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "266445649012",
+    "firebase_url": "https://doan-cb428-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "doan-cb428",
+    "storage_bucket": "doan-cb428.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:266445649012:android:d0261c098de9a35e8bcd21",
+        "android_client_info": {
+          "package_name": "com.example.doanmess"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbSHQH_JObKk_lVzbFrAnbn4gQZIe5ZyA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
