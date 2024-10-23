@@ -17,19 +17,21 @@ class Home : AppCompatActivity() {
     lateinit var btnContact: Button
     lateinit var btnInfo: Button
     lateinit var btnSearch: ImageButton
+    lateinit var btnMore: ImageButton
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_home)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(systemBars.left, 0 , systemBars.right, systemBars.bottom)
             insets
         }
         btnAllchat = findViewById<Button>(R.id.btnAllchat)
         btnContact = findViewById<Button>(R.id.btnContact)
         btnInfo = findViewById<Button>(R.id.btnInfo)
         btnSearch = findViewById<ImageButton>(R.id.btnSearch)
+        btnMore = findViewById<ImageButton>(R.id.btnMore)
         btnAllchat.setOnClickListener {
             CustomButtonToActive(btnAllchat)
             CustomButtonToInactive(btnContact)
@@ -46,6 +48,7 @@ class Home : AppCompatActivity() {
             CustomButtonToActive(btnInfo)
             CustomButtonToInactive(btnAllchat)
             CustomButtonToInactive(btnContact)
+            ChangeFragment(inforFragment())
         }
         btnSearch.setOnClickListener {
             CustomButtonToActive(btnContact)
@@ -55,7 +58,12 @@ class Home : AppCompatActivity() {
             ChangeFragment(fragment_Contact)
             fragment_Contact.focusSearch()
         }
-
+        btnMore.setOnClickListener{
+            CustomButtonToActive(btnInfo)
+            CustomButtonToInactive(btnAllchat)
+            CustomButtonToInactive(btnContact)
+            ChangeFragment(inforFragment())
+        }
         ChangeFragment(AllChatFra.newInstance())
 
     }

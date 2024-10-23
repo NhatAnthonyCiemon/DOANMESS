@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:paddingBottom="5dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Home">
@@ -21,11 +20,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="50dp"
             android:clipChildren="false"
             android:clipToPadding="false"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:paddingTop="10dp"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            >
 
 
             <LinearLayout
@@ -115,7 +117,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="0dp"
                 android:background="@drawable/custonlinear01_home"
                 android:orientation="horizontal">
 
@@ -154,14 +156,37 @@
 
             </LinearLayout>
 
-            <FrameLayout
-                android:id="@+id/fragment_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:clipChildren="false"
-                tools:layout_editor_absoluteX="1dp"
-                tools:layout_editor_absoluteY="1dp" />
+
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:scrollbars="none"
+                    android:paddingTop="20dp"
+                    android:contentDescription="Example"
+                    android:overScrollMode="ifContentScrolls"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" >
+
+                        <FrameLayout
+                            android:id="@+id/fragment_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:clipChildren="false"
+                            tools:layout_editor_absoluteX="1dp"
+                            tools:layout_editor_absoluteY="1dp" >
+                        </FrameLayout>
+                    </LinearLayout>
+
+
+
+                </ScrollView>
+
+
 
 
         </LinearLayout>
