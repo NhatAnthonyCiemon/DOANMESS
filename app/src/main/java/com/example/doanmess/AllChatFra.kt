@@ -64,14 +64,8 @@ class AllChatFra : Fragment() {
                     if (snapshot.exists()) {
                         list.removeIf { it !is DataMessGroup }
                         for (childSnapshot in snapshot.children) {
-                            var latestsmallSnapshot: DataSnapshot? = null
-                            var latestTime: Long = Long.MIN_VALUE
-                            for (smallchildSnapshot in childSnapshot.children) {
-                                val time = smallchildSnapshot.child("Time").value as Long
-                                if (time > latestTime) {
-                                    latestTime = time
-                                    latestsmallSnapshot = smallchildSnapshot
-                                }
+                            val latestsmallSnapshot = childSnapshot.children.maxByOrNull {
+                                    it.child("Time").getValue(Long::class.java) ?: 0L
                             }
                             if (latestsmallSnapshot != null) {
                                 val content = latestsmallSnapshot.child("Content").getValue(String::class.java)
