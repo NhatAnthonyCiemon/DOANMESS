@@ -52,6 +52,9 @@ class Chat_AllChatAdapter(var list: List<DataMess>): RecyclerView.Adapter<Chat_A
             txtContent.text = item.message
             txtTime.text = item.time
             imgAvatar.setImageResource(item.avatar)
+           if(item is DataMessGroup){
+               txtName.text = item.groupname
+           }
        }
     }
 

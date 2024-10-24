@@ -43,6 +43,9 @@ class Home : AppCompatActivity() {
             v.setPadding(systemBars.left, 0 , systemBars.right, systemBars.bottom)
             insets
         }
+        Firebase.firestore.clearPersistence().addOnCompleteListener {
+            // Bộ nhớ đệm đã được xóa
+        }
         FirebaseApp.initializeApp(this)
         btnAllchat = findViewById<Button>(R.id.btnAllchat)
         btnContact = findViewById<Button>(R.id.btnContact)
