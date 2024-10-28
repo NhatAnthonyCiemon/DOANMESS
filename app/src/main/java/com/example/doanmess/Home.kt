@@ -1,6 +1,8 @@
 package com.example.doanmess
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,6 +15,7 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -21,7 +24,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
-
+import java.util.jar.Manifest
 
 class Home : AppCompatActivity() {
     lateinit var btnAllchat: Button
@@ -44,9 +47,10 @@ class Home : AppCompatActivity() {
             insets
         }
         Firebase.firestore.clearPersistence().addOnCompleteListener {
-            // Bộ nhớ đệm đã được xóa
         }
         FirebaseApp.initializeApp(this)
+        //kiểm tra có quyền thông báo không không thì xin
+        checkPermissionNotify()
         btnAllchat = findViewById<Button>(R.id.btnAllchat)
         btnContact = findViewById<Button>(R.id.btnContact)
         btnInfo = findViewById<Button>(R.id.btnInfo)
@@ -96,22 +100,17 @@ class Home : AppCompatActivity() {
         }
         auth = Firebase.auth
         ChangeFragment(AllChatFra.newInstance())
-
-    }
-    override fun onStart() {
-        super.onStart()
         User = auth.currentUser
-
         if (User == null) {
             auth.signInWithEmailAndPassword("doanmessg@gmail.com", "1234567")
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         User = auth.currentUser
-                       Toast.makeText(
-                           baseContext,
-                           "Authentication success.",
-                           Toast.LENGTH_SHORT,
-                       ).show()
+                        Toast.makeText(
+                            baseContext,
+                            "Authentication success.",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                     } else {
                         Toast.makeText(
                             baseContext,
@@ -136,6 +135,33 @@ class Home : AppCompatActivity() {
         }
     }
 
+    fun checkPermissionNotify() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+            }
+            else{
+                ChannelController(this).createNotificationChannel()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1) {
+            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                // Permission granted
+                ChannelController(this).createNotificationChannel()
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     fun CustomButtonToActive(view: View) {
         view.background = getDrawable(R.drawable.custombtn02_home)
