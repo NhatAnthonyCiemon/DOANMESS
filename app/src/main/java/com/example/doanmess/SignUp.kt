@@ -7,10 +7,14 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+
 
 class SignUp : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
+
 
     private lateinit var etFullName: EditText
     private lateinit var etEmail: EditText
@@ -23,6 +27,9 @@ class SignUp : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
 
+        auth = FirebaseAuth.getInstance()
+
+
         etFullName = findViewById(R.id.etFullName)
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
@@ -31,23 +38,32 @@ class SignUp : AppCompatActivity() {
         btnSignIn = findViewById(R.id.btnSignIn)
 
         btnSignUp.setOnClickListener {
-            val fullName = etFullName.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
-            val confirmPassword = etConfirmPassword.text.toString().trim()
 
-            if (fullName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show()
-            } else if (password != confirmPassword) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please enter all details", Toast.LENGTH_SHORT).show()
             } else {
-                // Thực hiện xử lý đăng ký người dùng
-                // Bạn có thể kết nối với backend hoặc Firebase để thực hiện đăng ký
-                Toast.makeText(this, "Sign up successful", Toast.LENGTH_SHORT).show()
-                // Sau khi đăng ký thành công, bạn có thể chuyển về màn hình đăng nhập
-                val intent = Intent(this, Login::class.java)
-                startActivity(intent)
-                finish() // Đóng màn hình đăng ký sau khi chuyển về màn hình đăng nhập
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(this, "Sign-Up successful", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this, Home::class.java)
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            val exception = task.exception
+                            if (exception is FirebaseAuthWeakPasswordException) {
+                                Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                            } else if (exception is FirebaseAuthUserCollisionException) {
+                                Toast.makeText(this, "Email is already in use", Toast.LENGTH_SHORT).show()
+                            } else if (etPassword != etConfirmPassword) {
+                                Toast.makeText(this, "Password and Confirm Password must be the same", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this, "Sign-Up failed", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
             }
         }
 

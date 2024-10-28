@@ -9,6 +9,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
+
+
 
 class Login : AppCompatActivity() {
 //    private lateinit var etEmail: EditText
@@ -16,6 +19,8 @@ class Login : AppCompatActivity() {
 //    private lateinit var btnForgotPassword: Button
 //    private lateinit var btnLogin: Button
 //    private lateinit var btnSignUp: Button
+    private lateinit var auth: FirebaseAuth
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +31,18 @@ class Login : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        auth = FirebaseAuth.getInstance()
+
+        // Kiem tra da dang nhap chua
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            // User is signed in, navigate to Home activity
+            val intent = Intent(this, Home::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnForgotPassword = findViewById<Button>(R.id.btnForgotPassword)
@@ -39,22 +56,23 @@ class Login : AppCompatActivity() {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please enter all details", Toast.LENGTH_SHORT).show()
             } else {
-                // Thực hiện xử lý đăng nhập (giả sử không có backend)
-                if (email == "user123@gmail.com" && password == "123456") {
-                    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                    // Chuyển tới activity chính sau khi đăng nhập thành công
-                    val intent = Intent(this, Home::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
-                }
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this, Home::class.java)
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
         }
 
         btnForgotPassword.setOnClickListener {
             // Xử lý logic quên mật khẩu ở đây
-            Toast.makeText(this, "Forgot Password clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please remember your password", Toast.LENGTH_SHORT).show()
         }
 
         btnSignUp.setOnClickListener {

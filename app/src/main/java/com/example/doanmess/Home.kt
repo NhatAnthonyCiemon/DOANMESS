@@ -23,6 +23,7 @@ import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
 
 
+
 class Home : AppCompatActivity() {
     lateinit var btnAllchat: Button
     lateinit var btnContact: Button
@@ -43,6 +44,29 @@ class Home : AppCompatActivity() {
             v.setPadding(systemBars.left, 0 , systemBars.right, systemBars.bottom)
             insets
         }
+
+
+        // CODE DƯỚI ĐÂY LÀ DUY LÂM VIẾT THÊM ĐỂ LÀM PHẦN ĐĂNG NHẬP, NẾU CÓ MÂU THUẪN VỚI CODE CŨ THÌ BÁO ĐỂ CHỈNH LẠI NHA
+        // ======================================================================================================
+        // code nay de kiem tra xem user da dang nhap chua neu roi thi cho vo Home luon
+
+        val auth1 = FirebaseAuth.getInstance()
+        val currentUser = auth1.currentUser
+        if (currentUser == null) {
+            // User is not signed in, navigate to Login activity
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+            finish()
+        }
+        val logOutBtn = findViewById<Button>(R.id.logOutBtn)
+        logOutBtn.setOnClickListener {
+            auth1.signOut()
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+            finish()
+        }
+        // ======================================================================================================
+
         Firebase.firestore.clearPersistence().addOnCompleteListener {
             // Bộ nhớ đệm đã được xóa
         }
