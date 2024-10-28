@@ -1,8 +1,12 @@
 package com.example.doanmess
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -11,6 +15,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.createuiproject.MainChat
@@ -32,6 +39,7 @@ import com.google.firebase.firestore.firestoreSettings
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.zip.CRC32
 
 class AllChatFra : Fragment() {
     // TODO: Rename and change types of parameters
@@ -56,6 +64,48 @@ class AllChatFra : Fragment() {
         //myGroup["1"]= "Vô Lăng Vàng"
 
     }
+
+    private fun showHighPriorityNotification(context: Context, title: String, message: String, idNotify: Int) {
+        if (ActivityCompat.checkSelfPermission(
+                atvtContext,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val channelId = "TIN_NHAN_MOI"
+            val bitmapAvatar = BitmapFactory.decodeResource(
+                context.resources,
+                R.drawable.avatar_placeholder_allchat
+            )
+            val intent = Intent(context, MainChat::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+
+            val pendingIntent: PendingIntent =
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+            val builder = NotificationCompat.Builder(context, channelId)
+                .setSmallIcon(R.drawable.checkmark2)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                .setAutoCancel(true)
+                .setLargeIcon(bitmapAvatar)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+            with(NotificationManagerCompat.from(atvtContext)) {
+                notify(idNotify, builder.build())
+            }
+        }
+    }
+
+    fun encodeStringToNumber(input: String): Int {
+        val crc = CRC32()
+        crc.update(input.toByteArray())
+        return (crc.value % Int.MAX_VALUE).toInt()
+    }
+
     private fun ResumeRealTimeListen() {
         Firebase.database.getReference("users").child(User!!.uid)
             .addValueEventListener(object : ValueEventListener {
@@ -97,6 +147,10 @@ class AllChatFra : Fragment() {
                                             if (document != null) {
                                                 val name = document.data?.get("Name").toString()
                                                 list.add(DataMess(R.drawable.avatar_placeholder_allchat, name, content.toString(), timestamp!!, status!!, false))
+
+                                                if(status){
+                                                    showHighPriorityNotification(atvtContext, name, content.toString(), encodeStringToNumber(sendId.toString()+timestamp.toString()))
+                                                }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -154,6 +208,9 @@ class AllChatFra : Fragment() {
                                                         myGroup[childSnapshot.key.toString()].toString()
                                                     )
                                                 )
+                                                if(status){
+                                                    showHighPriorityNotification(atvtContext, myGroup[childSnapshot.key.toString()].toString(),name  +": "+ content.toString(), encodeStringToNumber(sendId.toString()+timestamp.toString()))
+                                                }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -177,6 +234,9 @@ class AllChatFra : Fragment() {
 
     }
     private fun ListenFirebase(){
+        if(User == null){
+            return
+        }
         Firebase.firestore.collection("users").document(User!!.uid)
             .addSnapshotListener { documentSnapshot, error ->
                 if (error != null) {
