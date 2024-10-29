@@ -45,14 +45,14 @@ class AddFriend : AppCompatActivity() {
                 db.collection("users").document(user.uid).get().addOnSuccessListener { document ->
                     // Fetch friends and requestSent list of current user
                     if (document.exists()) {
-                        friends.addAll(document.get("friends") as List<String>)
-                        requestSent.addAll(document.get("requestSent") as List<String>)
+                        friends.addAll(document.get("Friends") as List<String>)
+                        requestSent.addAll(document.get("RequestSent") as List<String>)
                     }
                     // result : all user
                     for (document in result) {
                         val userId = document.id
                         if (userId != user.uid && !friends.contains(userId)) {
-                            val name = document.getString("name") ?: ""
+                            val name = document.getString("Name") ?: ""
                             val image = R.drawable.avatar_placeholder_allchat // Placeholder image
                             val reqFriend = requestSent.contains(userId)
                             userList.add(Friend(userId, name, image, reqFriend))
@@ -71,8 +71,8 @@ class AddFriend : AppCompatActivity() {
         val userRef = db.collection("users").document(currentUserId)
         val targetUserRef = db.collection("users").document(id)
         if (reqFriend) {
-            userRef.update("requestSent", FieldValue.arrayUnion(id))
-            targetUserRef.update("requests", FieldValue.arrayUnion(currentUserId))
+            userRef.update("RequestSent", FieldValue.arrayUnion(id))
+            targetUserRef.update("Requests", FieldValue.arrayUnion(currentUserId))
                 .addOnSuccessListener {
                     Toast.makeText(this, "Friend request sent successfully", Toast.LENGTH_SHORT).show()
                 }
@@ -80,8 +80,8 @@ class AddFriend : AppCompatActivity() {
                     Toast.makeText(this, "Failed to send friend request", Toast.LENGTH_SHORT).show()
                 }
         } else {
-            userRef.update("requestSent", FieldValue.arrayRemove(id))
-            targetUserRef.update("requests", FieldValue.arrayRemove(currentUserId))
+            userRef.update("RequestSent", FieldValue.arrayRemove(id))
+            targetUserRef.update("Requests", FieldValue.arrayRemove(currentUserId))
                 .addOnSuccessListener {
                     Toast.makeText(this, "Friend request removed successfully", Toast.LENGTH_SHORT).show()
                 }
