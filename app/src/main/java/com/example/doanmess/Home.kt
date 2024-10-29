@@ -169,6 +169,7 @@ class Home : AppCompatActivity() {
                         "Error fetching document",
                         Toast.LENGTH_SHORT,
                     ).show()
+                    txtName.text= "Loading..."
                 }
         }
     }
