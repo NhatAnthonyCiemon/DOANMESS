@@ -65,46 +65,7 @@ class AllChatFra : Fragment() {
 
     }
 
-    private fun showHighPriorityNotification(context: Context, title: String, message: String, idNotify: Int) {
-        if (ActivityCompat.checkSelfPermission(
-                atvtContext,
-                android.Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val channelId = "TIN_NHAN_MOI"
-            val bitmapAvatar = BitmapFactory.decodeResource(
-                context.resources,
-                R.drawable.avatar_placeholder_allchat
-            )
-            val intent = Intent(context, MainChat::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            }
 
-            val pendingIntent: PendingIntent =
-                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-            val builder = NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.checkmark2)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-                .setAutoCancel(true)
-                .setLargeIcon(bitmapAvatar)
-                .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-
-            with(NotificationManagerCompat.from(atvtContext)) {
-                notify(idNotify, builder.build())
-            }
-        }
-    }
-
-    fun encodeStringToNumber(input: String): Int {
-        val crc = CRC32()
-        crc.update(input.toByteArray())
-        return (crc.value % Int.MAX_VALUE).toInt()
-    }
 
     private fun ResumeRealTimeListen() {
         Firebase.database.getReference("users").child(User!!.uid)
@@ -148,9 +109,6 @@ class AllChatFra : Fragment() {
                                                 val name = document.data?.get("Name").toString()
                                                 list.add(DataMess(R.drawable.avatar_placeholder_allchat, name, content.toString(), timestamp!!, status!!, false))
 
-                                                if(status){
-                                                    showHighPriorityNotification(atvtContext, name, content.toString(), encodeStringToNumber(sendId.toString()+timestamp.toString()))
-                                                }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -208,9 +166,6 @@ class AllChatFra : Fragment() {
                                                         myGroup[childSnapshot.key.toString()].toString()
                                                     )
                                                 )
-                                                if(status){
-                                                    showHighPriorityNotification(atvtContext, myGroup[childSnapshot.key.toString()].toString(),name  +": "+ content.toString(), encodeStringToNumber(sendId.toString()+timestamp.toString()))
-                                                }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {

@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -25,6 +27,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
+import com.google.firebase.messaging.FirebaseMessaging
 import java.util.jar.Manifest
 
 
@@ -72,7 +75,18 @@ class Home : AppCompatActivity() {
             finish()
         }
         // ======================================================================================================
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.e("HHHHHHHHHHHHHHH", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
 
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            Log.e("HHHHHHHHHHHHHHH", token!!)
+        })
         Firebase.firestore.clearPersistence().addOnCompleteListener {
         }
         FirebaseApp.initializeApp(this)
@@ -160,6 +174,7 @@ class Home : AppCompatActivity() {
                         "Error fetching document",
                         Toast.LENGTH_SHORT,
                     ).show()
+                    txtName.text= "Loading..."
                 }
         }
     }
