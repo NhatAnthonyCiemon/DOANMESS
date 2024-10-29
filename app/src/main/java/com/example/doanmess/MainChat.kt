@@ -3,6 +3,7 @@ package com.example.createuiproject
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +22,8 @@ class MainChat : AppCompatActivity() {
             ChatMessage("It will be 3000$", true),
             ChatMessage("Alright, let me think about it.", false) ,
         )
-
+        val chatId = intent.getStringExtra("chatId")
+        Toast.makeText(this, chatId, Toast.LENGTH_SHORT).show()
         val chatAdapter = ChatAdapter(chatMessages)
         val recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
         recyclerViewMessages.adapter = chatAdapter
