@@ -43,7 +43,7 @@
                 android:layout_weight="8"
                 android:fontFamily="sans-serif-medium"
                 android:singleLine="false"
-                android:text="Your Text Here"
+                android:text=""
                 android:textColor="#000000"
                 android:textSize="17sp"
                 android:textStyle="bold" />
@@ -57,14 +57,14 @@
                 android:layout_gravity="center"
                 android:gravity="right"
                 android:textColor="@color/black"
-                android:text="TextView" />
+                android:text="" />
         </LinearLayout>
         <TextView
             android:id="@+id/txtContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Your Text Here"
+            android:text=""
             android:textColor="@color/black"
             android:textSize="15sp"
             android:textStyle="bold" />

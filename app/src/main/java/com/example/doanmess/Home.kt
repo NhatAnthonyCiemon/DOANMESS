@@ -1,9 +1,12 @@
 package com.example.doanmess
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +16,9 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -21,6 +26,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
+import com.google.firebase.messaging.FirebaseMessaging
+import java.util.jar.Manifest
 
 
 class Home : AppCompatActivity() {
@@ -43,7 +50,45 @@ class Home : AppCompatActivity() {
             v.setPadding(systemBars.left, 0 , systemBars.right, systemBars.bottom)
             insets
         }
+
+
+        // CODE DƯỚI ĐÂY LÀ DUY LÂM VIẾT THÊM ĐỂ LÀM PHẦN ĐĂNG NHẬP, NẾU CÓ MÂU THUẪN VỚI CODE CŨ THÌ BÁO ĐỂ CHỈNH LẠI NHA
+        // ======================================================================================================
+        // code nay de kiem tra xem user da dang nhap chua neu roi thi cho vo Home luon
+
+        val auth1 = FirebaseAuth.getInstance()
+        val currentUser = auth1.currentUser
+        if (currentUser == null) {
+            // User is not signed in, navigate to Login activity
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+            finish()
+        }
+        val logOutBtn = findViewById<Button>(R.id.logOutBtn)
+        logOutBtn.setOnClickListener {
+            auth1.signOut()
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+            finish()
+        }
+        // ======================================================================================================
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.e("HHHHHHHHHHHHHHH", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            Log.e("HHHHHHHHHHHHHHH", token!!)
+        })
+        Firebase.firestore.clearPersistence().addOnCompleteListener {
+        }
         FirebaseApp.initializeApp(this)
+        //kiểm tra có quyền thông báo không không thì xin
+        checkPermissionNotify()
         btnAllchat = findViewById<Button>(R.id.btnAllchat)
         btnContact = findViewById<Button>(R.id.btnContact)
         btnInfo = findViewById<Button>(R.id.btnInfo)
@@ -93,22 +138,17 @@ class Home : AppCompatActivity() {
         }
         auth = Firebase.auth
         ChangeFragment(AllChatFra.newInstance())
-
-    }
-    override fun onStart() {
-        super.onStart()
         User = auth.currentUser
-
         if (User == null) {
             auth.signInWithEmailAndPassword("doanmessg@gmail.com", "1234567")
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         User = auth.currentUser
-                       Toast.makeText(
-                           baseContext,
-                           "Authentication success.",
-                           Toast.LENGTH_SHORT,
-                       ).show()
+                        Toast.makeText(
+                            baseContext,
+                            "Authentication success.",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                     } else {
                         Toast.makeText(
                             baseContext,
@@ -133,6 +173,33 @@ class Home : AppCompatActivity() {
         }
     }
 
+    fun checkPermissionNotify() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+            }
+            else{
+                ChannelController(this).createNotificationChannel()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1) {
+            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                // Permission granted
+                ChannelController(this).createNotificationChannel()
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     fun CustomButtonToActive(view: View) {
         view.background = getDrawable(R.drawable.custombtn02_home)
