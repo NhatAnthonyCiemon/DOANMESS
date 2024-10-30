@@ -1,17 +1,23 @@
 package com.example.doanmess
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 
 class ContactsFragment : Fragment() {
@@ -20,13 +26,18 @@ class ContactsFragment : Fragment() {
     lateinit var recyclerView: RecyclerView
     lateinit var searchBtn : ImageButton
     lateinit var searchFilter: EditText
+    lateinit var toAddFriendBtn: Button
+    private lateinit var database: FirebaseDatabase
+    private lateinit var userStatusListener: ValueEventListener
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        database = FirebaseDatabase.getInstance()
         list = mutableListOf(
-            Contact(R.drawable.avatar_placeholder_allchat, "conchocuaduynhan", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "conglongcuaduylan", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn C", true),
+            Contact("5sOWGPgonbafPOPh2weIwvcP0wK2",R.drawable.avatar_placeholder_allchat, "Nguyễn Văn C", false),
+            Contact("c33ebNdc6rStVchv3ovFalNOxDh2" ,R.drawable.avatar_placeholder_allchat, "conchocuaduynhan", false),
+            Contact("vwAUzgbCSNWNq4a48xoM2zZVCcH3",R.drawable.avatar_placeholder_allchat, "conglongcuaduylan", false),
+
+            /*
             Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn D", false),
             Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn E", true),
             Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn F", false),
@@ -38,8 +49,25 @@ class ContactsFragment : Fragment() {
             Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn L", false),
             Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn M", true),
             Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn N", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn O", true),
+            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn O", true),*/
         )
+        // Listen for changes in online status
+        list.forEach { contact ->
+
+            val userStatusRef = database.getReference("users/${contact.id}/online")
+            userStatusListener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val isOnline = snapshot.getValue(Boolean::class.java) ?: false
+                    contact.online = isOnline
+                    recyclerView.adapter?.notifyDataSetChanged()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle possible errors.
+                }
+            }
+            userStatusRef.addValueEventListener(userStatusListener)
+        }
     }
 
     override fun onCreateView(
@@ -54,10 +82,14 @@ class ContactsFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         searchBtn = view.findViewById(R.id.search_btn)
         searchFilter = view.findViewById(R.id.filter_search)
+        toAddFriendBtn = view.findViewById(R.id.toAddFriendBtn)
+        toAddFriendBtn.setOnClickListener {
+            val intent = Intent(activity, AddFriend::class.java)
+            startActivity(intent)
+        }
 
 
-
-        searchBtn.setOnClickListener({
+        searchBtn.setOnClickListener{
             val filter = searchFilter.text.toString()
             if(filter.isEmpty()){
                 adapter.changeList(list)
@@ -69,8 +101,16 @@ class ContactsFragment : Fragment() {
                 adapter.changeList(filteredList)
             }
 
-        })
+        }
         return view
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        // Remove the listener to avoid memory leaks
+        list.forEach { contact ->
+            val userStatusRef = database.getReference("users/${contact.id}/online")
+            userStatusRef.removeEventListener(userStatusListener)
+        }
     }
     fun focusSearch() {
         if(::searchFilter.isInitialized){
