@@ -16,6 +16,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,37 +41,17 @@ class ContactsFragment : Fragment() {
     private lateinit var database: FirebaseDatabase
     private lateinit var userStatusListener: ValueEventListener
     val firestore = Firebase.firestore
+    lateinit var adapter : ContactsAdapter
     val currentUser = FirebaseAuth.getInstance().currentUser
+    private lateinit var progressBar: ProgressBar
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         database = FirebaseDatabase.getInstance()
-        /*     list = mutableListOf(
-            Contact("5sOWGPgonbafPOPh2weIwvcP0wK2",R.drawable.avatar_placeholder_allchat, "Nguyễn Văn C", false),
-            Contact("c33ebNdc6rStVchv3ovFalNOxDh2" ,R.drawable.avatar_placeholder_allchat, "conchocuaduynhan", false),
-            Contact("vwAUzgbCSNWNq4a48xoM2zZVCcH3",R.drawable.avatar_placeholder_allchat, "conglongcuaduylan", false),
-
-            *//*
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn D", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn E", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn F", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn G", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn H", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn I", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn J", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn K", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn L", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn M", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn N", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn O", true),*//*
-        )*/
-
-        lifecycleScope.launch {
-            fetchFriendsAndGroups()
-            addRealtimeListeners()
-        }
 
     }
-
+    private fun showLoading(isLoading: Boolean) {
+        progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -78,30 +59,23 @@ class ContactsFragment : Fragment() {
         // Inflate the layout for this fragment
         var view: View = inflater.inflate(R.layout.fragment_contacts, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewContact)
-        val adapter = ContactsAdapter(list)
+        adapter = ContactsAdapter(list)
         recyclerView.adapter = adapter
         recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         searchBtn = view.findViewById(R.id.search_btn)
         searchFilter = view.findViewById(R.id.filter_search)
         toAddFriendBtn = view.findViewById(R.id.toAddFriendBtn)
+        progressBar = view.findViewById(R.id.progressBar)
         toAddFriendBtn.setOnClickListener {
             val intent = Intent(activity, AddFriend::class.java)
             startActivity(intent)
         }
 
 
-        searchBtn.setOnClickListener {
-       /*     val filter = searchFilter.text.toString()
-            if (filter.isEmpty()) {
-                adapter.changeList(list)
 
-            } else {
-                val filterLowerCase = filter.toLowerCase()
-                val filteredList = list.filter { it.name.toLowerCase().contains(filterLowerCase) }
-                adapter.changeList(filteredList)
-            }
-*/
+        searchBtn.setOnClickListener {
+
         }
         searchFilter.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -119,16 +93,18 @@ class ContactsFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+        lifecycleScope.launch {
+            showLoading(true)
+            fetchFriendsAndGroups()
+            addRealtimeListeners()
+        }
+
         return view
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onPause() {
+        super.onPause()
         // Remove the listener to avoid memory leaks
-    /*    list.forEach { contact ->
-            val userStatusRef = database.getReference("users/${contact.id}/online")
-            userStatusRef.removeEventListener(userStatusListener)
-        }*/
         if (::userStatusListener.isInitialized) {
             list.forEach { contact ->
                 val userStatusRef = database.getReference("users/${contact.id}/online")
@@ -177,11 +153,11 @@ class ContactsFragment : Fragment() {
         val userRef = firestore.collection("users").document(userId)
         val documentSnapshot = userRef.get().await()
         if (documentSnapshot.exists()) {
-            val avatarUrl = documentSnapshot.getString("Avatar") ?: ""
+            val avatarUrl = documentSnapshot.getString("Avatar") ?: "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
             val name = documentSnapshot.getString("Name") ?: ""
             val contact = Contact(userId, avatarUrl, name, false)
             list.add(contact)
-            recyclerView.adapter?.notifyDataSetChanged()
+         //   adapter.notifyDataSetChanged()
         }
     }
 
@@ -193,11 +169,12 @@ class ContactsFragment : Fragment() {
             val name = documentSnapshot.getString("Name") ?: ""
             val contact = Contact(groupId, avatarUrl, name, false)
             list.add(contact)
-            recyclerView.adapter?.notifyDataSetChanged()
+        //    adapter.notifyDataSetChanged()
         }
     }
     private fun addRealtimeListeners() {
-       // recyclerView.adapter?.notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
+        showLoading(false)
         list.forEach { contact ->
             val userStatusRef = database.getReference("users/${contact.id}/online")
             userStatusListener = object : ValueEventListener {
@@ -210,13 +187,13 @@ class ContactsFragment : Fragment() {
                                 val delayedIsOnline = delayedSnapshot.getValue(Boolean::class.java) ?: false
                                 if (!delayedIsOnline) {
                                     contact.online = false
-                                    recyclerView.adapter?.notifyDataSetChanged()
+                                    adapter.notifyDataSetChanged()
                                 }
                             }
                         }, 2500)
                     } else {
                         contact.online = true
-                        recyclerView.adapter?.notifyDataSetChanged()
+                        adapter?.notifyDataSetChanged()
                     }
                 }
 

@@ -88,11 +88,13 @@ class AddFriend :  HandleOnlineActivity() {
                         if (userId != user.uid && !friends.contains(userId) && !requests.contains(userId)) {
                             val name = document.getString("Name") ?: ""
                           //  val image = R.drawable.avatar_placeholder_allchat // Placeholder image
-                            var imageUrl : String? = document.getString("Avatar")
-                           // if(imageUrl=="" || imageUrl==null)
-                         //       imageUrl = "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
+                            var imageUrl = document.getString("Avatar") ?: "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
+                            if(imageUrl==null || imageUrl== ""){
+                                imageUrl = "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
+                            }
                             val reqFriend = requestSent.contains(userId)
-                            userList.add(Friend(userId, name, imageUrl!!, reqFriend))
+
+                            userList.add(Friend(userId, name, imageUrl, reqFriend))
                         }
                     }
                     adapter.notifyDataSetChanged()
