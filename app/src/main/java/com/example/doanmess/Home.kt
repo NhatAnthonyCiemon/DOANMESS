@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import HandleOnlineActivity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -31,7 +32,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import java.util.jar.Manifest
 
 
-class Home : AppCompatActivity() {
+class Home : HandleOnlineActivity() {
     lateinit var btnAllchat: Button
     lateinit var btnContact: Button
     lateinit var btnInfo: Button
@@ -163,7 +164,7 @@ class Home : AppCompatActivity() {
                 }
         }*/
         if (User != null) {
-            updateOnlineStatus(true)
+         //   updateOnlineStatus(true)
             dbfirestore.collection("users").document(User!!.uid).get()
                 .addOnSuccessListener { document ->
                     txtName.text = document.getString("Name")
@@ -222,15 +223,15 @@ class Home : AppCompatActivity() {
         transaction.commitNow()
     }
     // Function to update online status
-    private fun updateOnlineStatus(isOnline: Boolean) {
+/*    private fun updateOnlineStatus(isOnline: Boolean) {
         val database = FirebaseDatabase.getInstance()
         val userStatusRef = database.getReference("users/${User!!.uid}/online")
         userStatusRef.setValue(isOnline)
-    }
-    override fun onDestroy() {
+    }*/
+ /*   override fun onDestroy() {
         super.onDestroy()
         updateOnlineStatus(false)
-    }
+    }*/
 
 /*    override fun onResume() {
         super.onResume()

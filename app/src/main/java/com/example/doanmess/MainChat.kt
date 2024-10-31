@@ -1,5 +1,6 @@
 package com.example.createuiproject
 
+import HandleOnlineActivity
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.widget.LinearLayout
@@ -10,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doanmess.R
 
-class MainChat : AppCompatActivity() {
+class MainChat : HandleOnlineActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

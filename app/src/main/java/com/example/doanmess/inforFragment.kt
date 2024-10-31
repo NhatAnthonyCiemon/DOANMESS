@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
@@ -33,6 +34,7 @@ class inforFragment : Fragment() {
     private lateinit var button: FloatingActionButton
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
     private lateinit var userId: String
+    private lateinit var friendReqFrame : FrameLayout
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -43,17 +45,21 @@ class inforFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Thay userId bằng ID người dùng Firebase của bạn
-        userId = "USER_ID"
+        userId = FirebaseAuth.getInstance().currentUser!!.uid
 
         val darkMode = view.findViewById<FrameLayout>(R.id.darkMode)
         val changeAvata = view.findViewById<FrameLayout>(R.id.changeAvata)
         val changeName = view.findViewById<FrameLayout>(R.id.changeName)
         val txtName = view.findViewById<TextView>(R.id.txtName)
         val txtMode = view.findViewById<TextView>(R.id.txtCheckDarkMode)
-
+        friendReqFrame = view.findViewById(R.id.friendRequest)
         imageView = view.findViewById(R.id.imgView)
         button = view.findViewById(R.id.floatingActionButton)
 
+        friendReqFrame.setOnClickListener {
+            val intent = Intent(context, FriendRequest::class.java)
+            startActivity(intent)
+        }
         imagePickerLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -152,7 +158,7 @@ class inforFragment : Fragment() {
 
     private fun saveUserName(name: String) {
         firestore.collection("users").document(userId)
-            .update("name", name)
+            .update("Name", name)
             .addOnFailureListener { e ->
                 // Xử lý lỗi nếu cập nhật thất bại
             }
@@ -160,7 +166,7 @@ class inforFragment : Fragment() {
 
     private fun saveDarkMode(mode: String) {
         firestore.collection("users").document(userId)
-            .update("darkMode", mode)
+            .update("DarkMode", mode)
             .addOnFailureListener { e ->
                 // Xử lý lỗi nếu cập nhật thất bại
             }
@@ -168,7 +174,7 @@ class inforFragment : Fragment() {
 
     private fun saveImageUri(uri: String) {
         firestore.collection("users").document(userId)
-            .update("imageUri", uri)
+            .update("Avatar", uri)
             .addOnFailureListener { e ->
                 // Xử lý lỗi nếu cập nhật thất bại
             }
@@ -180,9 +186,9 @@ class inforFragment : Fragment() {
         userDocRef.get().addOnSuccessListener { document ->
             if (document.exists()) {
                 // Tài liệu của người dùng tồn tại, tải dữ liệu từ Firestore
-                val savedName = document.getString("name") ?: "User"
-                val savedMode = document.getString("darkMode") ?: "Off"
-                val savedImageUri = document.getString("imageUri")
+                val savedName = document.getString("Name") ?: "User"
+                val savedMode = document.getString("DarkMode") ?: "Off"
+                val savedImageUri = document.getString("Avatar")
 
                 view?.findViewById<TextView>(R.id.txtName)?.text = savedName
                 view?.findViewById<TextView>(R.id.txtCheckDarkMode)?.text = savedMode

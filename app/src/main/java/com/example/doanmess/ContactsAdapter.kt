@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 
 class ContactsAdapter(var contactList:  List<Contact>) : RecyclerView.Adapter<ContactsAdapter.MyViewHolder>() {
 
@@ -35,7 +36,11 @@ class ContactsAdapter(var contactList:  List<Contact>) : RecyclerView.Adapter<Co
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.setText(contactList[position].name)
-        holder.imgView.setImageResource(contactList[position].avatar)
+     //   holder.imgView.setImageResource(contactList[position].avatar)
+        Picasso
+            .get()
+            .load(contactList[position].avatar)
+            .into(holder.imgView);
         if (contactList[position].online) {
             holder.onlineDot.visibility = View.VISIBLE
         } else {
