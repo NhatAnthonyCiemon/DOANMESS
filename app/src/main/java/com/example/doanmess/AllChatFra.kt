@@ -1,5 +1,6 @@
 package com.example.doanmess
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.ContentValues.TAG
 import android.content.Context
@@ -47,7 +48,7 @@ class AllChatFra : Fragment() {
     private var list: MutableList<DataMess> = mutableListOf()
     private var myGroup: MutableMap<String, String> = mutableMapOf()
     private var avatarList: MutableMap<String, String> = mutableMapOf()
-    lateinit var atvtContext: Context
+    lateinit var atvtContext: Activity
     private lateinit var auth: FirebaseAuth
     private var User: FirebaseUser? = null
     val dbfirestore = Firebase.firestore
@@ -95,7 +96,7 @@ class AllChatFra : Fragment() {
                                             if (document != null) {
                                                 val name = document.data?.get("Name").toString()
                                                 val avatar = document.data?.get("Avatar").toString()
-                                                list.add(DataMess(avatar, name, content.toString(), timestamp!!, status!!, true))
+                                                list.add(DataMess(recvId.toString(),avatar, name, content.toString(), timestamp!!, status!!, true))
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                                 loadingBar.visibility = View.GONE
@@ -113,7 +114,7 @@ class AllChatFra : Fragment() {
                                             if (document != null) {
                                                 val name = document.data?.get("Name").toString()
                                                 val avatar = document.data?.get("Avatar").toString()
-                                                list.add(DataMess(avatar, name, content.toString(), timestamp!!, status!!, false))
+                                                list.add(DataMess(sendId.toString(),avatar, name, content.toString(), timestamp!!, status!!, false))
 
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
@@ -153,7 +154,7 @@ class AllChatFra : Fragment() {
                                 val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
 
                                 if (User!!.uid == sendId) {
-                                    list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
+                                    list.add(DataMessGroup(childSnapshot.key.toString(),avatarList[childSnapshot.key.toString()].toString(), myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
                                     list.sortByDescending { it.timestamp }
                                     adapter.notifyDataSetChanged()
                                 } else {
@@ -164,6 +165,7 @@ class AllChatFra : Fragment() {
                                                 val name = document.data?.get("Name").toString()
                                                 list.add(
                                                     DataMessGroup(
+                                                        childSnapshot.key.toString(),
                                                         avatarList[childSnapshot.key.toString()].toString(),
                                                         name,
                                                         content.toString(),
@@ -244,7 +246,7 @@ class AllChatFra : Fragment() {
         val view = inflater.inflate(R.layout.fragment_all_chat, container, false)
         val recyclerView = view.findViewById<RecyclerView>(R.id.RVChat_AllChat)
         loadingBar = view.findViewById(R.id.LoadingBar)
-        adapter = Chat_AllChatAdapter(list)
+        adapter = Chat_AllChatAdapter(atvtContext,list)
         adapter.setOnItemClickListener(object : Chat_AllChatAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
                 //code để chuyển đến màn hình chat
@@ -263,7 +265,6 @@ class AllChatFra : Fragment() {
 
     override fun onDestroyView(){
         super.onDestroyView()
-        myGroup.clear()
         PauseRealTimeListen()
     }
 
@@ -276,6 +277,8 @@ class AllChatFra : Fragment() {
     override fun onPause() {
         super.onPause()
         PauseRealTimeListen()
+        list.clear()
+        adapter.notifyDataSetChanged()
     }
 
     fun PauseRealTimeListen(){

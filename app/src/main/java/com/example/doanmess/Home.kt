@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -103,6 +104,7 @@ class Home : HandleOnlineActivity() {
         btnGroup.setOnClickListener{
             val intent = Intent(this, CreateGroup::class.java)
             startActivity(intent)
+
         }
 
         btnAllchat.setOnClickListener {
@@ -190,6 +192,7 @@ class Home : HandleOnlineActivity() {
             }
         }
     }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

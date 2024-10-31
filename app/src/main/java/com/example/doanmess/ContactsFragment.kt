@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -44,6 +45,7 @@ class ContactsFragment : Fragment() {
     lateinit var adapter : ContactsAdapter
     val currentUser = FirebaseAuth.getInstance().currentUser
     private lateinit var progressBar: ProgressBar
+    private lateinit var activity: Activity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         database = FirebaseDatabase.getInstance()
@@ -59,7 +61,8 @@ class ContactsFragment : Fragment() {
         // Inflate the layout for this fragment
         var view: View = inflater.inflate(R.layout.fragment_contacts, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewContact)
-        adapter = ContactsAdapter(list)
+        activity = requireActivity()
+        adapter = ContactsAdapter(activity,list)
         recyclerView.adapter = adapter
         recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
