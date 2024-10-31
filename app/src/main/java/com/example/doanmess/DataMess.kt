@@ -6,7 +6,7 @@ import java.util.Locale
 import java.util.TimeZone
 
 open class DataMess {
-    var avatar: Int=0
+    var avatar: String=""
     var name: String= ""
     var message: String=""
     var time: String=""
@@ -14,7 +14,7 @@ open class DataMess {
     var othersend: Boolean = false
     var last_name: String = ""
     var timestamp: Long = 0
-    constructor(avatar: Int, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean){
+    constructor(avatar: String, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean){
         this.avatar = avatar
         this.name = name
         this.status = status
@@ -34,7 +34,7 @@ open class DataMess {
 
 class DataMessGroup: DataMess {
     var groupname: String = ""
-    constructor(avatar: Int, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String): super(avatar, name, message, timestamp, status, true){
+    constructor(avatar: String, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String): super(avatar, name, message, timestamp, status, true){
         this.groupname = groupname
         this.message =  "$whosend: $message"
     }

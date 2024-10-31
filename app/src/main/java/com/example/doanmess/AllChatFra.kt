@@ -45,6 +45,7 @@ class AllChatFra : Fragment() {
     // TODO: Rename and change types of parameters
     private var list: MutableList<DataMess> = mutableListOf()
     private var myGroup: MutableMap<String, String> = mutableMapOf()
+    private var avatarList: MutableMap<String, String> = mutableMapOf()
     lateinit var atvtContext: Context
     private lateinit var auth: FirebaseAuth
     private var User: FirebaseUser? = null
@@ -91,7 +92,8 @@ class AllChatFra : Fragment() {
                                         .addOnSuccessListener { document ->
                                             if (document != null) {
                                                 val name = document.data?.get("Name").toString()
-                                                list.add(DataMess(R.drawable.avatar_placeholder_allchat, name, content.toString(), timestamp!!, status!!, true))
+                                                val avatar = document.data?.get("Avatar").toString()
+                                                list.add(DataMess(avatar, name, content.toString(), timestamp!!, status!!, true))
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -107,7 +109,8 @@ class AllChatFra : Fragment() {
                                         .addOnSuccessListener { document ->
                                             if (document != null) {
                                                 val name = document.data?.get("Name").toString()
-                                                list.add(DataMess(R.drawable.avatar_placeholder_allchat, name, content.toString(), timestamp!!, status!!, false))
+                                                val avatar = document.data?.get("Avatar").toString()
+                                                list.add(DataMess(avatar, name, content.toString(), timestamp!!, status!!, false))
 
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
@@ -146,7 +149,7 @@ class AllChatFra : Fragment() {
                                 val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
 
                                 if (User!!.uid == sendId) {
-                                    list.add(DataMessGroup(R.drawable.avatar_placeholder_allchat, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
+                                    list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
                                     list.sortByDescending { it.timestamp }
                                     adapter.notifyDataSetChanged()
                                 } else {
@@ -157,7 +160,7 @@ class AllChatFra : Fragment() {
                                                 val name = document.data?.get("Name").toString()
                                                 list.add(
                                                     DataMessGroup(
-                                                        R.drawable.avatar_placeholder_allchat,
+                                                        avatarList[childSnapshot.key.toString()].toString(),
                                                         name,
                                                         content.toString(),
                                                         timestamp!!,
@@ -211,8 +214,10 @@ class AllChatFra : Fragment() {
                         task.addOnSuccessListener { groupDoc ->
                             if (groupDoc != null && groupDoc.data != null) {
                                 val name_group = groupDoc.data?.get("Name").toString()
+                                val avatar_group = groupDoc.data?.get("Avatar").toString()
                                 val groupID = groupDoc.id
                                 myGroup[groupID] = name_group
+                                avatarList[groupID] = avatar_group
                             }
                         }.addOnFailureListener { exception ->
                             Log.d(TAG, "get failed with ", exception)
