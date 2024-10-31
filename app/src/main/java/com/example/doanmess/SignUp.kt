@@ -5,16 +5,28 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.PropertyName
+
+data class User(
+    @JvmField @PropertyName("Avatar") val Avatar: String = "",
+    @JvmField @PropertyName("Name") val Name: String = "",
+    @JvmField @PropertyName("RequestSent") val RequestSent: List<String> = listOf(),
+    @JvmField @PropertyName("Requests") val Requests: List<String> = listOf(),
+    @JvmField @PropertyName("Blocks") val Blocks: List<String> = listOf(),
+    @JvmField @PropertyName("Friends") val Friends: List<String> = listOf(),
+    @JvmField @PropertyName("Groups") val Groups: List<String> = listOf()
+)
+
 
 
 class SignUp : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
-
+    private lateinit var firestore: FirebaseFirestore
 
     private lateinit var etFullName: EditText
     private lateinit var etEmail: EditText
@@ -28,7 +40,7 @@ class SignUp : AppCompatActivity() {
         setContentView(R.layout.activity_sign_up)
 
         auth = FirebaseAuth.getInstance()
-
+        firestore = FirebaseFirestore.getInstance()
 
         etFullName = findViewById(R.id.etFullName)
         etEmail = findViewById(R.id.etEmail)
@@ -40,27 +52,47 @@ class SignUp : AppCompatActivity() {
         btnSignUp.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
+            val confirmPassword = etConfirmPassword.text.toString().trim()
+            val fullName = etFullName.text.toString().trim()
 
-            if (email.isEmpty() || password.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || fullName.isEmpty()) {
                 Toast.makeText(this, "Please enter all details", Toast.LENGTH_SHORT).show()
+            } else if (password != confirmPassword) {
+                Toast.makeText(this, "Password and Confirm Password must be the same", Toast.LENGTH_SHORT).show()
             } else {
                 auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(this, "Sign-Up successful", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this, Home::class.java)
-                            startActivity(intent)
-                            finish()
+                            val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
+                            val user = User(
+                                Avatar = "",
+                                Name = fullName,
+                                RequestSent = listOf(),
+                                Requests = listOf(),
+                                Blocks = listOf(),
+                                Friends = listOf(),
+                                Groups = listOf()
+                            )
+                            firestore.collection("users").document(userId).set(user)
+                                .addOnCompleteListener { dbTask ->
+                                    if (dbTask.isSuccessful) {
+                                        Toast.makeText(this, "Sign-Up successful", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(this, Home::class.java)
+                                        startActivity(intent)
+                                        finish()
+                                    } else {
+                                        Toast.makeText(this, "Failed to save user data", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                         } else {
                             val exception = task.exception
-                            if (exception is FirebaseAuthWeakPasswordException) {
-                                Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-                            } else if (exception is FirebaseAuthUserCollisionException) {
-                                Toast.makeText(this, "Email is already in use", Toast.LENGTH_SHORT).show()
-                            } else if (etPassword != etConfirmPassword) {
-                                Toast.makeText(this, "Password and Confirm Password must be the same", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(this, "Sign-Up failed", Toast.LENGTH_SHORT).show()
+                            when (exception) {
+                                is FirebaseAuthWeakPasswordException ->
+                                    Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                                is FirebaseAuthUserCollisionException ->
+                                    Toast.makeText(this, "Email is already in use", Toast.LENGTH_SHORT).show()
+                                else ->
+                                    Toast.makeText(this, "Sign-Up failed", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -68,10 +100,9 @@ class SignUp : AppCompatActivity() {
         }
 
         btnSignIn.setOnClickListener {
-            // Chuyển về màn hình đăng nhập
             val intent = Intent(this, Login::class.java)
             startActivity(intent)
-            finish() // Đóng màn hình đăng ký
+            finish()
         }
     }
 }
