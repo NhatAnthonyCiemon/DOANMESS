@@ -20,12 +20,15 @@ import android.widget.ProgressBar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -93,15 +96,15 @@ class ContactsFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
-        lifecycleScope.launch {
-            showLoading(true)
-            fetchFriendsAndGroups()
-            addRealtimeListeners()
-        }
-
+        showLoading(true)
+        fetchFriendsAndGroups()
         return view
     }
 
+    override fun onResume() {
+        super.onResume()
+        addRealtimeListeners()
+    }
     override fun onPause() {
         super.onPause()
         // Remove the listener to avoid memory leaks
@@ -132,49 +135,53 @@ class ContactsFragment : Fragment() {
     // Launch a coroutine to fetch friends and groups
 
 
-    private suspend fun fetchFriendsAndGroups() {
-        val userRef = firestore.collection("users").document(currentUser!!.uid)
-        val documentSnapshot = userRef.get().await()
-        if (documentSnapshot.exists()) {
-            val friendsIds = documentSnapshot.get("Friends") as? List<String> ?: emptyList()
-            val groupsIds = documentSnapshot.get("Groups") as? List<String> ?: emptyList()
-
-            friendsIds.forEach { friendId ->
-                fetchUserDetails(friendId)
+    private fun fetchFriendsAndGroups() {
+        val userRef = firestore.collection("users").document(currentUser!!.uid).get().addOnSuccessListener {
+            val friends = it.get("Friends") as List<String>
+            val groups = it.get("Groups") as List<String>
+            val tasks = mutableListOf<Task<DocumentSnapshot>>()
+            friends.forEach { friendId ->
+                val task = fetchUserDetails(friendId)
+                tasks.add(task)
             }
-
-            groupsIds.forEach { groupId ->
-                fetchGroupDetails(groupId)
+            groups.forEach { groupId ->
+                val task = fetchGroupDetails(groupId)
+                tasks.add(task)
+            }
+            Tasks.whenAllComplete(tasks).addOnCompleteListener {
+                addRealtimeListeners()
             }
         }
+
     }
 
-    private suspend fun fetchUserDetails(userId: String) {
-        val userRef = firestore.collection("users").document(userId)
-        val documentSnapshot = userRef.get().await()
-        if (documentSnapshot.exists()) {
-            val avatarUrl = documentSnapshot.getString("Avatar") ?: "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
-            val name = documentSnapshot.getString("Name") ?: ""
+    private fun fetchUserDetails(userId: String) : Task<DocumentSnapshot>{
+        val userRef = firestore.collection("users").document(userId).get().addOnSuccessListener {
+            val avatarUrl = it.getString("Avatar") ?: ""
+            val name = it.getString("Name") ?: ""
             val contact = Contact(userId, avatarUrl, name, false)
             list.add(contact)
-         //   adapter.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
         }
+        return userRef
     }
 
-    private suspend fun fetchGroupDetails(groupId: String) {
-        val groupRef = firestore.collection("groups").document(groupId)
-        val documentSnapshot = groupRef.get().await()
-        if (documentSnapshot.exists()) {
-            val avatarUrl = documentSnapshot.getString("Avatar") ?: ""
-            val name = documentSnapshot.getString("Name") ?: ""
+    private fun fetchGroupDetails(groupId: String): Task<DocumentSnapshot> {
+        val groupRef = firestore.collection("groups").document(groupId).get().addOnSuccessListener {
+            val avatarUrl = it.getString("Avatar") ?: ""
+            val name = it.getString("Name") ?: ""
             val contact = Contact(groupId, avatarUrl, name, false)
             list.add(contact)
-        //    adapter.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
         }
+        return groupRef
+
     }
     private fun addRealtimeListeners() {
-        adapter.notifyDataSetChanged()
-        showLoading(false)
+        if (list.isEmpty()) {
+            showLoading(false)
+            return
+        }
         list.forEach { contact ->
             val userStatusRef = database.getReference("users/${contact.id}/online")
             userStatusListener = object : ValueEventListener {
@@ -203,5 +210,6 @@ class ContactsFragment : Fragment() {
             }
             userStatusRef.addValueEventListener(userStatusListener)
         }
+        showLoading(false)
     }
 }
