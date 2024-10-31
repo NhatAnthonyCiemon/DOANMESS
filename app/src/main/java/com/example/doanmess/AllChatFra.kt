@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -51,6 +52,7 @@ class AllChatFra : Fragment() {
     private var User: FirebaseUser? = null
     val dbfirestore = Firebase.firestore
     private lateinit var adapter: Chat_AllChatAdapter
+    private lateinit var loadingBar : ProgressBar
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,6 +98,7 @@ class AllChatFra : Fragment() {
                                                 list.add(DataMess(avatar, name, content.toString(), timestamp!!, status!!, true))
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
+                                                loadingBar.visibility = View.GONE
                                             } else {
                                                 Log.d("exist", "No such document")
                                             }
@@ -136,6 +139,7 @@ class AllChatFra : Fragment() {
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
+
                     list.removeIf { it is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
                         if (myGroup.contains(childSnapshot.key.toString())) {
@@ -239,6 +243,7 @@ class AllChatFra : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_all_chat, container, false)
         val recyclerView = view.findViewById<RecyclerView>(R.id.RVChat_AllChat)
+        loadingBar = view.findViewById(R.id.LoadingBar)
         adapter = Chat_AllChatAdapter(list)
         adapter.setOnItemClickListener(object : Chat_AllChatAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
