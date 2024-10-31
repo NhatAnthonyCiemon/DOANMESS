@@ -6,7 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import android.widget.ImageView
 import android.widget.TextView
 import android.view.LayoutInflater
-import com.example.createuiproject.MainChat
+import com.squareup.picasso.Picasso
+import java.io.File
 
 
 class Chat_AllChatAdapter(var list: List<DataMess>): RecyclerView.Adapter<Chat_AllChatAdapter.MessHolder>() {
@@ -51,7 +52,7 @@ class Chat_AllChatAdapter(var list: List<DataMess>): RecyclerView.Adapter<Chat_A
             txtName.text = item.name
             txtContent.text = item.message
             txtTime.text = item.time
-            imgAvatar.setImageResource(item.avatar)
+           Picasso.get().load(list[position].avatar).into(imgAvatar)
            if(item is DataMessGroup){
                txtName.text = item.groupname
            }

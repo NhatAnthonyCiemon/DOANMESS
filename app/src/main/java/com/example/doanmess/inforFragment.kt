@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -17,18 +16,25 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class inforFragment : Fragment() {
-
+    private val storageReference = FirebaseStorage.getInstance().reference
+    private val firestore = FirebaseFirestore.getInstance()
     private lateinit var imageView: ImageView
     private lateinit var button: FloatingActionButton
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var userId: String
+    private lateinit var friendReqFrame : FrameLayout
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -38,17 +44,22 @@ class inforFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedPreferences = requireActivity().getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
+        // Thay userId bằng ID người dùng Firebase của bạn
+        userId = FirebaseAuth.getInstance().currentUser!!.uid
 
         val darkMode = view.findViewById<FrameLayout>(R.id.darkMode)
         val changeAvata = view.findViewById<FrameLayout>(R.id.changeAvata)
         val changeName = view.findViewById<FrameLayout>(R.id.changeName)
         val txtName = view.findViewById<TextView>(R.id.txtName)
         val txtMode = view.findViewById<TextView>(R.id.txtCheckDarkMode)
-
+        friendReqFrame = view.findViewById(R.id.friendRequest)
         imageView = view.findViewById(R.id.imgView)
         button = view.findViewById(R.id.floatingActionButton)
 
+        friendReqFrame.setOnClickListener {
+            val intent = Intent(context, FriendRequest::class.java)
+            startActivity(intent)
+        }
         imagePickerLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -56,18 +67,15 @@ class inforFragment : Fragment() {
                 val data: Intent? = result.data
                 val uri: Uri? = data?.data
                 imageView.setImageURI(uri)
-                // Lưu URI của hình ảnh vào SharedPreferences
-                saveImageUri(uri.toString())
+                uri?.let { uploadImage(it) }
             }
         }
 
-        button.setOnClickListener {
-            changeAvata()
-        }
+        button.setOnClickListener { changeAvata() }
 
         darkMode.setOnClickListener {
             changeBackgroundColor(darkMode, "#D9D9D9", 150)
-            changeMode(view)
+            toggleDarkMode(txtMode)
         }
 
         changeAvata.setOnClickListener {
@@ -80,12 +88,10 @@ class inforFragment : Fragment() {
             changeNameFunc(view)
         }
 
-        txtName.setOnClickListener {
-            changeNameFunc(view)
-        }
+        txtName.setOnClickListener { changeNameFunc(view) }
 
-        // Đọc và hiển thị thông tin khi khởi động
-        loadData()
+        // Tải thông tin từ Firestore khi khởi động
+        loadUserData()
     }
 
     private fun changeNameFunc(view: View) {
@@ -108,11 +114,8 @@ class inforFragment : Fragment() {
                 edtChangeName.visibility = View.INVISIBLE
                 txtName.visibility = View.VISIBLE
 
-                // Lưu tên người dùng
-                saveData(txtName.text.toString())
-
+                saveUserName(txtName.text.toString())
                 imm.hideSoftInputFromWindow(edtChangeName.windowToken, 0)
-
                 true
             } else {
                 false
@@ -120,25 +123,18 @@ class inforFragment : Fragment() {
         }
     }
 
-    private fun changeMode(view: View) {
-        val txtMode = view.findViewById<TextView>(R.id.txtCheckDarkMode)
-        if (txtMode.text.toString() == "Off") {
-            txtMode.text = "On"
-        } else {
-            txtMode.text = "Off"
-        }
-        // Lưu trạng thái chế độ tối
-        saveMode(txtMode.text.toString())
+    private fun toggleDarkMode(txtMode: TextView) {
+        txtMode.text = if (txtMode.text.toString() == "Off") "On" else "Off"
+        saveDarkMode(txtMode.text.toString())
     }
 
     private fun changeAvata() {
+        // Gọi ImagePicker để chọn hình ảnh
         ImagePicker.with(this)
             .crop()
             .compress(1024)
             .maxResultSize(1080, 1080)
-            .createIntent { intent ->
-                imagePickerLauncher.launch(intent)
-            }
+            .createIntent { intent -> imagePickerLauncher.launch(intent) }
     }
 
     private fun changeBackgroundColor(view: View, color: String, duration: Long) {
@@ -149,33 +145,76 @@ class inforFragment : Fragment() {
         view.postDelayed({ view.setBackgroundColor(currentColor) }, duration)
     }
 
-    // Hàm lưu trạng thái chế độ tối
-    private fun saveMode(mode: String) {
-        sharedPreferences.edit().putString("DarkMode", mode).apply()
+    private fun uploadImage(uri: Uri) {
+        val avatarRef = storageReference.child("avatars/$userId.jpg")
+        avatarRef.putFile(uri).addOnSuccessListener {
+            avatarRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                saveImageUri(downloadUri.toString())
+            }
+        }.addOnFailureListener {
+            // Xử lý lỗi tải ảnh
+        }
     }
 
-    // Hàm lưu tên người dùng
-    private fun saveData(name: String) {
-        sharedPreferences.edit().putString("UserName", name).apply()
+    private fun saveUserName(name: String) {
+        firestore.collection("users").document(userId)
+            .update("Name", name)
+            .addOnFailureListener { e ->
+                // Xử lý lỗi nếu cập nhật thất bại
+            }
     }
 
-    // Hàm lưu URI của hình ảnh
+    private fun saveDarkMode(mode: String) {
+        firestore.collection("users").document(userId)
+            .update("DarkMode", mode)
+            .addOnFailureListener { e ->
+                // Xử lý lỗi nếu cập nhật thất bại
+            }
+    }
+
     private fun saveImageUri(uri: String) {
-        sharedPreferences.edit().putString("ImageUri", uri).apply()
+        firestore.collection("users").document(userId)
+            .update("Avatar", uri)
+            .addOnFailureListener { e ->
+                // Xử lý lỗi nếu cập nhật thất bại
+            }
     }
 
-    // Hàm đọc và hiển thị thông tin
-    private fun loadData() {
-        val savedName = sharedPreferences.getString("UserName", "User")
-        val savedMode = sharedPreferences.getString("DarkMode", "Off")
-        val savedImageUri = sharedPreferences.getString("ImageUri", null)
+    private fun loadUserData() {
+        val userDocRef = firestore.collection("users").document(userId)
 
-        view?.findViewById<TextView>(R.id.txtName)?.text = savedName
-        view?.findViewById<TextView>(R.id.txtCheckDarkMode)?.text = savedMode
+        userDocRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                // Tài liệu của người dùng tồn tại, tải dữ liệu từ Firestore
+                val savedName = document.getString("Name") ?: "User"
+                val savedMode = document.getString("DarkMode") ?: "Off"
+                val savedImageUri = document.getString("Avatar")
 
-        // Hiển thị hình ảnh nếu có URI đã lưu
-        savedImageUri?.let {
-            imageView.setImageURI(Uri.parse(it))
+                view?.findViewById<TextView>(R.id.txtName)?.text = savedName
+                view?.findViewById<TextView>(R.id.txtCheckDarkMode)?.text = savedMode
+                // Sử dụng Glide để tải ảnh từ URL
+                savedImageUri?.let { uri ->
+                    Glide.with(this)
+                        .load(uri)
+                        .into(imageView)
+                }
+            } else {
+                // Nếu tài liệu không tồn tại, tạo tài liệu mới cho người dùng với các giá trị mặc định
+                val newUser = hashMapOf(
+                    "name" to "User",
+                    "darkMode" to "Off",
+                    "imageUri" to null // Có thể để null hoặc giá trị mặc định nếu có
+                )
+                userDocRef.set(newUser).addOnSuccessListener {
+                    // Tài liệu mới được tạo thành công
+                    view?.findViewById<TextView>(R.id.txtName)?.text = "User"
+                    view?.findViewById<TextView>(R.id.txtCheckDarkMode)?.text = "Off"
+                }.addOnFailureListener { e ->
+                    // Xử lý lỗi nếu không thể tạo tài liệu
+                }
+            }
+        }.addOnFailureListener {
+            // Xử lý lỗi nếu không thể tải dữ liệu từ Firestore
         }
     }
 }

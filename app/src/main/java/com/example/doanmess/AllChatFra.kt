@@ -45,6 +45,7 @@ class AllChatFra : Fragment() {
     // TODO: Rename and change types of parameters
     private var list: MutableList<DataMess> = mutableListOf()
     private var myGroup: MutableMap<String, String> = mutableMapOf()
+    private var avatarList: MutableMap<String, String> = mutableMapOf()
     lateinit var atvtContext: Context
     private lateinit var auth: FirebaseAuth
     private var User: FirebaseUser? = null
@@ -65,46 +66,7 @@ class AllChatFra : Fragment() {
 
     }
 
-    private fun showHighPriorityNotification(context: Context, title: String, message: String, idNotify: Int) {
-        if (ActivityCompat.checkSelfPermission(
-                atvtContext,
-                android.Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val channelId = "TIN_NHAN_MOI"
-            val bitmapAvatar = BitmapFactory.decodeResource(
-                context.resources,
-                R.drawable.avatar_placeholder_allchat
-            )
-            val intent = Intent(context, MainChat::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            }
 
-            val pendingIntent: PendingIntent =
-                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-            val builder = NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.checkmark2)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-                .setAutoCancel(true)
-                .setLargeIcon(bitmapAvatar)
-                .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-
-            with(NotificationManagerCompat.from(atvtContext)) {
-                notify(idNotify, builder.build())
-            }
-        }
-    }
-
-    fun encodeStringToNumber(input: String): Int {
-        val crc = CRC32()
-        crc.update(input.toByteArray())
-        return (crc.value % Int.MAX_VALUE).toInt()
-    }
 
     private fun ResumeRealTimeListen() {
         Firebase.database.getReference("users").child(User!!.uid)
@@ -130,7 +92,8 @@ class AllChatFra : Fragment() {
                                         .addOnSuccessListener { document ->
                                             if (document != null) {
                                                 val name = document.data?.get("Name").toString()
-                                                list.add(DataMess(R.drawable.avatar_placeholder_allchat, name, content.toString(), timestamp!!, status!!, true))
+                                                val avatar = document.data?.get("Avatar").toString()
+                                                list.add(DataMess(avatar, name, content.toString(), timestamp!!, status!!, true))
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -146,11 +109,9 @@ class AllChatFra : Fragment() {
                                         .addOnSuccessListener { document ->
                                             if (document != null) {
                                                 val name = document.data?.get("Name").toString()
-                                                list.add(DataMess(R.drawable.avatar_placeholder_allchat, name, content.toString(), timestamp!!, status!!, false))
+                                                val avatar = document.data?.get("Avatar").toString()
+                                                list.add(DataMess(avatar, name, content.toString(), timestamp!!, status!!, false))
 
-                                                if(status){
-                                                    showHighPriorityNotification(atvtContext, name, content.toString(), encodeStringToNumber(sendId.toString()+timestamp.toString()))
-                                                }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -188,7 +149,7 @@ class AllChatFra : Fragment() {
                                 val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
 
                                 if (User!!.uid == sendId) {
-                                    list.add(DataMessGroup(R.drawable.avatar_placeholder_allchat, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
+                                    list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
                                     list.sortByDescending { it.timestamp }
                                     adapter.notifyDataSetChanged()
                                 } else {
@@ -199,7 +160,7 @@ class AllChatFra : Fragment() {
                                                 val name = document.data?.get("Name").toString()
                                                 list.add(
                                                     DataMessGroup(
-                                                        R.drawable.avatar_placeholder_allchat,
+                                                        avatarList[childSnapshot.key.toString()].toString(),
                                                         name,
                                                         content.toString(),
                                                         timestamp!!,
@@ -208,9 +169,6 @@ class AllChatFra : Fragment() {
                                                         myGroup[childSnapshot.key.toString()].toString()
                                                     )
                                                 )
-                                                if(status){
-                                                    showHighPriorityNotification(atvtContext, myGroup[childSnapshot.key.toString()].toString(),name  +": "+ content.toString(), encodeStringToNumber(sendId.toString()+timestamp.toString()))
-                                                }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -256,8 +214,10 @@ class AllChatFra : Fragment() {
                         task.addOnSuccessListener { groupDoc ->
                             if (groupDoc != null && groupDoc.data != null) {
                                 val name_group = groupDoc.data?.get("Name").toString()
+                                val avatar_group = groupDoc.data?.get("Avatar").toString()
                                 val groupID = groupDoc.id
                                 myGroup[groupID] = name_group
+                                avatarList[groupID] = avatar_group
                             }
                         }.addOnFailureListener { exception ->
                             Log.d(TAG, "get failed with ", exception)

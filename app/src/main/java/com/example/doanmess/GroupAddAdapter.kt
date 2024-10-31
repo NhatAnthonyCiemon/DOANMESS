@@ -7,7 +7,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 
 class GroupAddAdapter(
     private var list: MutableList<GroupAdd>, private val onItemClicked: (String, String) -> Unit) : RecyclerView.Adapter<GroupAddAdapter.MyViewHolder>() {
@@ -51,7 +53,11 @@ class GroupAddAdapter(
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.setText(list[position].name)
-        holder.imgView.setImageResource(list[position].image)
+     //   holder.imgView.setImageResource(list[position].image)
+        Picasso
+            .get()
+            .load(list[position].image)
+            .into(holder.imgView);
         holder.addBtn.setOnClickListener({
             if(list[position].added == false) {
                 list[position].added = true

@@ -1,11 +1,13 @@
 package com.example.doanmess
 
+import HandleOnlineActivity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -17,17 +19,20 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
+import com.google.firebase.messaging.FirebaseMessaging
 import java.util.jar.Manifest
 
 
-class Home : AppCompatActivity() {
+class Home : HandleOnlineActivity() {
     lateinit var btnAllchat: Button
     lateinit var btnContact: Button
     lateinit var btnInfo: Button
@@ -61,6 +66,8 @@ class Home : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+       // Toast.makeText(this, "Welcome ${currentUser?.email}", Toast.LENGTH_SHORT).show()
         val logOutBtn = findViewById<Button>(R.id.logOutBtn)
         logOutBtn.setOnClickListener {
             auth1.signOut()
@@ -69,7 +76,18 @@ class Home : AppCompatActivity() {
             finish()
         }
         // ======================================================================================================
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.e("HHHHHHHHHHHHHHH", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
 
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            Log.e("HHHHHHHHHHHHHHH", token!!)
+        })
         Firebase.firestore.clearPersistence().addOnCompleteListener {
         }
         FirebaseApp.initializeApp(this)
@@ -125,11 +143,12 @@ class Home : AppCompatActivity() {
         auth = Firebase.auth
         ChangeFragment(AllChatFra.newInstance())
         User = auth.currentUser
-        if (User == null) {
+  /*      if (User == null) {
             auth.signInWithEmailAndPassword("doanmessg@gmail.com", "1234567")
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         User = auth.currentUser
+                        updateOnlineStatus(true)
                         Toast.makeText(
                             baseContext,
                             "Authentication success.",
@@ -143,8 +162,9 @@ class Home : AppCompatActivity() {
                         ).show()
                     }
                 }
-        }
-        else{
+        }*/
+        if (User != null) {
+         //   updateOnlineStatus(true)
             dbfirestore.collection("users").document(User!!.uid).get()
                 .addOnSuccessListener { document ->
                     txtName.text = document.getString("Name")
@@ -155,6 +175,7 @@ class Home : AppCompatActivity() {
                         "Error fetching document",
                         Toast.LENGTH_SHORT,
                     ).show()
+                    txtName.text= "Loading..."
                 }
         }
     }
@@ -201,5 +222,23 @@ class Home : AppCompatActivity() {
         transaction.replace(R.id.fragment_container, fragment)
         transaction.commitNow()
     }
+    // Function to update online status
+/*    private fun updateOnlineStatus(isOnline: Boolean) {
+        val database = FirebaseDatabase.getInstance()
+        val userStatusRef = database.getReference("users/${User!!.uid}/online")
+        userStatusRef.setValue(isOnline)
+    }*/
+ /*   override fun onDestroy() {
+        super.onDestroy()
+        updateOnlineStatus(false)
+    }*/
 
+/*    override fun onResume() {
+        super.onResume()
+        updateOnlineStatus(true)
+    }
+    override fun onStop() {
+        super.onStop()
+        updateOnlineStatus(false)
+    }*/
 }
