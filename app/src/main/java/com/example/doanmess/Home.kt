@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
@@ -29,6 +30,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.delay
@@ -74,29 +77,73 @@ class Home : HandleOnlineActivity() {
        // Toast.makeText(this, "Welcome ${currentUser?.email}", Toast.LENGTH_SHORT).show()
         val logOutBtn = findViewById<Button>(R.id.logOutBtn)
         logOutBtn.setOnClickListener {
-            auth1.signOut()
-            val intent = Intent(this, Login::class.java)
-            startActivity(intent)
-            finish()
+
+            val dir = filesDir
+            val files = dir.listFiles()
+            if (files != null) {
+                for (file in files) {
+                    if (file.isFile) {
+                        try {
+                            file.delete()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
+            val docRef = dbfirestore.collection("users").document(currentUser!!.uid)
+            //xóa 1 phần tử trong mảng field của firestore
+            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+
+            docRef.update("Devices", FieldValue.arrayRemove(androidId))
+                .addOnSuccessListener {
+                    Log.d("thanhhhhhhcoooong", "Phần tử đã được xóa thành công khỏi mảng")
+                }
+                .addOnFailureListener { e ->
+                    Log.d("xxxxxxxxxxxxxxxx", "Loi xoa phan tu", e)
+                }
+
+            val docRef2 = dbfirestore.collection("devices").document(androidId.toString())
+            docRef2.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+
+                        docRef2.update("User_id", "")
+                            .addOnSuccessListener {
+                                Log.d("TAG", "Trường User_id đã được ghi đè thành công")
+                                auth1.signOut()
+                                val intent = Intent(this, Login::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w("TAG", "Lỗi khi ghi đè trường User_id", e)
+                            }
+                    } else {
+                        docRef2.set(hashMapOf("Token" to "", "User_id" to ""))
+                            .addOnSuccessListener {
+                                Log.d("TAG", "DocumentSnapshot successfully updated!")
+                                auth1.signOut()
+                                val intent = Intent(this, Login::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w("TAG", "Error updating document", e)
+                            }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d("TAG", "get failed with ", exception)
+                }
+
         }
         // ======================================================================================================
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.e("HHHHHHHHHHHHHHH", "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
 
-            // Get new FCM registration token
-            val token = task.result
-
-            // Log and toast
-            Log.e("HHHHHHHHHHHHHHH", token!!)
-        })
         Firebase.firestore.clearPersistence().addOnCompleteListener {
         }
         FirebaseApp.initializeApp(this)
-        //kiểm tra có quyền thông báo không không thì xin
-        checkPermissionNotify()
+
         btnAllchat = findViewById<Button>(R.id.btnAllchat)
         btnContact = findViewById<Button>(R.id.btnContact)
         btnInfo = findViewById<Button>(R.id.btnInfo)
@@ -169,10 +216,9 @@ class Home : HandleOnlineActivity() {
                 }
         }*/
         if (User != null) {
-         //   updateOnlineStatus(true)
             dbfirestore.collection("users").document(User!!.uid).get()
                 .addOnSuccessListener { document ->
-                    txtName.text = document.getString("Name")
+                    txtName.text = document.data?.get("Name").toString()
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(
@@ -198,7 +244,11 @@ class Home : HandleOnlineActivity() {
 
     //nhận kết quả trả về từ 1 activity khác viết code
 
-
+    override fun onResume() {
+        super.onResume()
+        //kiểm tra có quyền thông báo không không thì xin
+        checkPermissionNotify()
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

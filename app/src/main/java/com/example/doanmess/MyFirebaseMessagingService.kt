@@ -5,13 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.createuiproject.MainChat
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import android.provider.Settings
+import com.google.firebase.firestore.SetOptions
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -25,7 +30,38 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         Log.e("HHHHHHHHHHHHHHHHHHHHHHHH", "Refreshed token: $token")
         //sendRegistrationToServer(token)
+
+        val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val docRef = Firebase.firestore.collection("devices").document(androidId)
+        val user = hashMapOf(
+            "Token" to token,
+            "User_id" to ""
+        ) as Map<String, Any?>
+        docRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    docRef
+                        .update("Token", token)
+                        .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully updated!") }
+                        .addOnFailureListener { e -> Log.w("TAG", "Error updating document", e) }
+                }
+                else{
+                    docRef
+                        .set(user, SetOptions.merge())
+                        .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully updated!") }
+                        .addOnFailureListener { e -> Log.w("TAG", "Error updating document", e) }
+                }
+            }
+        docRef
+            .set(user, SetOptions.merge())
+            .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully updated!") }
+            .addOnFailureListener { e -> Log.w("TAG", "Error updating document", e) }
+
     }
+
+
+
+
     private fun showHighPriorityNotification(context: Context, title: String, message: String) {
         if (ActivityCompat.checkSelfPermission(
                 context,

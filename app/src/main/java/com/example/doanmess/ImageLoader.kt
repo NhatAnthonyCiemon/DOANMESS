@@ -4,7 +4,7 @@ import android.app.Activity
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
+
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -17,15 +17,17 @@ import java.io.OutputStream
 import java.net.URL
 
 class ImageLoader(private val cont: Activity) {
-    val mutex = Mutex()
+
     suspend fun checkFile(Path: String, uid: String): String = withContext(Dispatchers.IO) {
-        mutex.withLock {
+
             val file = File(cont.filesDir, "uid_avatar.json")
             val gson = Gson()
             val list: MutableMap<String, String> = if (file.exists()) {
-                val bufferedReader = BufferedReader(FileReader(file))
-                val type = object : TypeToken<MutableMap<String, String>>() {}.type
-                gson.fromJson(bufferedReader, type)
+                MutexProvider.mutex.withLock {
+                    val bufferedReader = BufferedReader(FileReader(file))
+                    val type = object : TypeToken<MutableMap<String, String>>() {}.type
+                    gson.fromJson(bufferedReader, type)
+                }
             } else {
                 mutableMapOf()
             }
@@ -38,33 +40,33 @@ class ImageLoader(private val cont: Activity) {
                 val json = gson.toJson(list)
                 saveFile(file, json)
                 downloadImage(Path, uid)
-                res = "${cont.filesDir}/$uid.jpg"
+                res = "$Path"
             }
             return@withContext res
         }
 
-
-    }
-
-    fun downloadImage(urlPath: String, uid: String){
+    suspend fun downloadImage(urlPath: String, uid: String){
         val url = URL(urlPath)
         val connection = url.openConnection()
         connection.connect()
-
         val input: InputStream = connection.getInputStream()
         val output = FileOutputStream(File(cont.filesDir, "$uid.jpg"))
         copyStream(input, output)
     }
 
-    fun copyStream(input: InputStream, output: OutputStream) {
-        input.use { inputStream ->
-            output.use { outputStream ->
-                inputStream.copyTo(outputStream)
+    suspend fun copyStream(input: InputStream, output: OutputStream) {
+        MutexProvider.mutex.withLock {
+            input.use { inputStream ->
+                output.use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
             }
         }
     }
 
-    fun saveFile(file: File, json: String) {
-        FileWriter(file).use { it.write(json) }
+    suspend fun saveFile(file: File, json: String) {
+        MutexProvider.mutex.withLock {
+            FileWriter(file).use { it.write(json) }
+        }
     }
 }

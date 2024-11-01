@@ -2,6 +2,8 @@ package com.example.doanmess
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -9,8 +11,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.firestore
+import com.google.firebase.messaging.FirebaseMessaging
 
 
 class Login : AppCompatActivity() {
@@ -61,6 +68,8 @@ class Login : AppCompatActivity() {
                         if (task.isSuccessful) {
                             Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
                             val intent = Intent(this, Home::class.java)
+                            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                            LoginNewDevice().RegisterNewDevice(androidId, auth.currentUser!!.uid)
                             startActivity(intent)
                             finish()
                         } else {
@@ -80,6 +89,67 @@ class Login : AppCompatActivity() {
             val intent = Intent(this, SignUp::class.java)
             startActivity(intent)
         }
+    }
+
+}
+
+class LoginNewDevice {
+    constructor() {
+
+    }
+    fun RegisterNewDevice(deviceID:String, uid: String) {
+        // thêm mã thiết bị vào 1 trường array tên Devices trong collection users
+        val docRef = Firebase.firestore.collection("users").document(uid)
+        docRef
+            .update("Devices", FieldValue.arrayUnion(deviceID))
+            .addOnSuccessListener {
+                Log.d("TAG", "DocumentSnapshot successfully updated!")
+            }
+            .addOnFailureListener { e ->
+                Log.w("TAG", "Error updating document", e)
+            }
+
+        val secondDocRef = Firebase.firestore.collection("devices").document(deviceID)
+        secondDocRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+                        if (!task.isSuccessful) {
+                            Log.e("HHHHHHHHHHHHHHH", "Fetching FCM registration token failed", task.exception)
+                            return@OnCompleteListener
+                        }
+
+                        // Get new FCM registration token
+                        val token = task.result.toString()
+                        val data = hashMapOf(
+                            "Token" to token,
+                            "User_id" to uid
+                        )
+                        secondDocRef
+                            .set(data, SetOptions.merge())
+                            .addOnSuccessListener {
+                                Log.d("TAG", "DocumentSnapshot successfully updated!")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w("TAG", "Error updating document", e)
+                            }
+                    })
+                } else {
+                    secondDocRef.update("User_id", uid)
+                        .addOnSuccessListener {
+                            Log.d("TAG", "User_id field successfully updated!")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("TAG", "Error updating User_id field", e)
+                        }
+
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("TAG", "Error fetching document", e)
+            }
+
+
     }
 
 }

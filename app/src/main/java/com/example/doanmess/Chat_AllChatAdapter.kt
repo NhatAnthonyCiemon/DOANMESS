@@ -82,11 +82,17 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
             txtTime.text = item.time
 
             // Sử dụng lifecycleScope để chạy coroutine
+            //Picasso.get().load(item.avatar).into(imgAvatar)
             (cont as? LifecycleOwner)?.lifecycleScope?.launch {
                 try {
                     val ImageLoader = ImageLoader(cont)
                     val path = ImageLoader.checkFile(item.avatar, item.uid)
-                    Picasso.get().load(File(path)).into(imgAvatar)
+                    if(path != item.avatar && File(path).exists()) {
+                        Picasso.get().load(File(path)).memoryPolicy(MemoryPolicy.NO_CACHE).into(imgAvatar)
+                    }
+                    else {
+                        Picasso.get().load(item.avatar).memoryPolicy(MemoryPolicy.NO_CACHE).into(imgAvatar)
+                    }
                 }
                 catch (e: IOException) {
                     e.printStackTrace()
