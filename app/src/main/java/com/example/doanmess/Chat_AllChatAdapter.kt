@@ -12,6 +12,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -84,8 +85,7 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
             (cont as? LifecycleOwner)?.lifecycleScope?.launch {
                 try {
                     val path = checkFile(item.avatar, item.uid)
-                    Picasso.get().load(File(path)).into(imgAvatar)
-
+                    Picasso.get().load(File(path)).memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE).into(imgAvatar)
                 }
                 catch (e: IOException) {
                     e.printStackTrace()
