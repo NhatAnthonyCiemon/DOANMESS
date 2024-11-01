@@ -85,7 +85,7 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
             (cont as? LifecycleOwner)?.lifecycleScope?.launch {
                 try {
                     val path = checkFile(item.avatar, item.uid)
-                    Picasso.get().load(File(path)).memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE).into(imgAvatar)
+                    Picasso.get().load(File(path)).into(imgAvatar)
                 }
                 catch (e: IOException) {
                     e.printStackTrace()

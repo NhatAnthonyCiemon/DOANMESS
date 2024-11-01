@@ -20,6 +20,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -30,6 +31,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.jar.Manifest
 
 
@@ -104,7 +107,6 @@ class Home : HandleOnlineActivity() {
         btnGroup.setOnClickListener{
             val intent = Intent(this, CreateGroup::class.java)
             startActivity(intent)
-
         }
 
         btnAllchat.setOnClickListener {
@@ -192,6 +194,9 @@ class Home : HandleOnlineActivity() {
             }
         }
     }
+
+    //nhận kết quả trả về từ 1 activity khác viết code
+
 
 
     override fun onRequestPermissionsResult(
