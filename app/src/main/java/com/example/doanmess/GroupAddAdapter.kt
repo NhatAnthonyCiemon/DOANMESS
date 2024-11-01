@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import android.app.Activity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +9,15 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.PickVisualMediaRequest
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.launch
+import java.io.File
 
 class GroupAddAdapter(
+    private val cont: Activity,
     private var list: MutableList<GroupAdd>, private val onItemClicked: (String, String) -> Unit) : RecyclerView.Adapter<GroupAddAdapter.MyViewHolder>() {
 
     inner class MyViewHolder : RecyclerView.ViewHolder {
@@ -54,10 +60,19 @@ class GroupAddAdapter(
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.setText(list[position].name)
      //   holder.imgView.setImageResource(list[position].image)
-        Picasso
-            .get()
-            .load(list[position].image)
-            .into(holder.imgView);
+        (cont as? LifecycleOwner)?.lifecycleScope?.launch {
+            try {
+                val ImageLoader = ImageLoader(cont)
+                val path = ImageLoader.checkFile(list[position].image, list[position].id)
+                Picasso.get().load(File(path)).into(holder.imgView)
+
+            }
+            catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+
         holder.addBtn.setOnClickListener({
             if(list[position].added == false) {
                 list[position].added = true

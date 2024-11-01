@@ -7,11 +7,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:background="#F4F4F4"
-    android:paddingHorizontal="8dp"
-    android:paddingVertical="5dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    >
 
     <androidx.cardview.widget.CardView
         android:layout_width="80dp"
+
         android:layout_height="80dp"
         app:cardCornerRadius="@android:dimen/app_icon_size"
         app:cardElevation="0dp"
