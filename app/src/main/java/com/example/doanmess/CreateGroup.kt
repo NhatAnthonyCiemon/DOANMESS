@@ -73,7 +73,7 @@ class CreateGroup : HandleOnlineActivity() {
         addRv = findViewById(R.id.rvAdd)
         addedRv = findViewById(R.id.rvAdded)
 
-        adapterAdd = GroupAddAdapter(add) { id, name ->
+        adapterAdd = GroupAddAdapter(this,add) { id, name ->
             added.add(GroupAdded(name, id))
             adapterAdded.notifyItemInserted(added.size - 1)
         }
