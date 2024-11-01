@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -16,15 +17,19 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -40,37 +45,18 @@ class ContactsFragment : Fragment() {
     private lateinit var database: FirebaseDatabase
     private lateinit var userStatusListener: ValueEventListener
     val firestore = Firebase.firestore
+    lateinit var adapter : ContactsAdapter
     val currentUser = FirebaseAuth.getInstance().currentUser
+    private lateinit var progressBar: ProgressBar
+    private lateinit var activity: Activity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         database = FirebaseDatabase.getInstance()
-        /*     list = mutableListOf(
-            Contact("5sOWGPgonbafPOPh2weIwvcP0wK2",R.drawable.avatar_placeholder_allchat, "Nguyễn Văn C", false),
-            Contact("c33ebNdc6rStVchv3ovFalNOxDh2" ,R.drawable.avatar_placeholder_allchat, "conchocuaduynhan", false),
-            Contact("vwAUzgbCSNWNq4a48xoM2zZVCcH3",R.drawable.avatar_placeholder_allchat, "conglongcuaduylan", false),
-
-            *//*
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn D", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn E", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn F", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn G", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn H", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn I", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn J", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn K", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn L", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn M", true),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn N", false),
-            Contact(R.drawable.avatar_placeholder_allchat, "Nguyễn Văn O", true),*//*
-        )*/
-
-        lifecycleScope.launch {
-            fetchFriendsAndGroups()
-            addRealtimeListeners()
-        }
 
     }
-
+    private fun showLoading(isLoading: Boolean) {
+        progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -78,30 +64,24 @@ class ContactsFragment : Fragment() {
         // Inflate the layout for this fragment
         var view: View = inflater.inflate(R.layout.fragment_contacts, container, false)
         recyclerView = view.findViewById(R.id.recyclerViewContact)
-        val adapter = ContactsAdapter(list)
+        activity = requireActivity()
+        adapter = ContactsAdapter(activity,list)
         recyclerView.adapter = adapter
         recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         searchBtn = view.findViewById(R.id.search_btn)
         searchFilter = view.findViewById(R.id.filter_search)
         toAddFriendBtn = view.findViewById(R.id.toAddFriendBtn)
+        progressBar = view.findViewById(R.id.progressBar)
         toAddFriendBtn.setOnClickListener {
             val intent = Intent(activity, AddFriend::class.java)
             startActivity(intent)
         }
 
 
-        searchBtn.setOnClickListener {
-       /*     val filter = searchFilter.text.toString()
-            if (filter.isEmpty()) {
-                adapter.changeList(list)
 
-            } else {
-                val filterLowerCase = filter.toLowerCase()
-                val filteredList = list.filter { it.name.toLowerCase().contains(filterLowerCase) }
-                adapter.changeList(filteredList)
-            }
-*/
+        searchBtn.setOnClickListener {
+
         }
         searchFilter.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -119,16 +99,14 @@ class ContactsFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+        showLoading(true)
+        fetchFriendsAndGroups()
         return view
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onPause() {
+        super.onPause()
         // Remove the listener to avoid memory leaks
-    /*    list.forEach { contact ->
-            val userStatusRef = database.getReference("users/${contact.id}/online")
-            userStatusRef.removeEventListener(userStatusListener)
-        }*/
         if (::userStatusListener.isInitialized) {
             list.forEach { contact ->
                 val userStatusRef = database.getReference("users/${contact.id}/online")
@@ -156,48 +134,53 @@ class ContactsFragment : Fragment() {
     // Launch a coroutine to fetch friends and groups
 
 
-    private suspend fun fetchFriendsAndGroups() {
-        val userRef = firestore.collection("users").document(currentUser!!.uid)
-        val documentSnapshot = userRef.get().await()
-        if (documentSnapshot.exists()) {
-            val friendsIds = documentSnapshot.get("Friends") as? List<String> ?: emptyList()
-            val groupsIds = documentSnapshot.get("Groups") as? List<String> ?: emptyList()
-
-            friendsIds.forEach { friendId ->
-                fetchUserDetails(friendId)
+    private fun fetchFriendsAndGroups() {
+        val userRef = firestore.collection("users").document(currentUser!!.uid).get().addOnSuccessListener {
+            val friends = it.get("Friends") as List<String>
+            val groups = it.get("Groups") as List<String>
+            val tasks = mutableListOf<Task<DocumentSnapshot>>()
+            friends.forEach { friendId ->
+                val task = fetchUserDetails(friendId)
+                tasks.add(task)
             }
-
-            groupsIds.forEach { groupId ->
-                fetchGroupDetails(groupId)
+            groups.forEach { groupId ->
+                val task = fetchGroupDetails(groupId)
+                tasks.add(task)
+            }
+            Tasks.whenAllComplete(tasks).addOnCompleteListener {
+                addRealtimeListeners()
             }
         }
+
+
     }
 
-    private suspend fun fetchUserDetails(userId: String) {
-        val userRef = firestore.collection("users").document(userId)
-        val documentSnapshot = userRef.get().await()
-        if (documentSnapshot.exists()) {
-            val avatarUrl = documentSnapshot.getString("Avatar") ?: ""
-            val name = documentSnapshot.getString("Name") ?: ""
+    private fun fetchUserDetails(userId: String) : Task<DocumentSnapshot>  {
+        val userRef = firestore.collection("users").document(userId).get().addOnSuccessListener {
+            val avatarUrl = it.getString("Avatar") ?: ""
+            val name = it.getString("Name") ?: ""
             val contact = Contact(userId, avatarUrl, name, false)
             list.add(contact)
-            recyclerView.adapter?.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
         }
+        return userRef
     }
 
-    private suspend fun fetchGroupDetails(groupId: String) {
-        val groupRef = firestore.collection("groups").document(groupId)
-        val documentSnapshot = groupRef.get().await()
-        if (documentSnapshot.exists()) {
-            val avatarUrl = documentSnapshot.getString("Avatar") ?: ""
-            val name = documentSnapshot.getString("Name") ?: ""
+    private fun fetchGroupDetails(groupId: String) : Task<DocumentSnapshot> {
+        val groupRef = firestore.collection("groups").document(groupId).get().addOnSuccessListener {
+            val avatarUrl = it.getString("Avatar") ?: ""
+            val name = it.getString("Name") ?: ""
             val contact = Contact(groupId, avatarUrl, name, false)
             list.add(contact)
-            recyclerView.adapter?.notifyDataSetChanged()
+            adapter.notifyDataSetChanged()
         }
+        return groupRef
     }
     private fun addRealtimeListeners() {
-       // recyclerView.adapter?.notifyDataSetChanged()
+        showLoading(false)
+        if (list.isEmpty()) {
+            return
+        }
         list.forEach { contact ->
             val userStatusRef = database.getReference("users/${contact.id}/online")
             userStatusListener = object : ValueEventListener {
@@ -210,13 +193,13 @@ class ContactsFragment : Fragment() {
                                 val delayedIsOnline = delayedSnapshot.getValue(Boolean::class.java) ?: false
                                 if (!delayedIsOnline) {
                                     contact.online = false
-                                    recyclerView.adapter?.notifyDataSetChanged()
+                                    adapter.notifyDataSetChanged()
                                 }
                             }
                         }, 2500)
                     } else {
                         contact.online = true
-                        recyclerView.adapter?.notifyDataSetChanged()
+                        adapter?.notifyDataSetChanged()
                     }
                 }
 

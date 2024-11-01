@@ -67,7 +67,7 @@ class FriendRequest : AppCompatActivity() {
                         val timeSent = request["timeSent"] as Long
                         db.collection("users").document(requestId).get().addOnSuccessListener { userDoc ->
                             val name = userDoc.getString("Name") ?: ""
-                            val profileImg = userDoc.getString("Avatar") ?: ""
+                            val profileImg = userDoc.getString("Avatar") ?: "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
                             val time = DateUtils.getRelativeTimeSpanString(timeSent, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString()
                             friendRequests.add(FriendRequestModel(requestId,profileImg!!, name, time))
                             adapter.notifyDataSetChanged()

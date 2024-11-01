@@ -164,17 +164,18 @@
 
 
 
-                <ScrollView
+           <!--     <ScrollView
                     android:layout_width="match_parent"
                     android:scrollbars="none"
                     android:paddingTop="20dp"
                     android:contentDescription="Example"
                     android:overScrollMode="ifContentScrolls"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent">-->
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="300dp"
+                        android:layout_height="match_parent"
+                        android:paddingTop="20dp"
                         android:orientation="vertical" >
 
                         <FrameLayout
@@ -192,7 +193,7 @@
 
 
 
-                </ScrollView>
+            <!--    </ScrollView>-->
 
 
 
