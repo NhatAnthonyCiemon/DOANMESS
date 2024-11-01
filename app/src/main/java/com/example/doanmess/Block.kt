@@ -51,22 +51,29 @@ class Block : HandleOnlineActivity() {
         fetchBlockedUsers()
     }
 
+
+//    working on
 private fun fetchBlockedUsers() {
     val userId = auth.currentUser?.uid ?: return
     if (firestore == null) {
         Toast.makeText(this, "Firestore is not initialized", Toast.LENGTH_SHORT).show()
         return
     }
-    firestore.collection("users").document(userId).collection("Blocks")
+    firestore.collection("users").document(userId)
         .get()
-        .addOnSuccessListener { documents ->
+        .addOnSuccessListener { document ->
             blockLists.clear()
-            if (documents.isEmpty) {
-                Log.d("Block", "No blocked users found")
-            }
-            for (document in documents) {
-                val blockedUserId = document.id
-                fetchUserDetails(blockedUserId)
+            if (document.exists()) {
+                val blockedUserIds = document["Blocks"] as? List<String>
+                if (blockedUserIds.isNullOrEmpty()) {
+                    Log.d("Block", "No blocked users found")
+                } else {
+                    for (blockedUserId in blockedUserIds) {
+                        fetchUserDetails(blockedUserId)
+                    }
+                }
+            } else {
+                Log.d("Block", "User document does not exist")
             }
         }
         .addOnFailureListener { e ->
@@ -83,7 +90,7 @@ private fun fetchBlockedUsers() {
                     val name = document.getString("Name") ?: ""
                     val avatar = document.getString("Avatar") ?: ""
                     Log.d("Block", "Fetched User Details - Name: $name, Avatar: $avatar")
-                    val block = BlockModel(name = name, avatar = avatar, timestamp = "")
+                    val block = BlockModel(uid = blockedUserId, name = name, avatar = avatar, timestamp = "")
                     blockLists.add(block)
                     adapter.notifyDataSetChanged()
                 } else {
