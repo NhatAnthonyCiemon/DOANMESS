@@ -35,6 +35,7 @@ class inforFragment : Fragment() {
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
     private lateinit var userId: String
     private lateinit var friendReqFrame : FrameLayout
+    private lateinit var blockListFrame : FrameLayout
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -53,8 +54,14 @@ class inforFragment : Fragment() {
         val txtName = view.findViewById<TextView>(R.id.txtName)
         val txtMode = view.findViewById<TextView>(R.id.txtCheckDarkMode)
         friendReqFrame = view.findViewById(R.id.friendRequest)
+        blockListFrame = view.findViewById(R.id.blockList)
         imageView = view.findViewById(R.id.imgView)
         button = view.findViewById(R.id.floatingActionButton)
+
+        blockListFrame.setOnClickListener {
+            val intent = Intent(context, Block::class.java)
+            startActivity(intent)
+        }
 
         friendReqFrame.setOnClickListener {
             val intent = Intent(context, FriendRequest::class.java)

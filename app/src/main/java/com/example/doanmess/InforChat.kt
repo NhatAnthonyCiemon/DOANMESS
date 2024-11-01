@@ -26,7 +26,7 @@ class InforChat : HandleOnlineActivity() {
         val frmBlock = findViewById<FrameLayout>(R.id.frmBlock)
         val frmTrash = findViewById<FrameLayout>(R.id.frmTrash)
 
-// Thiết lập onClickListener cho các FrameLayout
+    // Thiết lập onClickListener cho các FrameLayout
         frmTopic.setOnClickListener {
             changeBackgroundColor(frmTopic, "#D9D9D9", 150)
         }
