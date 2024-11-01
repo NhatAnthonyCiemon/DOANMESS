@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,14 +57,10 @@ class ContactsAdapter(var cont: Activity,var contactList:  List<Contact>) : Recy
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.setText(contactList[position].name)
      //   holder.imgView.setImageResource(contactList[position].avatar)
-        Picasso
-            .get()
-            .load(contactList[position].avatar)
-            .into(holder.imgView);
         (cont as? LifecycleOwner)?.lifecycleScope?.launch {
             try {
                 val path = checkFile(contactList[position].avatar, contactList[position].id)
-                Picasso.get().load(File(path)).into(holder.imgView)
+                Picasso.get().load(File(path)).memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE).into(holder.imgView)
 
             }
             catch (e: IOException) {

@@ -52,6 +52,7 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.code.gson:gson:2.8.9")
 
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
