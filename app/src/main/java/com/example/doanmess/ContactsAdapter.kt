@@ -56,13 +56,16 @@ class ContactsAdapter(var cont: Activity,var contactList:  List<Contact>) : Recy
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.setText(contactList[position].name)
-     //   holder.imgView.setImageResource(contactList[position].avatar)
         (cont as? LifecycleOwner)?.lifecycleScope?.launch {
             try {
                 val ImageLoader = ImageLoader(cont)
                 val path = ImageLoader.checkFile(contactList[position].avatar, contactList[position].id)
-                Picasso.get().load(File(path)).into(holder.imgView)
-
+                if(path != contactList[position].avatar && File(path).exists()) {
+                    Picasso.get().load(File(path)).memoryPolicy(MemoryPolicy.NO_CACHE).into(holder.imgView)
+                }
+                else {
+                    Picasso.get().load(contactList[position].avatar).memoryPolicy(MemoryPolicy.NO_CACHE).into(holder.imgView)
+                }
             }
             catch (e: IOException) {
                 e.printStackTrace()
