@@ -55,6 +55,7 @@ class AllChatFra : Fragment() {
     private lateinit var loadingBar: ProgressBar
     private lateinit var userListener: ValueEventListener
     private lateinit var groupListener: ValueEventListener
+    private val btnGroup: Button by lazy { atvtContext.findViewById(R.id.btnGroup) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +74,8 @@ class AllChatFra : Fragment() {
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
+                    loadingBar.visibility = View.GONE
+                    btnGroup.visibility = View.VISIBLE
                     list.removeIf { it !is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
                         val latestsmallSnapshot = childSnapshot.children.maxByOrNull {
@@ -95,7 +98,7 @@ class AllChatFra : Fragment() {
                                             list.add(DataMess(recvId.toString(), avatar, name, content.toString(), timestamp!!, status!!, true))
                                             list.sortByDescending { it.timestamp }
                                             adapter.notifyDataSetChanged()
-                                            loadingBar.visibility = View.GONE
+
                                         } else {
                                             Log.d("exist", "No such document")
                                         }
@@ -136,6 +139,8 @@ class AllChatFra : Fragment() {
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
+                    loadingBar.visibility = View.GONE
+                    btnGroup.visibility = View.VISIBLE
                     list.removeIf { it is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
                         if (myGroup.contains(childSnapshot.key.toString())) {
@@ -201,6 +206,8 @@ class AllChatFra : Fragment() {
         adapter.notifyDataSetChanged()
         Firebase.firestore.collection("users").document(User!!.uid)
             .addSnapshotListener { documentSnapshot, error ->
+                loadingBar.visibility = View.GONE
+                btnGroup.visibility = View.VISIBLE
                 if (error != null) {
                     Log.w(TAG, "Listen failed.", error)
                     return@addSnapshotListener

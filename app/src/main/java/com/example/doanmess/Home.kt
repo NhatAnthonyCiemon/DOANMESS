@@ -104,6 +104,7 @@ class Home : HandleOnlineActivity() {
         btnMore = findViewById<ImageButton>(R.id.btnMore)
         txtName = findViewById<TextView>(R.id.txtName)
         btnGroup = findViewById<Button>(R.id.btnGroup)
+        btnGroup.visibility = View.GONE
         btnGroup.setOnClickListener{
             val intent = Intent(this, CreateGroup::class.java)
             startActivity(intent)
