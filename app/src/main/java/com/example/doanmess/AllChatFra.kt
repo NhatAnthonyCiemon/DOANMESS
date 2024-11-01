@@ -278,9 +278,17 @@ class AllChatFra : Fragment() {
     fun PauseRealTimeListen() {
         if (::userListener.isInitialized) {
             Firebase.database.getReference("users").child(User!!.uid).removeEventListener(userListener)
+            userListener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {}
+                override fun onCancelled(error: DatabaseError) {}
+            }
         }
         if (::groupListener.isInitialized) {
             Firebase.database.getReference("groups").removeEventListener(groupListener)
+            groupListener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {}
+                override fun onCancelled(error: DatabaseError) {}
+            }
         }
     }
 
