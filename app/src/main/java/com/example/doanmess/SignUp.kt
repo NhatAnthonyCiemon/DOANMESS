@@ -13,7 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.PropertyName
 
 data class User(
-    @JvmField @PropertyName("Avatar") val Avatar: String = "",
+    @JvmField @PropertyName("Avatar") val Avatar: String = "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9",
     @JvmField @PropertyName("Name") val Name: String = "",
     @JvmField @PropertyName("RequestSent") val RequestSent: List<String> = listOf(),
     @JvmField @PropertyName("Requests") val Requests: List<String> = listOf(),
@@ -65,7 +65,7 @@ class SignUp : AppCompatActivity() {
                         if (task.isSuccessful) {
                             val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
                             val user = User(
-                                Avatar = "",
+                                Avatar = "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9",
                                 Name = fullName,
                                 RequestSent = listOf(),
                                 Requests = listOf(),
