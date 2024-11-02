@@ -3,8 +3,12 @@ package com.example.doanmess
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.concurrent.thread
 
 class MessageController {
     fun newCreateGroup(id: String, uid: String){
@@ -77,22 +81,25 @@ class MessageController {
             }
     }
     fun sendAPIRequest(url: String) {
-        var connection: HttpURLConnection? = null
-        try {
-            val urlConnet = URL(url)
-            connection = urlConnet.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
-            connection.connect()
-            val responseCode = connection.responseCode
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                println("OK")
-            } else {
-                println("Fail")
+        CoroutineScope(Dispatchers.IO).launch {
+            var connection: HttpURLConnection? = null
+            try {
+                val urlConnection = URL(url)
+                connection = urlConnection.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connect()
+
+                val responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    println("Request successful: HTTP OK")
+                } else {
+                    println("Request failed: HTTP response code $responseCode")
+                }
+            } catch (e: Exception) {
+                println("Request failed: ${e.message}")
+            } finally {
+                connection?.disconnect()
             }
-        } catch (e: Exception) {
-            println("Fail")
-        } finally {
-            connection?.disconnect()
         }
     }
 }
