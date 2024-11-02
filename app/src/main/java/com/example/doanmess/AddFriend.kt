@@ -119,6 +119,7 @@ class AddFriend :  HandleOnlineActivity() {
                 ))
             ))
                 .addOnSuccessListener {
+                    MessageController().newFriendRequest(id, currentUserId)
                     Toast.makeText(this, "Friend request sent successfully", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener {

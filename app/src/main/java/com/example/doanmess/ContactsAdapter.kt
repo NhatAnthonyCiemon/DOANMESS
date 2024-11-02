@@ -61,10 +61,10 @@ class ContactsAdapter(var cont: Activity,var contactList:  List<Contact>) : Recy
                 val ImageLoader = ImageLoader(cont)
                 val path = ImageLoader.checkFile(contactList[position].avatar, contactList[position].id)
                 if(path != contactList[position].avatar && File(path).exists()) {
-                    Picasso.get().load(File(path)).memoryPolicy(MemoryPolicy.NO_CACHE).into(holder.imgView)
+                    Picasso.get().load(File(path)).into(holder.imgView)
                 }
                 else {
-                    Picasso.get().load(contactList[position].avatar).memoryPolicy(MemoryPolicy.NO_CACHE).into(holder.imgView)
+                    Picasso.get().load(contactList[position].avatar).into(holder.imgView)
                 }
             }
             catch (e: IOException) {

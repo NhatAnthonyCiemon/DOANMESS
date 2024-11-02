@@ -61,14 +61,6 @@ class CreateGroup : HandleOnlineActivity() {
         lifecycleScope.launch {
             fetchFriendsDetails()
         }
-    /*    originAdd.add(GroupAdd("vwAUzgbCSNWNq4a48xoM2zZVCcH3", "Group 3", R.drawable.avatar_placeholder_allchat, false))
-        originAdd.add(GroupAdd("c33ebNdc6rStVchv3ovFalNOxDh2", "Group 4", R.drawable.avatar_placeholder_allchat, false))
-        originAdd.add(GroupAdd("5sOWGPgonbafPOPh2weIwvcP0wK2", "Group 5", R.drawable.avatar_placeholder_allchat, false))
-        originAdd.add(GroupAdd("6", "Group 1", R.drawable.avatar_placeholder_allchat, false))
-        originAdd.add(GroupAdd("7", "Group 2", R.drawable.avatar_placeholder_allchat, false))
-        originAdd.add(GroupAdd("8", "Group 3", R.drawable.avatar_placeholder_allchat, false))
-        originAdd.add(GroupAdd("9", "Group 4", R.drawable.avatar_placeholder_allchat, false))
-        originAdd.add(GroupAdd("10", "Group 5", R.drawable.avatar_placeholder_allchat, false))*/
 
         addRv = findViewById(R.id.rvAdd)
         addedRv = findViewById(R.id.rvAdded)
@@ -197,7 +189,6 @@ class CreateGroup : HandleOnlineActivity() {
                 )
                 db.collection("groups").add(group).addOnSuccessListener { documentReference ->
                     val groupId = documentReference.id
-
                     // Add group ID to each user
                     val batch = db.batch()
                     try{
@@ -207,12 +198,14 @@ class CreateGroup : HandleOnlineActivity() {
                         }
                         batch.commit().addOnSuccessListener {
                             Toast.makeText(this, "Group created successfully", Toast.LENGTH_SHORT).show()
+                            MessageController().newCreateGroup(groupId, currentUser!!.uid)
                             val intent = Intent(this, Home::class.java)
                             intent.putExtra("chatId", groupId)
                             startActivity(intent)
                             finish()
                         }.addOnFailureListener {
                             Toast.makeText(this, "Failed to update users", Toast.LENGTH_SHORT).show()
+
                         }
                     }catch (e: Exception){
                         Toast.makeText(this, "Failed to update users", Toast.LENGTH_SHORT).show()

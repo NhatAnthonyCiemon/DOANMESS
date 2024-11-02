@@ -57,6 +57,7 @@ class FriendRequestAdapter(private val requests: MutableList<FriendRequestModel>
                         if (requestToRemove != null) {
                             currentUserRef.update("Requests", FieldValue.arrayRemove(requestToRemove))
                                 .addOnSuccessListener {
+                                    MessageController().newFriendAccpet(targetUserId, currentUserId)
                                     Toast.makeText(holder.itemView.context, "Friend request removed successfully", Toast.LENGTH_SHORT).show()
                                 }
                                 .addOnFailureListener {
