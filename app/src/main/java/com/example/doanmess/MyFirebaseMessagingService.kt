@@ -113,7 +113,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 android.Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            val channelId = "TIN_NHAN_MOI"
+            val channelId = "MESSAGE"
             var bitmapAvatar: Bitmap? = null
             if(url != ""){
                 GlobalScope.launch {
@@ -129,7 +129,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         .setSmallIcon(R.drawable.checkmark2)
                         .setContentTitle(title)
                         .setContentText(message)
-                        .setStyle(NotificationCompat.BigTextStyle().bigText(message))
                         .setAutoCancel(true)
                         .setLargeIcon(bitmapAvatar)
                         .setContentIntent(pendingIntent)
