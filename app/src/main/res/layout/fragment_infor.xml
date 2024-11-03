@@ -1,236 +1,242 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:scrollbars="none">
+    <RelativeLayout
 
-
-    <TextView
-        android:id="@+id/txtName"
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="0dp"
-        android:layout_marginEnd="0dp"
-        android:text="Mobile Devs"
-        android:textAlignment="center"
-        android:textSize="35dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/edtChangeName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/txtName"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="-10dp"
-        android:ems="10"
-        android:inputType="text"
-        android:textAlignment="center"
-        android:textSize="35dp"
-        android:visibility="invisible" />
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/imgView"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_below="@+id/txtName"
-        android:layout_marginTop="40dp"
-        android:layout_centerInParent="true"
-        android:src="@drawable/ic_launcher_background"
-        app:layout_constraintTop_toBottomOf="@+id/txtName"
-        app:shapeAppearanceOverlay="@style/circular" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/imgView"
-        android:layout_alignBottom="@+id/imgView"
-        android:layout_marginTop="144dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="-1dp"
-        android:backgroundTint="@color/white"
-        android:scaleType="fitCenter"
-        android:tint="@color/black"
-        app:layout_constraintEnd_toEndOf="@+id/imgView"
-        app:layout_constraintTop_toTopOf="@+id/imgView"
-        app:srcCompat="@drawable/camera" />
-
-    <FrameLayout
-        android:id="@+id/darkMode"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_below="@+id/imgView"
-        android:layout_alignParentStart="true"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="25dp">
-
-
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/dark_mode" />
 
         <TextView
-            android:id="@+id/textView2"
-            android:layout_width="280dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="80dp"
-            android:gravity="center_vertical"
-            android:text="Dark Mode"
-            android:textSize="25dp" />
+            android:id="@+id/txtName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="0dp"
+            android:text="Mobile Devs"
+            android:textAlignment="center"
+            android:textSize="35dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/txtCheckDarkMode"
+        <EditText
+            android:id="@+id/edtChangeName"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:gravity="center"
-            android:text="Off"
-            android:textSize="20dp" />
-    </FrameLayout>
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/txtName"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="-10dp"
+            android:ems="10"
+            android:inputType="text"
+            android:textAlignment="center"
+            android:textSize="35dp"
+            android:visibility="invisible" />
 
-    <FrameLayout
-        android:id="@+id/changeAvata"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_below="@+id/darkMode"
-        android:layout_alignParentStart="true"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="25dp">
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imgView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_below="@+id/txtName"
+            android:layout_marginTop="40dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintTop_toBottomOf="@+id/txtName"
+            app:shapeAppearanceOverlay="@style/circular" />
 
-
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/user" />
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="330dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="80dp"
-            android:gravity="center_vertical"
-            android:text="Change avatar"
-            android:textSize="25dp" />
-
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/changeName"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_below="@+id/changeAvata"
-        android:layout_alignParentStart="true"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="25dp">
-
-
-        <ImageView
-            android:id="@+id/imageView4"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/rename" />
-
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="280dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="80dp"
-            android:gravity="center_vertical"
-            android:text="Change name"
-            android:textSize="25dp" />
-
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/friendRequest"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_below="@+id/changeName"
-        android:layout_alignParentStart="true"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="25dp">
-
-
-        <ImageView
-            android:id="@+id/imageView5"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/friend" />
-
-        <TextView
-            android:id="@+id/textView5"
-            android:layout_width="280dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="80dp"
-            android:gravity="center_vertical"
-            android:text="Friend request"
-            android:textSize="25dp" />
-
-        <TextView
-            android:id="@+id/txtNumberRequest"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatingActionButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:gravity="center"
-            android:text="3"
-            android:textSize="20dp" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/blockList"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_below="@+id/friendRequest"
-        android:layout_alignParentStart="true"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="25dp">
-
-
-        <ImageView
-            android:id="@+id/imageView6"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/imgView"
+            android:layout_alignBottom="@+id/imgView"
+            android:layout_marginTop="144dp"
+            android:layout_marginEnd="1dp"
+            android:layout_marginBottom="-1dp"
+            android:backgroundTint="@color/white"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/block" />
+            android:tint="@color/black"
+            app:layout_constraintEnd_toEndOf="@+id/imgView"
+            app:layout_constraintTop_toTopOf="@+id/imgView"
+            app:srcCompat="@drawable/camera" />
 
-        <TextView
-            android:id="@+id/textView6"
-            android:layout_width="280dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="80dp"
-            android:gravity="center_vertical"
-            android:text="Block list"
-            android:textSize="25dp" />
+        <FrameLayout
+            android:id="@+id/darkMode"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@+id/imgView"
+            android:layout_alignParentStart="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="25dp">
 
-        <TextView
-            android:id="@+id/txtNumberBlock"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:gravity="center"
-            android:text="3"
-            android:textSize="20dp" />
 
-    </FrameLayout>
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="0dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/dark_mode" />
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="280dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="80dp"
+                android:gravity="center_vertical"
+                android:text="Dark Mode"
+                android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/txtCheckDarkMode"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:gravity="center"
+                android:text="Off"
+                android:textSize="20dp" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/changeAvata"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@+id/darkMode"
+            android:layout_alignParentStart="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="25dp">
+
+
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="0dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/user" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="330dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="80dp"
+                android:gravity="center_vertical"
+                android:text="Change avatar"
+                android:textSize="25dp" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/changeName"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@+id/changeAvata"
+            android:layout_alignParentStart="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="25dp">
+
+
+            <ImageView
+                android:id="@+id/imageView4"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="0dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/rename" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="280dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="80dp"
+                android:gravity="center_vertical"
+                android:text="Change name"
+                android:textSize="25dp" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/friendRequest"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@+id/changeName"
+            android:layout_alignParentStart="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="25dp">
+
+
+            <ImageView
+                android:id="@+id/imageView5"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="0dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/friend" />
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="280dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="80dp"
+                android:gravity="center_vertical"
+                android:text="Friend request"
+                android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/txtNumberRequest"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:gravity="center"
+                android:text="3"
+                android:textSize="20dp" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/blockList"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@+id/friendRequest"
+            android:layout_alignParentStart="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="25dp">
+
+
+            <ImageView
+                android:id="@+id/imageView6"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="0dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/block" />
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="280dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="80dp"
+                android:gravity="center_vertical"
+                android:text="Block list"
+                android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/txtNumberBlock"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:gravity="center"
+                android:text="3"
+                android:textSize="20dp" />
+
+        </FrameLayout>
+
+    </RelativeLayout>
+</ScrollView>

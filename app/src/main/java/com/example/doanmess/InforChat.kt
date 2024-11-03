@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import HandleOnlineActivity
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -11,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-class InforChat : AppCompatActivity() {
+class InforChat : HandleOnlineActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -25,7 +26,7 @@ class InforChat : AppCompatActivity() {
         val frmBlock = findViewById<FrameLayout>(R.id.frmBlock)
         val frmTrash = findViewById<FrameLayout>(R.id.frmTrash)
 
-// Thiết lập onClickListener cho các FrameLayout
+    // Thiết lập onClickListener cho các FrameLayout
         frmTopic.setOnClickListener {
             changeBackgroundColor(frmTopic, "#D9D9D9", 150)
         }

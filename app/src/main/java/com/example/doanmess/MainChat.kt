@@ -1,6 +1,6 @@
 package com.example.createuiproject
 
-import android.content.Intent
+import HandleOnlineActivity
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.widget.ImageButton
@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.doanmess.InforChat
 import com.example.doanmess.R
 
-class MainChat : AppCompatActivity() {
+class MainChat : HandleOnlineActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

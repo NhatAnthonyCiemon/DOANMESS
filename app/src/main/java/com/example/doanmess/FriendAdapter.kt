@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 
 class FriendAdapter (
     private var list: MutableList<Friend>, private val onItemClicked: (String, Boolean) -> Unit) : RecyclerView.Adapter<FriendAdapter.MyViewHolder>() {
@@ -22,7 +23,6 @@ class FriendAdapter (
                 imgView = itemView.findViewById(R.id.userImage)
                 nameView = itemView.findViewById(R.id.userName)
                 addBtn = itemView.findViewById(R.id.addBtn)
-
             }
 
         }
@@ -52,7 +52,12 @@ class FriendAdapter (
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.setText(list[position].name)
-        holder.imgView.setImageResource(list[position].image)
+
+     //   holder.imgView.setImageResource(list[position].image)
+        Picasso
+            .get()
+            .load(list[position].image)
+            .into(holder.imgView);
         holder.addBtn.setOnClickListener{
             list[position].reqFriend = !list[position].reqFriend
             onItemClicked(list[position].id, list[position].reqFriend)
