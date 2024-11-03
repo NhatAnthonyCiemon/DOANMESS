@@ -1,7 +1,5 @@
 package com.example.doanmess
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -10,27 +8,10 @@ import android.widget.TextView
 import android.view.LayoutInflater
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.google.common.reflect.TypeToken
-import com.google.gson.Gson
-import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import java.io.BufferedReader
 import java.io.File
-import java.io.FileOutputStream
-import java.io.FileReader
-import java.io.FileWriter
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-
-import java.net.URL
-
 
 class Chat_AllChatAdapter(private val cont: Activity, private val list: List<DataMess>) : RecyclerView.Adapter<Chat_AllChatAdapter.MessHolder>() {
 
