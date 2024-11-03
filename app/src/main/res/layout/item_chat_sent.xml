@@ -2,24 +2,35 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp">
 
     <Space
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
+    <TextView
+        android:id="@+id/timestampTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@android:color/white"
+        android:textSize="12sp" />
 
     <TextView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/messageTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@drawable/rounded_background_white"
         android:textColor="@android:color/holo_orange_dark"
         android:padding="10dp"
         android:layout_gravity="end"
         android:text="Sent message"
-        android:layout_marginStart="20dp"/>
+        android:maxWidth="250dp"
+        android:layout_marginStart="5dp"/>
+
+     <!-- Add padding for timestamp -->
 
 </LinearLayout>

@@ -1,0 +1,43 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:layout_gravity="start"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/senderNameTextView"
+        android:textColor="@color/white"
+        android:layout_marginBottom="2dp"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/avatarImageView"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_avatar" /> <!-- Placeholder for avatar -->
+
+        <TextView
+            android:id="@+id/messageTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_background_orange"
+            android:textColor="@android:color/white"
+            android:padding="10dp"
+            android:maxWidth="250dp"
+            android:layout_marginEnd="5dp"
+            android:text="Sent messagafdafasdadfadsfasdfsdafadsfadsafssdafadse"/>
+
+        <TextView
+            android:id="@+id/timestampTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@android:color/white"
+            android:textSize="12sp" /> <!-- Add padding for timestamp -->
+    </LinearLayout>
+</LinearLayout>

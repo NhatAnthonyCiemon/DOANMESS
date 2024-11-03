@@ -81,7 +81,7 @@ class AllChatFra : Fragment() {
                                         if (document != null) {
                                             val name = document.data?.get("Name").toString()
                                             val avatar = document.data?.get("Avatar").toString()
-                                            list.add(DataMess(recvId.toString(), avatar, name, content.toString(), timestamp!!, status!!, true))
+                                            list.add(DataMess( avatar, recvId.toString(), name, content.toString(), timestamp!!, status!!, true))
                                             list.sortByDescending { it.timestamp }
                                             adapter.notifyDataSetChanged()
 
@@ -99,7 +99,7 @@ class AllChatFra : Fragment() {
                                         if (document != null) {
                                             val name = document.data?.get("Name").toString()
                                             val avatar = document.data?.get("Avatar").toString()
-                                            list.add(DataMess(sendId.toString(), avatar, name, content.toString(), timestamp!!, status!!, false))
+                                            list.add(DataMess(avatar, sendId!!, name, content.toString(), timestamp!!, status!!, false))
                                             list.sortByDescending { it.timestamp }
                                             adapter.notifyDataSetChanged()
                                         } else {
@@ -140,7 +140,7 @@ class AllChatFra : Fragment() {
                                 val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
 
                                 if (User!!.uid == sendId) {
-                                    list.add(DataMessGroup(childSnapshot.key.toString(), avatarList[childSnapshot.key.toString()].toString(), myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
+                                    list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
                                     list.sortByDescending { it.timestamp }
                                     adapter.notifyDataSetChanged()
                                 } else {
@@ -151,8 +151,8 @@ class AllChatFra : Fragment() {
                                                 val name = document.data?.get("Name").toString()
                                                 list.add(
                                                     DataMessGroup(
-                                                        childSnapshot.key.toString(),
                                                         avatarList[childSnapshot.key.toString()].toString(),
+                                                        childSnapshot.key.toString(),
                                                         name,
                                                         content.toString(),
                                                         timestamp!!,
@@ -240,10 +240,33 @@ class AllChatFra : Fragment() {
 
         adapter = Chat_AllChatAdapter(atvtContext, list)
         adapter.setOnItemClickListener(object : Chat_AllChatAdapter.OnItemClickListener {
-            override fun onItemClick(position: Int) {
-                val intent = Intent(atvtContext, MainChat::class.java)
-                startActivity(intent)
-            }
+//            override fun onItemClick(position: Int) {
+//                val intent = Intent(atvtContext, MainChat::class.java)
+//                intent.putExtra("uid", list[position].uid)
+//                intent.putExtra("name", list[position].name)
+//                intent.putExtra("avatar", list[position].avatar)
+//                intent.putExtra("isGroup", list[position].isGroup)
+//                startActivity(intent)
+//            }
+                override fun onItemClick(position: Int) {
+                    val intent = Intent(atvtContext, MainChat::class.java)
+                    val item = list[position]
+
+                    intent.putExtra("uid", item.uid)
+                    intent.putExtra("avatar", item.avatar)
+                    intent.putExtra("isGroup", item.isGroup)
+
+                    // Check if item is of type DataMessGroup to send groupname instead of name
+                    if (item is DataMessGroup) {
+                        intent.putExtra("isGroup", true)
+                        intent.putExtra("name", item.groupname) // Send groupname for DataMessGroup
+                    } else {
+                        intent.putExtra("isGroup", false)
+                        intent.putExtra("name", item.name) // Send name for other types
+                    }
+
+                    startActivity(intent)
+                }
         })
 
         recyclerView.adapter = adapter

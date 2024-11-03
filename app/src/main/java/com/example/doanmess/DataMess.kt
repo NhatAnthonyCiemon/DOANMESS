@@ -6,8 +6,8 @@ import java.util.Locale
 import java.util.TimeZone
 
 open class DataMess {
-    var uid : String = ""
-    var avatar: String=""
+    var uid: String= ""
+    var avatar: String?= ""
     var name: String= ""
     var message: String=""
     var time: String=""
@@ -15,7 +15,8 @@ open class DataMess {
     var othersend: Boolean = false
     var last_name: String = ""
     var timestamp: Long = 0
-    constructor(uid: String, avatar: String, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean){
+    var isGroup: Boolean = false
+    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean, isGroup: Boolean = false) {
         this.uid = uid
         this.avatar = avatar
         this.name = name
@@ -34,10 +35,12 @@ open class DataMess {
     }
 }
 
-class DataMessGroup: DataMess {
+class DataMessGroup : DataMess {
     var groupname: String = ""
-    constructor(uid: String, avatar: String, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String): super(uid, avatar, name, message, timestamp, status, true){
+
+    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String, isGroup: Boolean = true)
+            : super(avatar, uid, name, message, timestamp, status, true) {
         this.groupname = groupname
-        this.message =  "$whosend: $message"
+        this.message = "$whosend: $message"
     }
 }

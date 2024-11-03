@@ -67,7 +67,7 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
             (cont as? LifecycleOwner)?.lifecycleScope?.launch {
                 try {
                     val ImageLoader = ImageLoader(cont)
-                    val path = ImageLoader.checkFile(item.avatar, item.uid)
+                    val path = ImageLoader.checkFile(item.avatar!!, item.uid)
                     if(path != item.avatar && File(path).exists()) {
                         Picasso.get().load(File(path)).into(imgAvatar)
                     }
