@@ -8,11 +8,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.HttpURLConnection
 import java.net.URL
-import kotlin.concurrent.thread
+
 
 class MessageController {
     fun newCreateGroup(id: String, uid: String){
-        Firebase.firestore.collection("user").document(uid).get()
+        Firebase.firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val name = document.get("Name") as? String ?: ""
@@ -26,7 +26,7 @@ class MessageController {
 
     }
     fun newFriendRequest(uid_other: String, uid: String){
-        Firebase.firestore.collection("user").document(uid).get()
+        Firebase.firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val name = document.get("Name") as? String ?: ""
@@ -40,7 +40,7 @@ class MessageController {
             }
     }
     fun newFriendAccpet(uid_other: String, uid: String){
-        Firebase.firestore.collection("user").document(uid).get()
+        Firebase.firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val name = document.get("Name") as? String ?: ""
@@ -54,7 +54,7 @@ class MessageController {
             }
     }
     fun newMessageFriend(uid_other: String, uid: String, content: String){
-        Firebase.firestore.collection("user").document(uid).get()
+        Firebase.firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val name = document.get("Name") as? String ?: ""
@@ -68,7 +68,7 @@ class MessageController {
             }
     }
     fun newMessageGroup(id: String, uid: String, content: String){
-        Firebase.firestore.collection("user").document(uid).get()
+        Firebase.firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val name = document.get("Name") as? String ?: ""
@@ -86,12 +86,12 @@ class MessageController {
             try {
                 val urlConnection = URL(url)
                 connection = urlConnection.openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
                 connection.connect()
 
                 val responseCode = connection.responseCode
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     println("Request successful: HTTP OK")
+                    println("Response message: ${connection.responseMessage}")
                 } else {
                     println("Request failed: HTTP response code $responseCode")
                 }
