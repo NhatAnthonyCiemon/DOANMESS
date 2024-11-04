@@ -25,7 +25,7 @@ open class DataMess {
         this.othersend = othersend
         this.message = if(!othersend) "Bạn: $message" else last_name + ": $message"
         this.timestamp = timestamp
-        this.time = convertTimestampToString(timestamp*1000)
+        this.time = convertTimestampToString(timestamp)
     }
     fun convertTimestampToString(timestamp: Long, timeZone: TimeZone = TimeZone.getDefault()): String {
         val sdf = SimpleDateFormat("E HH:mm", Locale.getDefault())

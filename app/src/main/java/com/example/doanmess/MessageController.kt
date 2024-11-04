@@ -53,6 +53,7 @@ class MessageController {
                 Log.e("Error", e.toString())
             }
     }
+
     fun newMessageFriend(uid_other: String, uid: String, content: String){
         Firebase.firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
@@ -67,13 +68,13 @@ class MessageController {
                 Log.e("Error", e.toString())
             }
     }
-    fun newMessageGroup(id: String, uid: String, content: String){
+    fun newMessageGroup(idGroup: String, uid: String, content: String){
         Firebase.firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val name = document.get("Name") as? String ?: ""
                     val afterContent = name +": "+ content
-                    sendAPIRequest("https://android-backend-3day.vercel.app/sendgroup/$id/$uid/$afterContent")
+                    sendAPIRequest("https://android-backend-3day.vercel.app/sendgroup/$idGroup/$uid/$afterContent")
                 }
             }
             .addOnFailureListener { e ->
