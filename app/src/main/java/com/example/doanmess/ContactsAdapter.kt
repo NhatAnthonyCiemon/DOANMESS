@@ -55,19 +55,19 @@ class ContactsAdapter(var cont: Activity,var contactList:  List<Contact>) : Recy
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.nameView.setText(contactList[position].name)
+        holder.nameView.text = contactList[position].name
         (cont as? LifecycleOwner)?.lifecycleScope?.launch {
             try {
                 val ImageLoader = ImageLoader(cont)
-                val path = ImageLoader.checkFile(contactList[position].avatar, contactList[position].id)
-                if(path != contactList[position].avatar && File(path).exists()) {
+                val avatarUrl = contactList[position].avatar.takeIf { it.isNotEmpty() }
+                    ?: "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
+                val path = ImageLoader.checkFile(avatarUrl, contactList[position].id)
+                if (path != avatarUrl && File(path).exists()) {
                     Picasso.get().load(File(path)).into(holder.imgView)
+                } else {
+                    Picasso.get().load(avatarUrl).into(holder.imgView)
                 }
-                else {
-                    Picasso.get().load(contactList[position].avatar).into(holder.imgView)
-                }
-            }
-            catch (e: IOException) {
+            } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
