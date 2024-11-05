@@ -125,6 +125,14 @@
             android:padding="10dp"
             android:scrollbars="vertical" />
 
+        <TextView
+            android:id="@+id/blocked_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="You can't no longer chat to this user."
+            android:visibility="invisible" />
+
         <LinearLayout
             android:layout_width="354dp"
             android:layout_height="80dp"

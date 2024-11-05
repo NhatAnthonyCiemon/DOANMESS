@@ -14,6 +14,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.bumptech.glide.request.RequestOptions
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerView.Adapter<BlockAdapter.ViewHolder>() {
@@ -34,7 +37,9 @@ class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerVi
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = blockLists[position]
         holder.userName.text = item.name
-        holder.blockTime.text = item.timestamp
+        holder.blockTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
+            Date(item.timestamp)
+        )
 
         val requestOptions = RequestOptions().circleCrop()
         val avatarUrl = if (item.avatar.isNotEmpty()) item.avatar else "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
@@ -53,7 +58,7 @@ class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerVi
                 Log.d("Unblock", "Attempting to unblock user with ID: $blockedUserId for user: $userId")
 
                 firestore.collection("users").document(userId)
-                    .update("Blocks", FieldValue.arrayRemove(blockedUserId))
+                    .update("Blocks", FieldValue.arrayRemove(mapOf("uid" to blockedUserId, "timeStamp" to item.timestamp)))
                     .addOnSuccessListener {
                         Log.d("Unblock", "Successfully removed $blockedUserId from block list")
                         blockLists.removeAt(pos)
@@ -73,6 +78,7 @@ class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerVi
             val pos = holder.adapterPosition
             if (pos != RecyclerView.NO_POSITION) {
                 blockLists.removeAt(pos)
+                // XU LI VIEC XOA TIN NHAN VAO DAY
                 notifyItemRemoved(pos)
                 if (blockLists.isEmpty()) {
                     Toast.makeText(holder.itemView.context, "No more blocked users.", Toast.LENGTH_SHORT).show()

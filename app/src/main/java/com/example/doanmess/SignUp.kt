@@ -19,7 +19,8 @@ data class User(
     @JvmField @PropertyName("Requests") val Requests: List<String> = listOf(),
     @JvmField @PropertyName("Blocks") val Blocks: List<String> = listOf(),
     @JvmField @PropertyName("Friends") val Friends: List<String> = listOf(),
-    @JvmField @PropertyName("Groups") val Groups: List<String> = listOf()
+    @JvmField @PropertyName("Groups") val Groups: List<String> = listOf(),
+    @JvmField @PropertyName("Devices") val Devices: List<String> = listOf()
 )
 
 
@@ -71,13 +72,15 @@ class SignUp : AppCompatActivity() {
                                 Requests = listOf(),
                                 Blocks = listOf(),
                                 Friends = listOf(),
-                                Groups = listOf()
+                                Groups = listOf(),
+                                Devices = listOf()
                             )
                             firestore.collection("users").document(userId).set(user)
                                 .addOnCompleteListener { dbTask ->
                                     if (dbTask.isSuccessful) {
-                                        Toast.makeText(this, "Sign-Up successful", Toast.LENGTH_SHORT).show()
-                                        val intent = Intent(this, Home::class.java)
+                                        Toast.makeText(this, "Sign-Up successful. Please log in.", Toast.LENGTH_SHORT).show()
+                                        auth.signOut()  // Sign out the user
+                                        val intent = Intent(this, Login::class.java)
                                         startActivity(intent)
                                         finish()
                                     } else {

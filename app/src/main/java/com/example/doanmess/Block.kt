@@ -47,37 +47,35 @@ class Block : HandleOnlineActivity() {
     }
 
 
-//    working on
-private fun fetchBlockedUsers() {
-    val userId = auth.currentUser?.uid ?: return
-    if (firestore == null) {
-        Toast.makeText(this, "Firestore is not initialized", Toast.LENGTH_SHORT).show()
-        return
-    }
-    firestore.collection("users").document(userId)
-        .get()
-        .addOnSuccessListener { document ->
-            blockLists.clear()
-            if (document.exists()) {
-                val blockedUserIds = document["Blocks"] as? List<String>
-                if (blockedUserIds.isNullOrEmpty()) {
-                    Log.d("Block", "No blocked users found")
-                } else {
-                    for (blockedUserId in blockedUserIds) {
-                        fetchUserDetails(blockedUserId)
+    //    working on
+    private fun fetchBlockedUsers() {
+        val userId = auth.currentUser?.uid ?: return
+        firestore.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                blockLists.clear()
+                if (document.exists()) {
+                    val blockedUsers = document["Blocks"] as? List<Map<String, Any>>
+                    if (blockedUsers.isNullOrEmpty()) {
+                        Log.d("Block", "No blocked users found")
+                    } else {
+                        for (blockedUser in blockedUsers) {
+                            val uid = blockedUser["uid"] as? String ?: continue
+                            val timestamp = blockedUser["timeStamp"] as? Long ?: continue
+                            fetchUserDetails(uid, timestamp)
+                        }
                     }
+                } else {
+                    Log.d("Block", "User document does not exist")
                 }
-            } else {
-                Log.d("Block", "User document does not exist")
             }
-        }
-        .addOnFailureListener { e ->
-            Toast.makeText(this, "Error fetching blocked users", Toast.LENGTH_SHORT).show()
-            Log.e("Block", "Error fetching blocked users", e)
-        }
-}
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error fetching blocked users", Toast.LENGTH_SHORT).show()
+                Log.e("Block", "Error fetching blocked users", e)
+            }
+    }
 
-    private fun fetchUserDetails(blockedUserId: String) {
+    private fun fetchUserDetails(blockedUserId: String, timestamp: Long) {
         firestore.collection("users").document(blockedUserId)
             .get()
             .addOnSuccessListener { document ->
@@ -85,7 +83,7 @@ private fun fetchBlockedUsers() {
                     val name = document.getString("Name") ?: ""
                     val avatar = document.getString("Avatar") ?: ""
                     Log.d("Block", "Fetched User Details - Name: $name, Avatar: $avatar")
-                    val block = BlockModel(uid = blockedUserId, name = name, avatar = avatar, timestamp = "")
+                    val block = BlockModel(uid = blockedUserId, name = name, avatar = avatar, timestamp = timestamp)
                     blockLists.add(block)
                     adapter.notifyDataSetChanged()
                 } else {
@@ -98,18 +96,18 @@ private fun fetchBlockedUsers() {
             }
     }
 
-    private fun blockUser(blockedUserId: String, blockedUserName: String, blockedUserAvatar: String) {
-        val userId = auth.currentUser?.uid ?: return
-        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-        val block = BlockModel(name = blockedUserName, avatar = blockedUserAvatar, timestamp = timestamp)
-        firestore.collection("users").document(userId).collection("Blocks").document(blockedUserId)
-            .set(block)
-            .addOnSuccessListener {
-                Toast.makeText(this, "User blocked successfully", Toast.LENGTH_SHORT).show()
-                fetchBlockedUsers()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "Error blocking user", Toast.LENGTH_SHORT).show()
-            }
-    }
+//    private fun blockUser(blockedUserId: String, blockedUserName: String, blockedUserAvatar: String) {
+//        val userId = auth.currentUser?.uid ?: return
+//        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+//        val block = BlockModel(name = blockedUserName, avatar = blockedUserAvatar, timestamp = timestamp)
+//        firestore.collection("users").document(userId).collection("Blocks").document(blockedUserId)
+//            .set(block)
+//            .addOnSuccessListener {
+//                Toast.makeText(this, "User blocked successfully", Toast.LENGTH_SHORT).show()
+//                fetchBlockedUsers()
+//            }
+//            .addOnFailureListener { e ->
+//                Toast.makeText(this, "Error blocking user", Toast.LENGTH_SHORT).show()
+//            }
+//    }
 }

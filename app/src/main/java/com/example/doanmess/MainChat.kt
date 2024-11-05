@@ -3,10 +3,12 @@ package com.example.createuiproject
 import android.content.Intent
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -293,22 +295,26 @@ class MainChat : AppCompatActivity() {
         inputBarLayoutParams.width = (screenHeight * 0.70).toInt()
         inputBar.layoutParams = inputBarLayoutParams
 
+        checkBlockedStatus()
+
         // set on click listener for the back button to navigate back to the home activity
         findViewById<ImageButton>(R.id.back_button).setOnClickListener {
             finish()
         }
 
-        //set on click listener for the info button to navigate to the user info activity
+        // Set on click listener for the info button to navigate to the user info activity
         findViewById<ImageButton>(R.id.info_button).setOnClickListener {
             // Navigate to user info activity
             val intent = Intent(this, InforChat::class.java)
+            intent.putExtra("uid", targetUserUid) // Pass the uid to InforChat
             startActivity(intent)
         }
 
-        //set on click listener for the name_layout to navigate to the user infor activity
+        // Set on click listener for the name_layout to navigate to the user info activity
         findViewById<LinearLayout>(R.id.name_layout).setOnClickListener {
             // Navigate to user info activity
             val intent = Intent(this, InforChat::class.java)
+            intent.putExtra("uid", targetUserUid) // Pass the uid to InforChat
             startActivity(intent)
         }
 
@@ -367,5 +373,42 @@ class MainChat : AppCompatActivity() {
                 }
             }
         }
+    }
+    override fun onResume() {
+        super.onResume()
+        checkBlockedStatus()
+    }
+    private fun checkBlockedStatus() {
+        val inputBar = findViewById<LinearLayout>(R.id.input_bar)
+        val blockedMessage = findViewById<TextView>(R.id.blocked_message)
+        val userId = auth.currentUser?.uid ?: return
+        val targetUserUid = intent.getStringExtra("uid") ?: return
+
+        Firebase.firestore.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val blockedUsers = document["Blocks"] as? List<Map<String, Any>>
+                    if (blockedUsers != null) {
+                        for (blockedUser in blockedUsers) {
+                            val uid = blockedUser["uid"] as? String
+                            if (uid == targetUserUid) {
+                                // Hide input bar and show blocked message
+                                inputBar.visibility = View.GONE
+                                blockedMessage.visibility = View.VISIBLE
+                                return@addOnSuccessListener
+                            }
+                        }
+                    }
+                }
+                // If not blocked, show input bar and hide blocked message
+                inputBar.visibility = View.VISIBLE
+                blockedMessage.visibility = View.GONE
+            }
+            .addOnFailureListener { e ->
+                // Handle error
+                inputBar.visibility = View.VISIBLE
+                blockedMessage.visibility = View.GONE
+            }
     }
 }
