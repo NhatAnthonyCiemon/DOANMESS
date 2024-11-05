@@ -6,12 +6,15 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,8 +25,43 @@ class InforChat : HandleOnlineActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_infor_chat)
+        val imgBack = findViewById<ImageView>(R.id.imgBack)
+        imgBack.setOnClickListener {
+            finish() // Close the current activity and go back to the previous one
+        }
 
         val chatUserId = intent.getStringExtra("uid") // Retrieve the uid from the intent
+        val imgView = findViewById<ImageView>(R.id.imgView) // Avatar ImageView
+        val txtName = findViewById<TextView>(R.id.txtName) // Name TextView
+        if (!chatUserId.isNullOrEmpty()) {
+            // Fetch user data from Firebase Firestore
+            val firestore = FirebaseFirestore.getInstance()
+            firestore.collection("users").document(chatUserId).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        // Retrieve the avatar URL and name from the document
+                        val avatarUrl = document.getString("Avatar")
+                        val name = document.getString("Name")
+
+                        // Set the name in the TextView
+                        txtName.text = name ?: "User"
+
+                        // Load the avatar into the ImageView using Glide
+                        if (!avatarUrl.isNullOrEmpty()) {
+                            Glide.with(this).load(avatarUrl).into(imgView)
+                        } else {
+                            imgView.setImageResource(R.drawable.ic_launcher_background) // Placeholder
+                        }
+                    } else {
+                        Toast.makeText(this, "User not found.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Failed to load user data: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this, "Invalid user ID.", Toast.LENGTH_SHORT).show()
+        }
 
         val frmTopic = findViewById<FrameLayout>(R.id.frmTopic)
         val frmFastEmotion = findViewById<FrameLayout>(R.id.frmFastEmotion)
