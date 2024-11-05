@@ -13,6 +13,8 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.bumptech.glide.request.RequestOptions
+
 
 class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerView.Adapter<BlockAdapter.ViewHolder>() {
 
@@ -33,7 +35,13 @@ class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerVi
         val item = blockLists[position]
         holder.userName.text = item.name
         holder.blockTime.text = item.timestamp
-        Glide.with(holder.itemView.context).load(item.avatar).into(holder.profileImage)
+
+        val requestOptions = RequestOptions().circleCrop()
+        val avatarUrl = if (item.avatar.isNotEmpty()) item.avatar else "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
+        Glide.with(holder.itemView.context)
+            .load(avatarUrl)
+            .apply(requestOptions)
+            .into(holder.profileImage)
 
         holder.btnAccept.setOnClickListener {
             val pos = holder.adapterPosition
