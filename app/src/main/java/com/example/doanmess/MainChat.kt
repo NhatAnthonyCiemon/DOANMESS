@@ -147,55 +147,6 @@ class MainChat : AppCompatActivity() {
             }
         }
         else {
-//            database = Firebase.database.getReference("groups").child(targetUserUid)
-//            database.addValueEventListener(object : ValueEventListener {
-//                override fun onDataChange(snapshot: DataSnapshot) {
-////                    val senderName = snapshot.child("name").getValue(String::class.java) ?: "Unknown"
-////                    val avatarUrl = snapshot.child("avatar").getValue(String::class.java) ?: ""
-//
-//                    chatMessages.clear() // Clear previous data
-//                    lastSenderId = "" // Reset lastSenderId for fresh load
-//
-//                    for (messageSnapshot in snapshot.children) {
-//                        // Manually extract each field and handle null cases
-//                        val content =
-//                            messageSnapshot.child("Content").getValue(String::class.java) ?: ""
-//                        val sendId =
-//                            messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
-//                        val recvId =
-//                            messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
-//                        val status =
-//                            messageSnapshot.child("Status").getValue(Boolean::class.java)
-//                                ?: false
-//                        val time =
-//                            messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
-//
-//                        val database2 = Firebase.firestore.collection("users").document(sendId)
-//                        val senderName = database2.get().result?.getString("Name") ?: "Unknown"
-//                        val avatarUrl = database2.get().result?.getString("Avatar") ?: ""
-//
-//                        val chatMessage = ChatMessage(
-//                            content = content,
-//                            sendId = sendId,
-//                            recvId = recvId,
-//                            status = status,
-//                            time = time
-//                        ).apply {
-//                            this.senderName = senderName
-//                            this.avatarUrl = avatarUrl
-//                        }
-//                        // Check if the sender is different from the last one
-//                        chatMessage.showSenderInfo = sendId != lastSenderId
-//                        lastSenderId = sendId // Update the last sender
-//                        chatMessages.add(chatMessage)
-//                        // Refresh your adapter or UI component here
-//                    }
-//                    chatAdapter.notifyDataSetChanged()
-//                }
-//                override fun onCancelled(error: DatabaseError) {
-//                }
-//            })
-//        }
             database = Firebase.database.getReference("groups").child(targetUserUid)
             database.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {

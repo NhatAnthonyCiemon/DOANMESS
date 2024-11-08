@@ -24,20 +24,18 @@
 
         <TextView
             android:id="@+id/messageTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_background_orange"
             android:textColor="@android:color/white"
             android:padding="10dp"
-            android:maxWidth="250dp"
             android:layout_marginEnd="5dp"
-            android:text="Sent messagafdafasdadfadsfasdfsdafadsfadsafssdafadse"/>
+            android:layout_weight="1"/>
 
         <TextView
             android:id="@+id/timestampTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:textColor="@android:color/white"
             android:textSize="12sp" /> <!-- Add padding for timestamp -->
     </LinearLayout>
