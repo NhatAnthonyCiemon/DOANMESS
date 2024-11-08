@@ -88,6 +88,7 @@ class MainChat : AppCompatActivity() {
         // Set up the RecyclerView
         val chatAdapter = ChatAdapter(chatMessages, isGroup)
         val recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
+        recyclerViewMessages.isVerticalScrollBarEnabled = false;
         recyclerViewMessages.adapter = chatAdapter
         recyclerViewMessages.layoutManager = LinearLayoutManager(this)
 
@@ -279,22 +280,6 @@ class MainChat : AppCompatActivity() {
         }
 
 
-            // Get the display metrics
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val screenHeight = displayMetrics.heightPixels
-
-        // Set RecyclerView height to a percentage of the screen height (e.g., 70%)
-        val layoutParams = recyclerViewMessages.layoutParams
-        layoutParams.height = (screenHeight * 0.75).toInt() // Change the percentage as needed
-        recyclerViewMessages.layoutParams = layoutParams
-
-        //set the input bar width to 70%
-        val inputBar = findViewById<LinearLayout>(R.id.input_bar)
-        val inputBarLayoutParams = inputBar.layoutParams
-        inputBarLayoutParams.width = (screenHeight * 0.70).toInt()
-        inputBar.layoutParams = inputBarLayoutParams
-
         checkBlockedStatus()
 
         // set on click listener for the back button to navigate back to the home activity
@@ -325,7 +310,7 @@ class MainChat : AppCompatActivity() {
 
         val message_input = findViewById<android.widget.EditText>(R.id.message_input)
         // set on click listener for the send button to send the message
-        findViewById<FrameLayout>(R.id.send_button).setOnClickListener {
+        findViewById<ImageButton>(R.id.send_button).setOnClickListener {
             val message = message_input.text.toString()
             if (!isGroup) {
                 if (message.isNotEmpty()) {
