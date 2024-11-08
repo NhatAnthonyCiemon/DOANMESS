@@ -153,12 +153,7 @@ class MainChat : AppCompatActivity() {
                     chatMessages.clear() // Clear previous data
                     lastSenderId = "" // Reset lastSenderId for fresh load
 
-                    // Use a counter to keep track of how many Firestore queries have completed
-//                    var completedQueries = 0
-                    val totalMessages = snapshot.childrenCount
-
                     for (messageSnapshot in snapshot.children) {
-                        // Manually extract each field and handle null cases
                         val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
                         val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                         val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
@@ -191,12 +186,6 @@ class MainChat : AppCompatActivity() {
 
                             chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
 
-
-                            // Notify the adapter only when all Firestore queries are completed
-//                            completedQueries++
-//                            if (completedQueries == totalMessages.toInt()) {
-//                                chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
-//                            }
                         }.addOnFailureListener {
                             // Handle Firestore retrieval failure if needed
                             val chatMessage = ChatMessage(
@@ -214,12 +203,6 @@ class MainChat : AppCompatActivity() {
                             lastSenderId = sendId // Update the last sender
                             chatMessages.add(chatMessage)
                             chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
-
-                            // Update completedQueries
-//                            completedQueries++
-//                            if (completedQueries == totalMessages.toInt()) {
-//                                chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
-//                            }
                         }
                     }
                 }
