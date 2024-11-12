@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.doanmess.InforChat
+import com.example.doanmess.MessageController
 import com.example.doanmess.R
 import com.example.doanmess.User
 import com.google.firebase.Firebase
@@ -33,6 +34,7 @@ class MainChat : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private val chatMessages = mutableListOf<ChatMessage>()
     private var lastSenderId: String = ""
+    private val messageController = MessageController()
     data class ChatMessage(
         val content: String = "",
         val sendId: String = "",
@@ -109,7 +111,6 @@ class MainChat : AppCompatActivity() {
                         chatMessages.clear() // Clear previous data
                         lastSenderId = "" // Reset lastSenderId for fresh load
                         for (messageSnapshot in snapshot.children) {
-                         //   if(messageSnapshot.key == "Status") continue
                             // Manually extract each field and handle null cases
                             val content =
                                 messageSnapshot.child("Content").getValue(String::class.java) ?: ""
@@ -117,17 +118,12 @@ class MainChat : AppCompatActivity() {
                                 messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                             val recvId =
                                 messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
-                       /*     val status =
-                                messageSnapshot.child("Status").getValue(Boolean::class.java)
-                                    ?: false*/
                             val time =
                                 messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
-
                             val chatMessage = ChatMessage(
                                 content = content,
                                 sendId = sendId,
                                 recvId = recvId,
-                             //   status = status,
                                 time = time
                             ).apply {
                                 this.senderName = senderName
@@ -140,14 +136,11 @@ class MainChat : AppCompatActivity() {
                             chatMessages.add(chatMessage)
 
                             // Refresh your adapter or UI component here
-                            chatMessages.sortBy { it.time }
                             chatAdapter.notifyDataSetChanged()
 
                             recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
 
                         }
-                        chatMessages.sortBy { it.time }
-                        chatAdapter.notifyDataSetChanged()
                         recyclerViewMessages.scrollToPosition(chatMessages.size - 1) // Scroll to bottom
                     }
 
@@ -167,84 +160,39 @@ class MainChat : AppCompatActivity() {
             valueEventListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     chatMessages.clear() // Clear previous data
-                    Log.d("MainChat", "onDataChange: ${snapshot.key}")
+                 //   Log.d("MainChat", "onDataChange: ${snapshot.key}")
                     Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
 
                     lastSenderId = "" // Reset lastSenderId for fresh load
-                    for (messageSnapshot in snapshot.children) {
 
+                    val tempMessages = mutableListOf<ChatMessage>()
+
+                    for (messageSnapshot in snapshot.children) {
                         val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
                         val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                         val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
-                      //  val status = messageSnapshot.child("Status").getValue(Boolean::class.java) ?: false
                         val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
 
-                       // Fetch sender info from Firestore
-                        if(sendId  == "")
-                        {
-                            continue
-                        }
-                        val database2 = Firebase.firestore.collection("users").document(sendId)
-                        if(database2!= null)
-                        {
-                            database2.get().addOnSuccessListener { document ->
-                                val senderName = document.getString("Name") ?: "Unknown"
-                                val avatarUrl = document.getString("Avatar") ?: ""
-                                // Create and populate the chat message
-                                val chatMessage = ChatMessage(
-                                    content = content,
-                                    sendId = sendId,
-                                    recvId = recvId,
-                                    //  status = status,
-                                    time = time
-                                ).apply {
-                                    this.senderName = senderName
-                                    this.avatarUrl = avatarUrl
-                                    // Check if the sender is different from the last one
-                                    this.showSenderInfo = sendId != lastSenderId
-                                }
-                                // Update lastSenderId
-                                lastSenderId = sendId // Update the last sender
-                                chatMessages.add(chatMessage)
-                          //      chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
-                                recyclerViewMessages.scrollToPosition(chatMessages.size - 1) // Scroll to bottom
-                            }.addOnFailureListener {
-                                // Handle Firestore retrieval failure if needed
-                                val chatMessage = ChatMessage(
-                                    content = content,
-                                    sendId = sendId,
-                                    recvId = recvId,
-                                    //    status = status,
-                                    time = time
-                                ).apply {
-                                    this.senderName = "Unknown"
-                                    this.avatarUrl = ""
-                                    this.showSenderInfo = sendId != lastSenderId
-                                }
-                                lastSenderId = sendId // Update the last sender
-                                chatMessages.add(chatMessage)
-                                chatMessages.sortBy { it.time }
-                                chatAdapter.notifyDataSetChanged()
+                        val chatMessage = ChatMessage(
+                            content = content,
+                            sendId = sendId,
+                            recvId = recvId,
+                            time = time
+                        )
 
-                             //   chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
-                                recyclerViewMessages.scrollToPosition(chatMessages.size - 1) // Scroll to bottom
-                        }
-
-                        }
+                        tempMessages.add(chatMessage)
                     }
 
-                    chatMessages.sortBy { it.time  }
-                    for (message in chatMessages) {
-                        Log.d("MainChat", "onDataChange: ${message.time}")
-                    }
-                    chatAdapter.notifyDataSetChanged()
+                    tempMessages.sortBy { it.time }
+                    chatMessages.addAll(tempMessages) // Update chatMessages with sorted list
+                    chatAdapter.notifyDataSetChanged() // Notify adapter of data change
+                    recyclerViewMessages.scrollToPosition(chatMessages.size - 1) // Scroll to bottom
+
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     // Handle database error if needed
                 }
             }
-
             database.addValueEventListener(valueEventListener)
         }
 
@@ -305,6 +253,7 @@ class MainChat : AppCompatActivity() {
                         "RecvId" to chatMessage.recvId,
                         "Time" to chatMessage.time
                     )
+
                     Firebase.database.getReference("users").child(currentUserUid!!)
                         .child(targetUserUid).child("Messages").push().setValue(newMessage)
                     //Save for target user
@@ -316,6 +265,7 @@ class MainChat : AppCompatActivity() {
                     )
                     Firebase.database.getReference("users").child(targetUserUid!!)
                         .child(currentUserUid).child("Messages").push().setValue(newMessage2)
+                    messageController.newMessageFriend(targetUserUid, currentUserUid, message )
                 }
             }
             else {
@@ -331,10 +281,27 @@ class MainChat : AppCompatActivity() {
                                         Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(user).setValue(false)
                                     }
                                 }
+
+                                // After updating the status, push the new message
+                                val chatMessage = ChatMessage(
+                                    content = message,
+                                    sendId = currentUserUid ?: "",
+                                    recvId = targetUserUid,
+                                    time = System.currentTimeMillis()
+                                )
+                                message_input.text.clear()
+                                val newMessage = mapOf(
+                                    "Content" to chatMessage.content,
+                                    "SendId" to chatMessage.sendId,
+                                    "RecvId" to chatMessage.recvId,
+                                    "Time" to chatMessage.time
+                                )
+                                database.push().setValue(newMessage)
+                                messageController.newMessageGroup(targetUserUid, currentUserUid, message)
                             }
                         }
                     }
-                    val chatMessage = ChatMessage(
+               /*     val chatMessage = ChatMessage(
                         content = message,
                         sendId = currentUserUid ?: "",
                         recvId = targetUserUid,
@@ -346,14 +313,13 @@ class MainChat : AppCompatActivity() {
                     message_input.text.clear()
                     // Save the message to the database
               //      Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
-                    //create new hash of message
                     val newMessage = mapOf(
                         "Content" to chatMessage.content,
                         "SendId" to chatMessage.sendId,
                         "RecvId" to chatMessage.recvId,
                         "Time" to chatMessage.time
                     )
-                    database.push().setValue(newMessage)
+                    database.push().setValue(newMessage)*/
 
 
                 }
@@ -368,8 +334,14 @@ class MainChat : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (::valueEventListener.isInitialized) {
-            database= Firebase.database.getReference("users").child(auth.currentUser?.uid ?: "")
-                .child(intent.getStringExtra("uid") ?: "").child("Messages")
+            if(intent.getBooleanExtra("isGroup", false)) {
+                database= Firebase.database.getReference("groups").child(intent.getStringExtra("uid") ?: "").child("Messages")
+            }
+            else {
+                database =
+                    Firebase.database.getReference("users").child(auth.currentUser?.uid ?: "")
+                        .child(intent.getStringExtra("uid") ?: "").child("Messages")
+            }
             database.removeEventListener(valueEventListener)
         }
     }

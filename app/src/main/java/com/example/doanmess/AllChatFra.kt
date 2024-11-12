@@ -59,10 +59,11 @@ class AllChatFra : Fragment() {
         userListener = object : ValueEventListener {
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
+                Log.d("AllFra", snapshot.key.toString())
                 if (snapshot.exists()) {
                     loadingBar.visibility = View.GONE
                     btnGroup.visibility = View.VISIBLE
-                    list.removeIf { it !is DataMessGroup }
+              //      list.removeIf { it !is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
                         val latestsmallSnapshot = childSnapshot.child("Messages").children.maxByOrNull {
                             it.child("Time").getValue(Long::class.java) ?: 0L
@@ -83,7 +84,7 @@ class AllChatFra : Fragment() {
                                                 val name = document.data?.get("Name").toString()
                                                 val avatar = document.data?.get("Avatar").toString()
                                                 val existingItem = list.find { it.uid == recvId.toString() }
-                                  /*              if (existingItem != null) {
+                                                if (existingItem != null) {
                                                     existingItem.apply {
                                                         this.othersend= false
                                                         this.avatar = avatar
@@ -92,7 +93,7 @@ class AllChatFra : Fragment() {
                                                         this.timestamp = timestamp!!
                                                         this.status = status!!
                                                     }
-                                                } else {*/
+                                                } else {
                                                     list.add(
                                                         DataMess(
                                                             avatar,
@@ -104,7 +105,7 @@ class AllChatFra : Fragment() {
                                                             false
                                                         )
                                                     )
-                                              //  }
+                                                }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
 
@@ -124,7 +125,7 @@ class AllChatFra : Fragment() {
                                                 val name = document.data?.get("Name").toString()
                                                 val avatar = document.data?.get("Avatar").toString()
                                                 val existingItem = list.find { it.uid == sendId.toString() }
-                                          /*      if (existingItem != null) {
+                                                if (existingItem != null) {
                                                     existingItem.apply {
                                                         this.othersend= true
                                                         this.avatar = avatar
@@ -133,7 +134,7 @@ class AllChatFra : Fragment() {
                                                         this.timestamp = timestamp!!
                                                         this.status = status!!
                                                     }
-                                                } else {*/
+                                                } else {
                                                     list.add(
                                                         DataMess(
                                                             avatar,
@@ -145,7 +146,7 @@ class AllChatFra : Fragment() {
                                                             true
                                                         )
                                                     )
-                                               // }
+                                                }
 
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
@@ -171,10 +172,11 @@ class AllChatFra : Fragment() {
         groupListener = object : ValueEventListener {
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
+                Log.d("AllFra", snapshot.key.toString())
                 if (snapshot.exists()) {
                     loadingBar.visibility = View.GONE
                     btnGroup.visibility = View.VISIBLE
-                    list.removeIf { it is DataMessGroup }
+                //    list.removeIf { it is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
                         if (myGroup.contains(childSnapshot.key.toString())) {
                             val latestsmallSnapshot = childSnapshot.child("Messages").children.maxByOrNull {
@@ -187,7 +189,16 @@ class AllChatFra : Fragment() {
                                 val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
 
                                 if (User!!.uid == sendId) {
-                                    list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
+                                    val existingItem = list.find { it.uid == childSnapshot.key.toString() }
+                                    if (existingItem != null) {
+                                        existingItem.apply {
+                                            this.message = "Bạn: ${content.toString()}"
+                                            this.timestamp = timestamp!!
+                                            this.status = status!!
+                                        }
+                                    } else {
+                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
+                                    }
                                     list.sortByDescending { it.timestamp }
                                     adapter.notifyDataSetChanged()
                                 } else {
@@ -196,18 +207,28 @@ class AllChatFra : Fragment() {
                                         .addOnSuccessListener { document ->
                                             if (document != null) {
                                                 val name = document.data?.get("Name").toString()
-                                                list.add(
-                                                    DataMessGroup(
-                                                        avatarList[childSnapshot.key.toString()].toString(),
-                                                        childSnapshot.key.toString(),
-                                                        name,
-                                                        content.toString(),
-                                                        timestamp!!,
-                                                        status!!,
-                                                        name,
-                                                        myGroup[childSnapshot.key.toString()].toString()
+                                                val existingItem = list.find { it.uid == childSnapshot.key.toString() }
+                                                if (existingItem != null) {
+                                                    existingItem.apply {
+                                                        this.message = "$name: ${content.toString()}"
+                                                        this.timestamp = timestamp!!
+                                                        this.status = status!!
+                                                        this.last_name = name
+                                                    }
+                                                } else {
+                                                    list.add(
+                                                        DataMessGroup(
+                                                            avatarList[childSnapshot.key.toString()].toString(),
+                                                            childSnapshot.key.toString(),
+                                                            name,
+                                                            content.toString(),
+                                                            timestamp!!,
+                                                            status!!,
+                                                            name,
+                                                            myGroup[childSnapshot.key.toString()].toString()
+                                                        )
                                                     )
-                                                )
+                                                }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -236,7 +257,7 @@ class AllChatFra : Fragment() {
             return
         }
         list.clear()
-        adapter.notifyDataSetChanged()
+     //   adapter.notifyDataSetChanged()
         Firebase.firestore.collection("users").document(User!!.uid)
             .addSnapshotListener { documentSnapshot, error ->
                 loadingBar.visibility = View.GONE
