@@ -64,57 +64,104 @@ class AllChatFra : Fragment() {
                     btnGroup.visibility = View.VISIBLE
                     list.removeIf { it !is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
-                        val latestsmallSnapshot = childSnapshot.children.maxByOrNull {
+                        val latestsmallSnapshot = childSnapshot.child("Messages").children.maxByOrNull {
                             it.child("Time").getValue(Long::class.java) ?: 0L
                         }
                         if (latestsmallSnapshot != null) {
                             val content = latestsmallSnapshot.child("Content").getValue(String::class.java)
                             val recvId = latestsmallSnapshot.child("RecvId").getValue(String::class.java)
                             val sendId = latestsmallSnapshot.child("SendId").getValue(String::class.java)
-                            val status = latestsmallSnapshot.child("Status").getValue(Boolean::class.java)
+                            val status = childSnapshot.child("Status").getValue(Boolean::class.java) ?: false
                             val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
 
-                            if (User!!.uid == sendId) {
-                                dbfirestore.collection("users").document(recvId.toString())
-                                    .get()
-                                    .addOnSuccessListener { document ->
-                                        if (document != null) {
-                                            val name = document.data?.get("Name").toString()
-                                            val avatar = document.data?.get("Avatar").toString()
-                                            list.add(DataMess( avatar, recvId.toString(), name, content.toString(), timestamp!!, status!!, true))
-                                            list.sortByDescending { it.timestamp }
-                                            adapter.notifyDataSetChanged()
+                            if (User != null && recvId != null && sendId != null) {
+                                if (User!!.uid == sendId) {
+                                    dbfirestore.collection("users").document(recvId.toString())
+                                        .get()
+                                        .addOnSuccessListener { document ->
+                                            if (document != null) {
+                                                val name = document.data?.get("Name").toString()
+                                                val avatar = document.data?.get("Avatar").toString()
+                                                val existingItem = list.find { it.uid == recvId.toString() }
+                                  /*              if (existingItem != null) {
+                                                    existingItem.apply {
+                                                        this.othersend= false
+                                                        this.avatar = avatar
+                                                        this.name = name
+                                                        this.message = if(!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
+                                                        this.timestamp = timestamp!!
+                                                        this.status = status!!
+                                                    }
+                                                } else {*/
+                                                    list.add(
+                                                        DataMess(
+                                                            avatar,
+                                                            recvId.toString(),
+                                                            name,
+                                                            content.toString(),
+                                                            timestamp!!,
+                                                            status!!,
+                                                            false
+                                                        )
+                                                    )
+                                              //  }
+                                                list.sortByDescending { it.timestamp }
+                                                adapter.notifyDataSetChanged()
 
-                                        } else {
-                                            Log.d("exist", "No such document")
+                                            } else {
+                                                Log.d("exist", "No such document")
+                                            }
                                         }
-                                    }
-                                    .addOnFailureListener { exception ->
-                                        Log.d("exist", "get failed with ", exception)
-                                    }
-                            } else {
-                                dbfirestore.collection("users").document(sendId.toString())
-                                    .get()
-                                    .addOnSuccessListener { document ->
-                                        if (document != null) {
-                                            val name = document.data?.get("Name").toString()
-                                            val avatar = document.data?.get("Avatar").toString()
-                                            list.add(DataMess(avatar, sendId!!, name, content.toString(), timestamp!!, status!!, false))
-                                            list.sortByDescending { it.timestamp }
-                                            adapter.notifyDataSetChanged()
-                                        } else {
-                                            Log.d("exist", "No such document")
+                                        .addOnFailureListener { exception ->
+                                            Log.d("exist", "get failed with ", exception)
                                         }
-                                    }
-                                    .addOnFailureListener { exception ->
-                                        Log.d("exist", "get failed with ", exception)
-                                    }
+                                } else {
+                                    Log.d("AllFra", snapshot.key.toString())
+                                    dbfirestore.collection("users").document(sendId.toString())
+                                        .get()
+                                        .addOnSuccessListener { document ->
+                                            if (document != null) {
+                                                val name = document.data?.get("Name").toString()
+                                                val avatar = document.data?.get("Avatar").toString()
+                                                val existingItem = list.find { it.uid == sendId.toString() }
+                                          /*      if (existingItem != null) {
+                                                    existingItem.apply {
+                                                        this.othersend= true
+                                                        this.avatar = avatar
+                                                        this.name = name
+                                                        this.message =if(!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
+                                                        this.timestamp = timestamp!!
+                                                        this.status = status!!
+                                                    }
+                                                } else {*/
+                                                    list.add(
+                                                        DataMess(
+                                                            avatar,
+                                                            sendId!!,
+                                                            name,
+                                                            content.toString(),
+                                                            timestamp!!,
+                                                            status!!,
+                                                            true
+                                                        )
+                                                    )
+                                               // }
+
+                                                list.sortByDescending { it.timestamp }
+                                                adapter.notifyDataSetChanged()
+                                            } else {
+                                                Log.d("exist", "No such document")
+                                            }
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            Log.d("exist", "get failed with ", exception)
+                                        }
+                                }
                             }
                         }
                     }
                 }
             }
-
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(atvtContext, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
             }
@@ -130,13 +177,13 @@ class AllChatFra : Fragment() {
                     list.removeIf { it is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
                         if (myGroup.contains(childSnapshot.key.toString())) {
-                            val latestsmallSnapshot = childSnapshot.children.maxByOrNull {
+                            val latestsmallSnapshot = childSnapshot.child("Messages").children.maxByOrNull {
                                 it.child("Time").getValue(Long::class.java) ?: 0L
                             }
                             if (latestsmallSnapshot != null) {
                                 val content = latestsmallSnapshot.child("Content").getValue(String::class.java)
                                 val sendId = latestsmallSnapshot.child("SendId").getValue(String::class.java)
-                                val status = latestsmallSnapshot.child("Status").getValue(Boolean::class.java)
+                                val status = childSnapshot.child("Status").child(User!!.uid).getValue(Boolean::class.java) ?: false
                                 val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
 
                                 if (User!!.uid == sendId) {

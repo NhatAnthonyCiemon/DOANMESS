@@ -36,7 +36,7 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
 
     override fun getItemViewType(position: Int): Int {
         val item = list[position]
-        return if (item.status) 1 else 0
+        return if (item.status) 0 else 1
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessHolder {

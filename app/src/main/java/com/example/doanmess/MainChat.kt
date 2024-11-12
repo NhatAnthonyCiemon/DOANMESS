@@ -2,9 +2,8 @@ package com.example.createuiproject
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
-import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.doanmess.InforChat
 import com.example.doanmess.R
+import com.example.doanmess.User
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -24,19 +24,20 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 
 class MainChat : AppCompatActivity() {
+    private lateinit var valueEventListener: ValueEventListener
     private lateinit var auth: FirebaseAuth
     private lateinit var database: DatabaseReference
     private val chatMessages = mutableListOf<ChatMessage>()
     private var lastSenderId: String = ""
-
     data class ChatMessage(
         val content: String = "",
         val sendId: String = "",
         val recvId: String = "",
-        val status: Boolean = false,
+     //   val status: Boolean = false,
         val time: Long = 0L,
         var showSenderInfo: Boolean = false
     ) {
@@ -94,18 +95,21 @@ class MainChat : AppCompatActivity() {
 
         if (!isGroup) {
             if (currentUserUid != null && targetUserUid != null) {
-                database =
-                    Firebase.database.getReference("users").child(currentUserUid)
-                        .child(targetUserUid)
-
-                database.addValueEventListener(object : ValueEventListener {
+                //set status of user in list chat of last item  to true
+                Firebase.database.getReference("users").child(currentUserUid!!)
+                    .child(targetUserUid).child("Status").setValue(true)
+                database = Firebase.database.getReference("users").child(currentUserUid)
+                        .child(targetUserUid).child("Messages")
+                valueEventListener = object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
+                        Firebase.database.getReference("users").child(currentUserUid!!)
+                            .child(targetUserUid).child("Status").setValue(true)
                         val senderName = name
                         val avatarUrl = avatar
                         chatMessages.clear() // Clear previous data
                         lastSenderId = "" // Reset lastSenderId for fresh load
-
                         for (messageSnapshot in snapshot.children) {
+                         //   if(messageSnapshot.key == "Status") continue
                             // Manually extract each field and handle null cases
                             val content =
                                 messageSnapshot.child("Content").getValue(String::class.java) ?: ""
@@ -113,9 +117,9 @@ class MainChat : AppCompatActivity() {
                                 messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                             val recvId =
                                 messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
-                            val status =
+                       /*     val status =
                                 messageSnapshot.child("Status").getValue(Boolean::class.java)
-                                    ?: false
+                                    ?: false*/
                             val time =
                                 messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
 
@@ -123,7 +127,7 @@ class MainChat : AppCompatActivity() {
                                 content = content,
                                 sendId = sendId,
                                 recvId = recvId,
-                                status = status,
+                             //   status = status,
                                 time = time
                             ).apply {
                                 this.senderName = senderName
@@ -136,81 +140,112 @@ class MainChat : AppCompatActivity() {
                             chatMessages.add(chatMessage)
 
                             // Refresh your adapter or UI component here
-                        }
-                        chatAdapter.notifyDataSetChanged()
+                            chatMessages.sortBy { it.time }
+                            chatAdapter.notifyDataSetChanged()
 
+                            recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
+
+                        }
+                        chatMessages.sortBy { it.time }
+                        chatAdapter.notifyDataSetChanged()
+                        recyclerViewMessages.scrollToPosition(chatMessages.size - 1) // Scroll to bottom
                     }
 
                     override fun onCancelled(error: DatabaseError) {
                     }
-                })
+
+                }
+                //sort chatmessages list by time
+
+                database.addValueEventListener(valueEventListener)
             }
         }
         else {
-            database = Firebase.database.getReference("groups").child(targetUserUid)
-            database.addValueEventListener(object : ValueEventListener {
+            //set status of user of Status of that Group to true
+            Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
+            database = Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
+            valueEventListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     chatMessages.clear() // Clear previous data
-                    lastSenderId = "" // Reset lastSenderId for fresh load
+                    Log.d("MainChat", "onDataChange: ${snapshot.key}")
+                    Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
 
+                    lastSenderId = "" // Reset lastSenderId for fresh load
                     for (messageSnapshot in snapshot.children) {
+
                         val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
                         val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                         val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
-                        val status = messageSnapshot.child("Status").getValue(Boolean::class.java) ?: false
+                      //  val status = messageSnapshot.child("Status").getValue(Boolean::class.java) ?: false
                         val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
 
                        // Fetch sender info from Firestore
+                        if(sendId  == "")
+                        {
+                            continue
+                        }
                         val database2 = Firebase.firestore.collection("users").document(sendId)
-                        database2.get().addOnSuccessListener { document ->
-                            val senderName = document.getString("Name") ?: "Unknown"
-                            val avatarUrl = document.getString("Avatar") ?: ""
+                        if(database2!= null)
+                        {
+                            database2.get().addOnSuccessListener { document ->
+                                val senderName = document.getString("Name") ?: "Unknown"
+                                val avatarUrl = document.getString("Avatar") ?: ""
+                                // Create and populate the chat message
+                                val chatMessage = ChatMessage(
+                                    content = content,
+                                    sendId = sendId,
+                                    recvId = recvId,
+                                    //  status = status,
+                                    time = time
+                                ).apply {
+                                    this.senderName = senderName
+                                    this.avatarUrl = avatarUrl
+                                    // Check if the sender is different from the last one
+                                    this.showSenderInfo = sendId != lastSenderId
+                                }
+                                // Update lastSenderId
+                                lastSenderId = sendId // Update the last sender
+                                chatMessages.add(chatMessage)
+                          //      chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
+                                recyclerViewMessages.scrollToPosition(chatMessages.size - 1) // Scroll to bottom
+                            }.addOnFailureListener {
+                                // Handle Firestore retrieval failure if needed
+                                val chatMessage = ChatMessage(
+                                    content = content,
+                                    sendId = sendId,
+                                    recvId = recvId,
+                                    //    status = status,
+                                    time = time
+                                ).apply {
+                                    this.senderName = "Unknown"
+                                    this.avatarUrl = ""
+                                    this.showSenderInfo = sendId != lastSenderId
+                                }
+                                lastSenderId = sendId // Update the last sender
+                                chatMessages.add(chatMessage)
+                                chatMessages.sortBy { it.time }
+                                chatAdapter.notifyDataSetChanged()
 
-                            // Create and populate the chat message
-                            val chatMessage = ChatMessage(
-                                content = content,
-                                sendId = sendId,
-                                recvId = recvId,
-                                status = status,
-                                time = time
-                            ).apply {
-                                this.senderName = senderName
-                                this.avatarUrl = avatarUrl
-                                // Check if the sender is different from the last one
-                                this.showSenderInfo = sendId != lastSenderId
-                            }
+                             //   chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
+                                recyclerViewMessages.scrollToPosition(chatMessages.size - 1) // Scroll to bottom
+                        }
 
-                            // Update lastSenderId
-                            lastSenderId = sendId // Update the last sender
-                            chatMessages.add(chatMessage)
-
-                            chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
-
-                        }.addOnFailureListener {
-                            // Handle Firestore retrieval failure if needed
-                            val chatMessage = ChatMessage(
-                                content = content,
-                                sendId = sendId,
-                                recvId = recvId,
-                                status = status,
-                                time = time
-                            ).apply {
-                                this.senderName = "Unknown"
-                                this.avatarUrl = ""
-                                this.showSenderInfo = sendId != lastSenderId
-                            }
-
-                            lastSenderId = sendId // Update the last sender
-                            chatMessages.add(chatMessage)
-                            chatAdapter.notifyDataSetChanged() // Refresh your adapter or UI component here
                         }
                     }
+
+                    chatMessages.sortBy { it.time  }
+                    for (message in chatMessages) {
+                        Log.d("MainChat", "onDataChange: ${message.time}")
+                    }
+                    chatAdapter.notifyDataSetChanged()
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     // Handle database error if needed
                 }
-            })
+            }
+
+            database.addValueEventListener(valueEventListener)
         }
 
 
@@ -248,47 +283,79 @@ class MainChat : AppCompatActivity() {
             val message = message_input.text.toString()
             if (!isGroup) {
                 if (message.isNotEmpty()) {
+                    Firebase.database.getReference("users").child(currentUserUid!!)
+                        .child(targetUserUid).child("Status").setValue(true)
+                    Firebase.database.getReference("users").child(targetUserUid)
+                        .child(currentUserUid).child("Status").setValue(false)
                     val chatMessage = ChatMessage(
                         content = message,
                         sendId = currentUserUid ?: "",
                         recvId = targetUserUid,
-                        status = false,
+                     //   status = false,
                         time = System.currentTimeMillis()
                     )
-                    chatMessages.add(chatMessage)
-                    chatAdapter.notifyDataSetChanged()
+                  //  chatMessages.add(chatMessage)
+                  //  chatAdapter.notifyDataSetChanged()
+                    recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
                     message_input.text.clear()
                     // Save the message to the database
-                    database = Firebase.database.getReference("users").child(currentUserUid!!)
-                        .child(targetUserUid)
-                    val newMessage = database.push()
-                    newMessage.child("Content").setValue(chatMessage.content)
-                    newMessage.child("SendId").setValue(chatMessage.sendId)
-                    newMessage.child("RecvId").setValue(chatMessage.recvId)
-                    newMessage.child("Status").setValue(chatMessage.status)
-                    newMessage.child("Time").setValue(chatMessage.time)
+                    val newMessage = mapOf(
+                        "Content" to chatMessage.content,
+                        "SendId" to chatMessage.sendId,
+                        "RecvId" to chatMessage.recvId,
+                        "Time" to chatMessage.time
+                    )
+                    Firebase.database.getReference("users").child(currentUserUid!!)
+                        .child(targetUserUid).child("Messages").push().setValue(newMessage)
+                    //Save for target user
+                    val newMessage2 = mapOf(
+                        "Content" to chatMessage.content,
+                        "SendId" to chatMessage.sendId,
+                        "RecvId" to chatMessage.recvId,
+                        "Time" to chatMessage.time
+                    )
+                    Firebase.database.getReference("users").child(targetUserUid!!)
+                        .child(currentUserUid).child("Messages").push().setValue(newMessage2)
                 }
             }
             else {
                 if (message.isNotEmpty()) {
+                    Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
+                    val groupData = Firebase.firestore.collection("groups").document(targetUserUid)
+                    if(groupData != null) {
+                        groupData.get().addOnSuccessListener { document ->
+                            val users = document.get("Participants") as List<String>
+                            if (users != null) {
+                                for (user in users) {
+                                    if (user != currentUserUid) {
+                                        Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(user).setValue(false)
+                                    }
+                                }
+                            }
+                        }
+                    }
                     val chatMessage = ChatMessage(
                         content = message,
                         sendId = currentUserUid ?: "",
                         recvId = targetUserUid,
-                        status = false,
+                   //     status = false,
                         time = System.currentTimeMillis()
                     )
-                    chatMessages.add(chatMessage)
-                    chatAdapter.notifyDataSetChanged()
+                 //   chatMessages.add(chatMessage)
+              //      chatAdapter.notifyDataSetChanged()
                     message_input.text.clear()
                     // Save the message to the database
-                    database = Firebase.database.getReference("groups").child(targetUserUid)
-                    val newMessage = database.push()
-                    newMessage.child("Content").setValue(chatMessage.content)
-                    newMessage.child("SendId").setValue(chatMessage.sendId)
-                    newMessage.child("RecvId").setValue(chatMessage.recvId)
-                    newMessage.child("Status").setValue(chatMessage.status)
-                    newMessage.child("Time").setValue(chatMessage.time)
+              //      Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
+                    //create new hash of message
+                    val newMessage = mapOf(
+                        "Content" to chatMessage.content,
+                        "SendId" to chatMessage.sendId,
+                        "RecvId" to chatMessage.recvId,
+                        "Time" to chatMessage.time
+                    )
+                    database.push().setValue(newMessage)
+
+
                 }
             }
         }
@@ -296,6 +363,15 @@ class MainChat : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkBlockedStatus()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::valueEventListener.isInitialized) {
+            database= Firebase.database.getReference("users").child(auth.currentUser?.uid ?: "")
+                .child(intent.getStringExtra("uid") ?: "").child("Messages")
+            database.removeEventListener(valueEventListener)
+        }
     }
     private fun checkBlockedStatus() {
         val inputBar = findViewById<LinearLayout>(R.id.input_bar)

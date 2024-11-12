@@ -21,6 +21,7 @@ import android.widget.ProgressBar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.createuiproject.MainChat
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
@@ -101,8 +102,19 @@ class ContactsFragment : Fragment() {
         })
         showLoading(true)
         fetchFriendsAndGroups()
+        //change to MainChat activity when click on a contact
+        adapter.onItemClick = {
+            val intent = Intent(activity, MainChat::class.java).apply {
+                putExtra("uid",it.id)
+                putExtra("name",it.name)
+                putExtra("avatar",it.avatar)
+                putExtra("isGroup",it.isGroup)
+            }
+            startActivity(intent)
+        }
         return view
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -159,7 +171,7 @@ class ContactsFragment : Fragment() {
         val userRef = firestore.collection("users").document(userId).get().addOnSuccessListener {
             val avatarUrl = it.getString("Avatar") ?: ""
             val name = it.getString("Name") ?: ""
-            val contact = Contact(userId, avatarUrl, name, false)
+            val contact = Contact(userId, avatarUrl, name, false,false)
             list.add(contact)
             adapter.notifyDataSetChanged()
         }
@@ -170,7 +182,7 @@ class ContactsFragment : Fragment() {
         val groupRef = firestore.collection("groups").document(groupId).get().addOnSuccessListener {
             val avatarUrl = it.getString("Avatar") ?: ""
             val name = it.getString("Name") ?: ""
-            val contact = Contact(groupId, avatarUrl, name, false)
+            val contact = Contact(groupId, avatarUrl, name, false,true)
             list.add(contact)
             adapter.notifyDataSetChanged()
         }

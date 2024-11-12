@@ -29,18 +29,22 @@ import java.io.OutputStream
 import java.net.URL
 
 class ContactsAdapter(var cont: Activity,var contactList:  List<Contact>) : RecyclerView.Adapter<ContactsAdapter.MyViewHolder>() {
+    var onItemClick: ((Contact) -> Unit)? = null
 
-    class MyViewHolder : RecyclerView.ViewHolder {
+    inner class MyViewHolder : RecyclerView.ViewHolder {
         var imgView : ImageView
         var nameView : TextView
         var onlineDot: View
 
         constructor(itemView: View) : super(itemView) {
         }
-        init{
+        init {
             imgView = itemView.findViewById(R.id.userImage)
             nameView = itemView.findViewById(R.id.userName)
             onlineDot = itemView.findViewById(R.id.onlineStatus)
+            itemView.setOnClickListener() {
+                onItemClick?.invoke(contactList[adapterPosition])
+            }
         }
 
     }
