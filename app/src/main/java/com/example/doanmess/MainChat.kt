@@ -1,19 +1,28 @@
 package com.example.createuiproject
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.media.MediaRecorder
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
+import com.arthenica.mobileffmpeg.FFmpeg
 import com.bumptech.glide.Glide
 import com.example.doanmess.InforChat
 import com.example.doanmess.MessageController
@@ -29,18 +38,31 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
+import java.io.File
+import java.io.IOException
+import java.util.UUID
 
 class MainChat : AppCompatActivity() {
     private lateinit var valueEventListener: ValueEventListener
     private lateinit var auth: FirebaseAuth
+    private lateinit var recyclerViewMessages: RecyclerView
+    private lateinit var message_input: EditText
     private lateinit var database: DatabaseReference
     private val chatMessages = mutableListOf<ChatMessage>()
     private var lastSenderId: String = ""
     private val messageController = MessageController()
+    private var isGroup = false
+    private var currentUserUid: String = ""
+    private var targetUserUid: String = ""
+    private var mediaRecorder: MediaRecorder? = null
+    private var audioFilePath: String? = null
+    private val storage = FirebaseStorage.getInstance()
     data class ChatMessage(
         val content: String = "",
         val sendId: String = "",
         val recvId: String = "",
+        val type: String = "",
      //   val status: Boolean = false,
         val time: Long = 0L,
         var showSenderInfo: Boolean = false
@@ -49,6 +71,7 @@ class MainChat : AppCompatActivity() {
         var avatarUrl: String = ""
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -59,8 +82,8 @@ class MainChat : AppCompatActivity() {
             insets
         }
         auth = Firebase.auth
-        val currentUserUid = auth.currentUser?.uid
-        val targetUserUid = intent.getStringExtra("uid") ?: return
+        currentUserUid = auth.currentUser!!.uid
+        targetUserUid = intent.getStringExtra("uid") ?: return
 
 
         // Set the user name and avatar
@@ -93,10 +116,10 @@ class MainChat : AppCompatActivity() {
 //        })
 
 
-        val isGroup = intent.getBooleanExtra("isGroup", false)
+        isGroup = intent.getBooleanExtra("isGroup", false)
         // Set up the RecyclerView
         val chatAdapter = ChatAdapter(chatMessages, isGroup)
-        val recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
+        recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
         recyclerViewMessages.isVerticalScrollBarEnabled = false;
         recyclerViewMessages.adapter = chatAdapter
         recyclerViewMessages.layoutManager = LinearLayoutManager(this)
@@ -126,11 +149,14 @@ class MainChat : AppCompatActivity() {
                                 messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
                             val time =
                                 messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
+                            val type =
+                                messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                             val chatMessage = ChatMessage(
                                 content = content,
                                 sendId = sendId,
                                 recvId = recvId,
-                                time = time
+                                time = time,
+                                type = type
                             ).apply {
                                 this.senderName = senderName
                                 this.avatarUrl = avatarUrl
@@ -226,108 +252,202 @@ class MainChat : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // set on click listener for the mic button to start voice recording
-        findViewById<ImageView>(R.id.mic_button).setOnClickListener {
-            // Start voice recording
-        }
-
-        val message_input = findViewById<android.widget.EditText>(R.id.message_input)
+        message_input = findViewById<android.widget.EditText>(R.id.message_input)
         // set on click listener for the send button to send the message
         findViewById<ImageButton>(R.id.send_button).setOnClickListener {
             val message = message_input.text.toString()
-            if (!isGroup) {
-                if (message.isNotEmpty()) {
-                    Firebase.database.getReference("users").child(currentUserUid!!)
-                        .child(targetUserUid).child("Status").setValue(true)
-                    Firebase.database.getReference("users").child(targetUserUid)
-                        .child(currentUserUid).child("Status").setValue(false)
-                    val chatMessage = ChatMessage(
-                        content = message,
-                        sendId = currentUserUid ?: "",
-                        recvId = targetUserUid,
-                     //   status = false,
-                        time = System.currentTimeMillis()
-                    )
-                  //  chatMessages.add(chatMessage)
-                  //  chatAdapter.notifyDataSetChanged()
-                    recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
-                    message_input.text.clear()
-                    // Save the message to the database
-                    val newMessage = mapOf(
-                        "Content" to chatMessage.content,
-                        "SendId" to chatMessage.sendId,
-                        "RecvId" to chatMessage.recvId,
-                        "Time" to chatMessage.time
-                    )
+            sendMessage(message,"text")
+        }
 
-                    Firebase.database.getReference("users").child(currentUserUid!!)
-                        .child(targetUserUid).child("Messages").push().setValue(newMessage)
-                    //Save for target user
-                    val newMessage2 = mapOf(
-                        "Content" to chatMessage.content,
-                        "SendId" to chatMessage.sendId,
-                        "RecvId" to chatMessage.recvId,
-                        "Time" to chatMessage.time
-                    )
-                    Firebase.database.getReference("users").child(targetUserUid!!)
-                        .child(currentUserUid).child("Messages").push().setValue(newMessage2)
-                    messageController.newMessageFriend(targetUserUid, currentUserUid, message )
+        // set on click listener for the mic button to start voice recording
+        val micButton = findViewById<ImageView>(R.id.mic_button)
+        findViewById<ImageView>(R.id.mic_button).setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // Start voice recording
+                    startRecordingCheck()
+                    true
                 }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    // Stop recording and save to Firebase
+                    stopRecordingAndSave()
+                    v.performClick() // Call performClick for accessibility
+                    true
+                }
+                else -> false
             }
-            else {
-                if (message.isNotEmpty()) {
-                    Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
-                    val groupData = Firebase.firestore.collection("groups").document(targetUserUid)
-                    if(groupData != null) {
-                        groupData.get().addOnSuccessListener { document ->
-                            val users = document.get("Participants") as List<String>
-                            if (users != null) {
-                                for (user in users) {
-                                    if (user != currentUserUid) {
-                                        Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(user).setValue(false)
-                                    }
-                                }
+        }
+    }
 
-                                // After updating the status, push the new message
-                                val chatMessage = ChatMessage(
-                                    content = message,
-                                    sendId = currentUserUid ?: "",
-                                    recvId = targetUserUid,
-                                    time = System.currentTimeMillis()
-                                )
-                                message_input.text.clear()
-                                val newMessage = mapOf(
-                                    "Content" to chatMessage.content,
-                                    "SendId" to chatMessage.sendId,
-                                    "RecvId" to chatMessage.recvId,
-                                    "Time" to chatMessage.time
-                                )
-                                database.push().setValue(newMessage)
-                                messageController.newMessageGroup(targetUserUid, currentUserUid, message)
+    private fun sendMessage(message: String, type: String) {
+        if (!isGroup) {
+            if (message.isNotEmpty()) {
+                Firebase.database.getReference("users").child(currentUserUid!!)
+                    .child(targetUserUid).child("Status").setValue(true)
+                Firebase.database.getReference("users").child(targetUserUid)
+                    .child(currentUserUid).child("Status").setValue(false)
+                /*val chatMessage = ChatMessage(
+                    content = message,
+                    sendId = currentUserUid ?: "",
+                    recvId = targetUserUid,
+                    //   status = false,
+                    time = System.currentTimeMillis()
+                )*/
+                //  chatMessages.add(chatMessage)
+                //  chatAdapter.notifyDataSetChanged()
+                recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
+                message_input.text.clear()
+                // Save the message to the database
+                val newMessage = mapOf(
+                    "Content" to message,
+                    "SendId" to currentUserUid,
+                    "RecvId" to targetUserUid,
+                    "Time" to System.currentTimeMillis(),
+                    "Type" to type
+                )
+                Firebase.database.getReference("users").child(currentUserUid!!)
+                    .child(targetUserUid).child("Messages").push().setValue(newMessage)
+                //Save for target user
+                Firebase.database.getReference("users").child(targetUserUid!!)
+                    .child(currentUserUid).child("Messages").push().setValue(newMessage)
+                var noti = message
+                if(type == "audio") {
+                    noti = "Sent an audio"
+                }
+                messageController.newMessageFriend(targetUserUid, currentUserUid, noti )
+            }
+        }
+        else {
+            if (message.isNotEmpty() || type != "text") {
+                Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
+                val groupData = Firebase.firestore.collection("groups").document(targetUserUid)
+                if(groupData != null) {
+                    groupData.get().addOnSuccessListener { document ->
+                        val users = document.get("Participants") as List<String>
+                        if (users != null) {
+                            for (user in users) {
+                                if (user != currentUserUid) {
+                                    Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(user).setValue(false)
+                                }
                             }
+                            // After updating the status, push the new message
+           /*                 val chatMessage = ChatMessage(
+                                content = message,
+                                sendId = currentUserUid ?: "",
+                                recvId = targetUserUid,
+                                time = System.currentTimeMillis()
+                            )*/
+                            message_input.text.clear()
+                            val newMessage = mapOf(
+                                "Content" to message,
+                                "SendId" to currentUserUid,
+                                "RecvId" to targetUserUid,
+                                "Time" to System.currentTimeMillis(),
+                                "Type" to type
+                            )
+                            database.push().setValue(newMessage)
+                            messageController.newMessageGroup(targetUserUid, currentUserUid, message)
                         }
                     }
-               /*     val chatMessage = ChatMessage(
-                        content = message,
-                        sendId = currentUserUid ?: "",
-                        recvId = targetUserUid,
-                   //     status = false,
-                        time = System.currentTimeMillis()
-                    )
-                 //   chatMessages.add(chatMessage)
-              //      chatAdapter.notifyDataSetChanged()
-                    message_input.text.clear()
-                    // Save the message to the database
-              //      Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
-                    val newMessage = mapOf(
-                        "Content" to chatMessage.content,
-                        "SendId" to chatMessage.sendId,
-                        "RecvId" to chatMessage.recvId,
-                        "Time" to chatMessage.time
-                    )
-                    database.push().setValue(newMessage)*/
+                }
+            }
+        }
+    }
+    private fun requestPermissions() {
+        if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("MainChat", "Requesting permissions")
+            requestPermissions(arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 200)
+        }
+    }
+    private fun startRecordingCheck(){
+        if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            startRecording()
+        } else {
+            requestPermissions()
+        }
+    }
+
+    private fun startRecording() {
+        // Release any existing MediaRecorder instance
+        mediaRecorder?.release()
+        mediaRecorder = null
+        // Define the audio file path
+        audioFilePath = "${externalCacheDir?.absolutePath}/audiorecord123.wav"
+        // Delete the previous file if it exists
+        val audioFile = File(audioFilePath)
+        if (audioFile.exists()) {
+            audioFile.delete()
+        }
+        // Initialize and start the MediaRecorder
+        mediaRecorder = MediaRecorder().apply {
+            setAudioSource(MediaRecorder.AudioSource.MIC)
+            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+            setOutputFile(audioFilePath)
+            try {
+                prepare()
+                start()
+                Toast.makeText(this@MainChat, "Recording started", Toast.LENGTH_SHORT).show()
+            } catch (e: IOException) {
+                Toast.makeText(this@MainChat, "Recording failed", Toast.LENGTH_SHORT).show()
+            } catch (e: IllegalStateException) {
+                Toast.makeText(this@MainChat, "Recording failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 200) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, start recording
+             //   startRecording()
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Permissions denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    private fun stopRecordingAndSave() {
+
+        mediaRecorder?.apply {
+            try {
+                stop()
+            } catch (e: RuntimeException) {
+                // Handle the case where stop() is called before start() or if there was an error during recording
+                Log.e("MainChat", "stop() failed", e)
+            } finally {
+                release()
+            }
+        }
+        mediaRecorder = null
+
+        val wavFilePath = audioFilePath
 
 
+        val mp3FilePath = "${externalCacheDir?.absolutePath}/audiorecord123.mp3"
+        val audioFile = File(mp3FilePath)
+        if (audioFile.exists()) {
+            audioFile.delete()
+        }
+        // Convert wav to mp3 using FFmpeg
+        wavFilePath?.let {
+            val command = arrayOf("-i", it, mp3FilePath)
+            FFmpeg.executeAsync(command) { _, returnCode ->
+                if (returnCode == RETURN_CODE_SUCCESS) {
+                    val audioFileUri = Uri.fromFile(File(mp3FilePath))
+                    val audioRef = storage.reference.child("audio/${UUID.randomUUID()}.mp3")
+                    audioRef.putFile(audioFileUri)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@MainChat, "Recording saved", Toast.LENGTH_SHORT).show()
+                            //send link to that audio with type audio
+                            sendMessage(audioRef.toString(), "audio")
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this@MainChat, "Failed to save recording", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(this@MainChat, "Failed to convert recording", Toast.LENGTH_SHORT).show()
                 }
             }
         }

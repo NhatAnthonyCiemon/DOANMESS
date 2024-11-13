@@ -58,9 +58,6 @@ class CreateGroup : HandleOnlineActivity() {
         setContentView(R.layout.activity_create_group)
         enableEdgeToEdge()
 
-        lifecycleScope.launch {
-            fetchFriendsDetails()
-        }
 
         addRv = findViewById(R.id.rvAdd)
         addedRv = findViewById(R.id.rvAdded)
@@ -80,7 +77,9 @@ class CreateGroup : HandleOnlineActivity() {
             added.removeAt(added.indexOfFirst { it.id == id })
 
         }
-
+        lifecycleScope.launch {
+            fetchFriendsDetails()
+        }
         addRv.adapter = adapterAdd
         addRv.layoutManager = LinearLayoutManager(this)
 
