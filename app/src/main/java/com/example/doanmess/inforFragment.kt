@@ -142,8 +142,17 @@ class inforFragment : Fragment() {
             .compress(1024)
             .maxResultSize(1080, 1080)
             .createIntent { intent -> imagePickerLauncher.launch(intent) }
-    }
+        // Can I choose video instead of image? Show me how to do it.
 
+
+
+    }
+    private fun chooseMedia(){
+        // Chọn hình ảnh hoặc video từ thư viện
+        ImagePicker.with(this)
+            .galleryOnly()
+            .createIntent { intent -> imagePickerLauncher.launch(intent) }
+    }
     private fun changeBackgroundColor(view: View, color: String, duration: Long) {
         val background = view.background
         val currentColor = if (background is ColorDrawable) background.color else Color.TRANSPARENT

@@ -317,6 +317,9 @@ class AllChatFra : Fragment() {
 //                startActivity(intent)
 //            }
                 override fun onItemClick(position: Int) {
+                    if (list.isEmpty()) {
+                        return
+                    }
                     val intent = Intent(atvtContext, MainChat::class.java)
                     val item = list[position]
 

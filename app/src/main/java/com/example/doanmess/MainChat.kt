@@ -44,11 +44,13 @@ import java.io.IOException
 import java.util.UUID
 
 class MainChat : AppCompatActivity() {
+    private val REQUEST_CODE_PICK_MEDIA = 100
     private lateinit var valueEventListener: ValueEventListener
     private lateinit var auth: FirebaseAuth
     private lateinit var recyclerViewMessages: RecyclerView
     private lateinit var message_input: EditText
     private lateinit var database: DatabaseReference
+    private lateinit var attachButton : ImageView
     private val chatMessages = mutableListOf<ChatMessage>()
     private var lastSenderId: String = ""
     private val messageController = MessageController()
@@ -91,6 +93,7 @@ class MainChat : AppCompatActivity() {
         findViewById<android.widget.TextView>(R.id.user_name).text = name
         val avatar = intent.getStringExtra("avatar") ?: ""
         val avatarView = findViewById<ImageView>(R.id.user_avatar)
+        attachButton = findViewById(R.id.attach_button)
         if (avatar.isNotEmpty()) {
             Glide.with(this)
                 .load(avatar)
@@ -258,7 +261,14 @@ class MainChat : AppCompatActivity() {
             val message = message_input.text.toString()
             sendMessage(message,"text")
         }
-
+        attachButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "*/*"
+            val mimeTypes = arrayOf("image/*", "video/*")
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            startActivityForResult(intent, REQUEST_CODE_PICK_MEDIA)
+        }
         // set on click listener for the mic button to start voice recording
         val micButton = findViewById<ImageView>(R.id.mic_button)
         findViewById<ImageView>(R.id.mic_button).setOnTouchListener { v, event ->
@@ -366,7 +376,28 @@ class MainChat : AppCompatActivity() {
             requestPermissions()
         }
     }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_PICK_MEDIA && resultCode == RESULT_OK) {
+            val selectedMediaUri: Uri? = data?.data
+            if (selectedMediaUri != null) {
+                uploadMediaToFirebase(selectedMediaUri)
+            }
+        }
+    }
+    private fun uploadMediaToFirebase(fileUri: Uri) {
+        val storageRef = storage.reference.child("media/${UUID.randomUUID()}")
+        val uploadTask = storageRef.putFile(fileUri)
 
+        uploadTask.addOnSuccessListener {
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                val downloadUrl = uri.toString()
+                sendMessage(downloadUrl, "media")
+            }
+        }.addOnFailureListener {
+            Toast.makeText(this, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
     private fun startRecording() {
         // Release any existing MediaRecorder instance
         mediaRecorder?.release()
@@ -437,11 +468,14 @@ class MainChat : AppCompatActivity() {
                 if (returnCode == RETURN_CODE_SUCCESS) {
                     val audioFileUri = Uri.fromFile(File(mp3FilePath))
                     val audioRef = storage.reference.child("audio/${UUID.randomUUID()}.mp3")
+
                     audioRef.putFile(audioFileUri)
                         .addOnSuccessListener {
+                            audioRef.downloadUrl.addOnSuccessListener { uri ->
+                                //send link to that audio with type audio
+                                sendMessage(uri.toString(), "audio")
+                            }
                             Toast.makeText(this@MainChat, "Recording saved", Toast.LENGTH_SHORT).show()
-                            //send link to that audio with type audio
-                            sendMessage(audioRef.toString(), "audio")
                         }
                         .addOnFailureListener {
                             Toast.makeText(this@MainChat, "Failed to save recording", Toast.LENGTH_SHORT).show()

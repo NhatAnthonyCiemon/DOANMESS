@@ -1,4 +1,7 @@
 package com.example.createuiproject
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,9 +10,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.doanmess.R
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -113,9 +119,18 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
     inner class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
+        private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
 
         fun bind(chatMessage: MainChat.ChatMessage) {
-            messageTextView.text = chatMessage.content
+            if (chatMessage.type == "audio") {
+                messageTextView.visibility = View.GONE
+                audioPlayerView.visibility = View.VISIBLE
+                setupAudioPlayer(audioPlayerView, chatMessage.content)
+            } else {
+                messageTextView.visibility = View.VISIBLE
+                audioPlayerView.visibility = View.GONE
+                messageTextView.text = chatMessage.content
+            }
             timestampTextView.text = formatTimestamp(chatMessage.time)
             // Update lastSenderId
             lastSenderId = chatMessage.sendId
@@ -131,10 +146,19 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
     inner class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
+        private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
 
 
         fun bind(chatMessage: MainChat.ChatMessage) {
-            messageTextView.text = chatMessage.content
+            if (chatMessage.type == "audio") {
+                messageTextView.visibility = View.GONE
+                audioPlayerView.visibility = View.VISIBLE
+                setupAudioPlayer(audioPlayerView, chatMessage.content)
+            } else {
+                messageTextView.visibility = View.VISIBLE
+                audioPlayerView.visibility = View.GONE
+                messageTextView.text = chatMessage.content
+            }
 
             timestampTextView.text = formatTimestamp(chatMessage.time)
 
@@ -176,6 +200,39 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         }
     }
 
+    private fun setupAudioPlayer(audioPlayerView: View, audioUrl: String) {
+   /*     val context = audioPlayerView.context
+        if (context == null) {
+            // Handle the case where context is null
+            Log.d("ChatAdapter", "Context is null")
+            return
+        }
+        val player = ExoPlayer.Builder(context).build()
+
+        // Fetch the audio file from Firebase Storage
+        val mediaItem = MediaItem.fromUri(audioUrl)
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        audioPlayerView.setOnClickListener {
+            if (player.isPlaying) {
+                player.pause()
+            } else {
+                player.play()
+            }
+        }*/
+        val mediaPlayer : MediaPlayer = MediaPlayer()
+        mediaPlayer.setDataSource(audioUrl)
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
+        mediaPlayer.prepare()
+     //   mediaPlayer.start()
+        audioPlayerView.setOnClickListener {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+            } else {
+                mediaPlayer.start()
+            }
+        }
+    }
     // ViewHolder for messages without avatar
     inner class MessageNoAvatarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
