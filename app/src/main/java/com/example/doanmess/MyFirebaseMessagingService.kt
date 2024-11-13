@@ -77,9 +77,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val docRef = Firebase.firestore.collection("devices").document(androidId)
+        val auth = Firebase.auth
+        val user_current = auth.currentUser
+        var User_id = ""
+        if (user_current != null) {
+            User_id = user_current.uid
+        }
         val user = hashMapOf(
             "Token" to token,
-            "User_id" to ""
+            "User_id" to User_id
         ) as Map<String, Any?>
         docRef.get()
             .addOnSuccessListener { document ->

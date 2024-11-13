@@ -10,20 +10,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="38dp">
+
         <TextView
             android:id="@+id/messageTextView"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
             android:background="@drawable/rounded_background_orange"
-            android:textColor="@android:color/white"
-            android:padding="10dp"
-            android:layout_marginEnd="5dp"
-            android:layout_weight="1"/>
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingRight="5dp"
+            android:paddingLeft="5dp"
+
+            android:textColor="@android:color/white" />
 
         <TextView
             android:id="@+id/timestampTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:textColor="@android:color/white"
             android:textSize="12sp" /> <!-- Add padding for timestamp -->
     </LinearLayout>

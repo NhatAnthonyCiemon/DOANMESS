@@ -130,7 +130,8 @@ class Home : HandleOnlineActivity() {
         Firebase.firestore.clearPersistence().addOnCompleteListener {
         }
         FirebaseApp.initializeApp(this)
-
+        val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        Log.e("Android IDDDDDDDDDDDDDD", androidId)
         btnAllchat = findViewById<Button>(R.id.btnAllchat)
         btnContact = findViewById<Button>(R.id.btnContact)
         btnInfo = findViewById<Button>(R.id.btnInfo)
