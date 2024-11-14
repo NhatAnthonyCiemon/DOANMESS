@@ -42,8 +42,16 @@ import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.IOException
 import java.util.UUID
+import android.Manifest
+import android.location.Location
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
 
 class MainChat : AppCompatActivity() {
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     private val REQUEST_CODE_PICK_MEDIA = 100
     private lateinit var valueEventListener: ValueEventListener
     private lateinit var auth: FirebaseAuth
@@ -60,6 +68,7 @@ class MainChat : AppCompatActivity() {
     private var mediaRecorder: MediaRecorder? = null
     private var audioFilePath: String? = null
     private val storage = FirebaseStorage.getInstance()
+    private lateinit var locationBtn: ImageButton
     data class ChatMessage(
         val content: String = "",
         val sendId: String = "",
@@ -287,7 +296,33 @@ class MainChat : AppCompatActivity() {
                 else -> false
             }
         }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        locationBtn = findViewById(R.id.location_button)
+        locationBtn.setOnClickListener {
+            //send current location
+            sendCurrentLocation()
+        }
     }
+
+    private fun sendCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 1)
+            return
+        }
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            location?.let {
+                val latitude = it.latitude
+                val longitude = it.longitude
+                val locationMessage = "Location: https://maps.google.com/?q=$latitude,$longitude"
+                sendMessage(locationMessage, "location")
+            } ?: run {
+                Toast.makeText(this, "Unable to get location", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
     private fun sendMessage(message: String, type: String) {
         if (!isGroup) {
@@ -437,6 +472,12 @@ class MainChat : AppCompatActivity() {
                 // Permission denied
                 Toast.makeText(this, "Permissions denied", Toast.LENGTH_SHORT).show()
             }
+            return
+        }
+        if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+         //   sendCurrentLocation()
+        } else {
+            Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
         }
     }
     private fun stopRecordingAndSave() {
