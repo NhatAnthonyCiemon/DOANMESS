@@ -1,6 +1,6 @@
 package com.example.doanmess
 
-class Post (
+data class Post (
     val uid: String,
     val id: String,
     val profilePic: String,

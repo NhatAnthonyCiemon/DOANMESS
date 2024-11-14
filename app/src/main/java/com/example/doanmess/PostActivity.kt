@@ -44,15 +44,20 @@ class PostActivity : AppCompatActivity() {
         findViewById<ImageButton>(R.id.addPost).setOnClickListener {
             val intent = Intent(this, NewPost::class.java)
             intent.putExtra("uid", currentUser)
-            startActivityForResult(intent, 1)
+            startActivity(intent)
         }
         backBtn = findViewById(R.id.back_button)
         backBtn.setOnClickListener {
             finish()
         }
+    }
+    override fun onResume() {
+        super.onResume()
+        Log.d("PostActivity", "onResume")
+        postList.clear()
+        postAdapter.notifyDataSetChanged()
         loadPosts()
     }
-
     private fun loadPosts() {
         val firestore = FirebaseFirestore.getInstance()
         val friendsRef = firestore.collection("users").document(currentUser)
@@ -73,7 +78,6 @@ class PostActivity : AppCompatActivity() {
                             val profilePic = doc.getString("Avatar") ?: ""
                             userMap[uid] = Pair(userName, profilePic)
                         }
-
                         firestore.collection("posts")
                             .whereIn("uid", userIds)
                             .get()
@@ -98,9 +102,11 @@ class PostActivity : AppCompatActivity() {
                                 postList.clear()
                                 postList.addAll(posts)
                                 postAdapter.notifyDataSetChanged()
-                                if(posts.isNotEmpty()) {
-                                    recyclerView.smoothScrollToPosition(0)
-                                }
+                                    if(posts.isNotEmpty()) {
+                                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                                        layoutManager.smoothScrollToPosition(recyclerView, null, 0);
+
+                                    }
                             }
                             .addOnFailureListener { exception ->
                                 Log.d("PostActivity", "Error getting posts: ", exception)
@@ -141,13 +147,14 @@ class PostActivity : AppCompatActivity() {
         intent.putExtra("target", post.uid)
         intent.putExtra("avatar", post.profilePic)
         intent.putExtra("username", post.username)
-        startActivityForResult(intent, 1)
+        startActivity(intent)
     }
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+/*    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1) {
+        if (requestCode == 1 || requestCode == 0) {
+            postList.clear()
             Log.d("PostActivity", "onActivityResult: $resultCode")
             loadPosts()
         }
-    }
+    }*/
 }
