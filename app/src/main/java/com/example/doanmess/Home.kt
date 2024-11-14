@@ -175,10 +175,12 @@ class Home : HandleOnlineActivity() {
             fragment_Contact.focusSearch()
         }
         btnMore.setOnClickListener{
-            CustomButtonToActive(btnInfo)
+           /* CustomButtonToActive(btnInfo)
             CustomButtonToInactive(btnAllchat)
             CustomButtonToInactive(btnContact)
-            ChangeFragment(inforFragment())
+            ChangeFragment(inforFragment())*/
+            val intent = Intent(this, PostActivity::class.java)
+            startActivity(intent)
         }
         auth = Firebase.auth
         ChangeFragment(AllChatFra.newInstance())

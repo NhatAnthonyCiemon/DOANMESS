@@ -1,0 +1,153 @@
+package com.example.doanmess
+
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.widget.ImageButton
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+
+class PostActivity : AppCompatActivity() {
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var postAdapter: PostAdapter
+    private lateinit var backBtn : ImageButton
+    private var currentUser = ""
+    private val postList = mutableListOf<Post>()
+    private var posts = listOf<Post>()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_post)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        currentUser = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        if(currentUser.isEmpty()) {
+            finish()
+            return
+        }
+        recyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        postAdapter = PostAdapter(postList, { post -> likePost(post) }, { post -> navigateToIndividualPost(post) })
+        recyclerView.adapter = postAdapter
+
+        findViewById<ImageButton>(R.id.addPost).setOnClickListener {
+            val intent = Intent(this, NewPost::class.java)
+            intent.putExtra("uid", currentUser)
+            startActivityForResult(intent, 1)
+        }
+        backBtn = findViewById(R.id.back_button)
+        backBtn.setOnClickListener {
+            finish()
+        }
+        loadPosts()
+    }
+
+    private fun loadPosts() {
+        val firestore = FirebaseFirestore.getInstance()
+        val friendsRef = firestore.collection("users").document(currentUser)
+        friendsRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                val friends = document.get("Friends") as? List<String> ?: emptyList()
+                val liked = document.get("Posts.liked") as? List<String> ?: emptyList()
+                val userIds = friends + currentUser
+                val userMap = mutableMapOf<String, Pair<String, String>>()
+
+                firestore.collection("users")
+                    .whereIn(FieldPath.documentId(), userIds)
+                    .get()
+                    .addOnSuccessListener { userDocs ->
+                        userDocs.forEach { doc ->
+                            val uid = doc.id
+                            val userName = doc.getString("Name") ?: ""
+                            val profilePic = doc.getString("Avatar") ?: ""
+                            userMap[uid] = Pair(userName, profilePic)
+                        }
+
+                        firestore.collection("posts")
+                            .whereIn("uid", userIds)
+                            .get()
+                            .addOnSuccessListener { postDocs ->
+                                posts = postDocs.map { doc ->
+                                    val uid = doc.getString("uid") ?: ""
+                                    val userInfo = userMap[uid] ?: Pair("", "")
+                                    Post(
+                                        uid = uid,
+                                        id = doc.id,
+                                        profilePic = userInfo.second,
+                                        username = userInfo.first,
+                                        time = doc.getLong("time") ?: 0L,
+                                        title = doc.getString("title") ?: "",
+                                        mediaFile = doc.getString("mediaFile") ?: "",
+                                        type = doc.getString("type") ?: "",
+                                        likes = (doc.getLong("likes") ?: 0L).toInt(),
+                                        liked = liked.contains(doc.id)
+                                    )
+                                }.sortedByDescending { it.time }
+
+                                postList.clear()
+                                postList.addAll(posts)
+                                postAdapter.notifyDataSetChanged()
+                                if(posts.isNotEmpty()) {
+                                    recyclerView.smoothScrollToPosition(0)
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.d("PostActivity", "Error getting posts: ", exception)
+                            }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d("PostActivity", "Error getting users: ", exception)
+                    }
+            }
+        }.addOnFailureListener { exception ->
+            Log.w("PostActivity", "Error getting friends: ", exception)
+        }
+    }
+
+    private fun likePost(post: Post) {
+        val firestore = FirebaseFirestore.getInstance()
+        val userRef = firestore.collection("users").document(currentUser)
+        if (post.liked) {
+            post.likes--
+            userRef.update("Posts.liked", FieldValue.arrayRemove(post.id))
+        } else {
+            post.likes++
+            userRef.update("Posts.liked", FieldValue.arrayUnion(post.id))
+        }
+        post.liked = !post.liked
+        firestore.collection("posts").document(post.id)
+            .update("likes", post.likes)
+            .addOnSuccessListener {
+                Log.d("PostActivity", "Post likes updated successfully!")
+            }
+            .addOnFailureListener { e ->
+                Log.w("PostActivity", "Error updating post likes", e)
+            }
+    }
+    private fun navigateToIndividualPost(post: Post) {
+        val intent = Intent(this, IndividualPost::class.java)
+        intent.putExtra("current", currentUser)
+        intent.putExtra("target", post.uid)
+        intent.putExtra("avatar", post.profilePic)
+        intent.putExtra("username", post.username)
+        startActivityForResult(intent, 1)
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1) {
+            Log.d("PostActivity", "onActivityResult: $resultCode")
+            loadPosts()
+        }
+    }
+}

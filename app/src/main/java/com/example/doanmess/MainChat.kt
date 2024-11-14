@@ -96,7 +96,7 @@ class MainChat : AppCompatActivity() {
         currentUserUid = auth.currentUser!!.uid
         targetUserUid = intent.getStringExtra("uid") ?: return
 
-
+        isGroup = intent.getBooleanExtra("isGroup", false)
         // Set the user name and avatar
         val name = intent.getStringExtra("name") ?: "User"
         findViewById<android.widget.TextView>(R.id.user_name).text = name
@@ -128,7 +128,7 @@ class MainChat : AppCompatActivity() {
 //        })
 
 
-        isGroup = intent.getBooleanExtra("isGroup", false)
+
         // Set up the RecyclerView
         val chatAdapter = ChatAdapter(chatMessages, isGroup)
         recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
@@ -352,6 +352,9 @@ class MainChat : AppCompatActivity() {
                 )
                 Firebase.database.getReference("users").child(currentUserUid!!)
                     .child(targetUserUid).child("Messages").push().setValue(newMessage)
+                if(currentUserUid == targetUserUid) {
+                    return
+                }
                 //Save for target user
                 Firebase.database.getReference("users").child(targetUserUid!!)
                     .child(currentUserUid).child("Messages").push().setValue(newMessage)
