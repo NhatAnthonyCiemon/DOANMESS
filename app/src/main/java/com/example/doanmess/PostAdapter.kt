@@ -54,7 +54,7 @@ class PostAdapter(
                 holder.videoPreview.setMediaController(mediaController)
                 holder.videoPreview.requestFocus()
                 mediaController.setAnchorView(holder.videoPreview)
-                holder.videoPreview.start()
+              //  holder.videoPreview.start()
             }
         }else if(post.type.contains("image")){
             holder.imagePreview.visibility = View.VISIBLE

@@ -80,11 +80,13 @@ class NewPost : AppCompatActivity() {
                 if (mimeType?.startsWith("video/") == true) {
                     videoPreview.setVideoURI(uri)
                     videoPreview.visibility = VideoView.VISIBLE
-
-                    val mediaController = MediaController(this)
-                    videoPreview.setMediaController(mediaController)
-                    videoPreview.requestFocus()
-                    mediaController.setAnchorView(videoPreview)
+                    videoPreview.setOnPreparedListener {
+                        val mediaController = MediaController(this)
+                        videoPreview.setMediaController(mediaController)
+                        videoPreview.requestFocus()
+                        mediaController.setAnchorView(videoPreview)
+                        videoPreview.start()
+                    }
                     imagePreview.visibility = ImageView.GONE
                 } else if (mimeType?.startsWith("image/") == true) {
                     imagePreview.setImageURI(uri)
