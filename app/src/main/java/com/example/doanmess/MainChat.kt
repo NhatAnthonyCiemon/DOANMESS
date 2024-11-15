@@ -1,4 +1,4 @@
-package com.example.createuiproject
+package com.example.doanmess
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -45,6 +45,7 @@ import java.util.UUID
 import android.Manifest
 import android.location.Location
 import androidx.core.app.ActivityCompat
+import com.example.createuiproject.ChatAdapter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
@@ -93,6 +94,7 @@ class MainChat : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top , systemBars.right, systemBars.bottom)
             insets
         }
+        supportActionBar?.hide()
         auth = Firebase.auth
         currentUserUid = auth.currentUser!!.uid
         targetUserUid = intent.getStringExtra("uid") ?: return
@@ -264,12 +266,25 @@ class MainChat : AppCompatActivity() {
             intent.putExtra("uid", targetUserUid) // Pass the uid to InforChat
             startActivity(intent)
         }
-
+        recyclerViewMessages.addOnLayoutChangeListener(View.OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            if (bottom < oldBottom) {
+                recyclerViewMessages.postDelayed({
+                    recyclerViewMessages.smoothScrollToPosition(
+                        chatAdapter.itemCount
+                    )
+                }, 50)
+            }
+        })
         message_input = findViewById<android.widget.EditText>(R.id.message_input)
         // set on click listener for the send button to send the message
         findViewById<ImageButton>(R.id.send_button).setOnClickListener {
             val message = message_input.text.toString()
             sendMessage(message,"text")
+        }
+        message_input.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
+            }
         }
         attachButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)

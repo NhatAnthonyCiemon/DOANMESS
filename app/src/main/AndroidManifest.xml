@@ -31,6 +31,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".MainChat"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"
+            />
+        <activity
             android:name=".Call"
             android:exported="true" />
         <activity
@@ -125,19 +131,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true" />
-        <activity
-            android:name="com.example.createuiproject.MainChat"
-            android:exported="true"
-            android:parentActivityName=".Home">
 
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-
-        </activity>
         <activity
             android:name=".InforChat"
             android:exported="true">

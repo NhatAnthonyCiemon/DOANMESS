@@ -3,7 +3,11 @@
     <style name="Base.Theme.DOANMESS" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
-    <style name="Theme.DOANMESS" parent="Base.Theme.DOANMESS" />
+    <style name="Theme.DOANMESS" parent="Base.Theme.DOANMESS" >
+
+    </style>
 </resources>
