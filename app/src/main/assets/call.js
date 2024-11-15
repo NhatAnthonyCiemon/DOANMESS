@@ -7,24 +7,22 @@ remoteVideo.style.opacity = 0
 localVideo.onplaying = () => { localVideo.style.opacity = 1 }
 remoteVideo.onplaying = () => { remoteVideo.style.opacity = 1 }
 
-let peer
+var peer
 function init(userId) {
-
     peer = new Peer(userId, {
-           host: "0.peerjs.com",
-           port: 443,
-           secure: true,
-    })
+            host: "0.peerjs.com",
+            port: 443,
+            secure: true,
+    });
 
     peer.on('open', () => {
         Android.onPeerConnected()
     })
 
     listen()
-
 }
 
-let localStream
+var localStream
 function listen() {
     peer.on('call', (call) => {
 
@@ -38,9 +36,7 @@ function listen() {
             call.answer(stream)
             call.on('stream', (remoteStream) => {
                 remoteVideo.srcObject = remoteStream
-                if(remoteVideo.srcObject) {
-                    remoteVideo.style.opacity = 1
-                }
+
                 remoteVideo.className = "primary-video"
                 localVideo.className = "secondary-video"
 
@@ -52,37 +48,31 @@ function listen() {
 }
 
 function startCall(otherUserId) {
-    navigator.mediaDevices.getUserMedia({
+    navigator.getUserMedia({
         audio: true,
-        video: true,
-    })
-    .then((stream) => {
-        localVideo.srcObject = stream;
-        localStream = stream;
+        video: true
+    }, (stream) => {
 
-        // Thực hiện cuộc gọi với PeerJS
-        const call = peer.call(otherUserId, stream);
-        if (!call) {
-            console.log("Call failed");
-            return;
+        localVideo.srcObject = stream
+        localStream = stream
+
+        const call = peer.call(otherUserId, stream)
+        if (!call){
+            Android.onCallError()
+            return
         }
 
-        call.on("stream", (remoteStream) => {
-            remoteVideo.srcObject = remoteStream;
-            if(remoteVideo.srcObject) {
-                remoteVideo.style.opacity = 1
-            }
-            remoteVideo.className = "primary-video";
-            localVideo.className = "secondary-video";
-        });
+        Android.onCallReady(otherUserId)
 
-        call.on("error", (err) => {
-            console.error("Call error:", err);
-        });
+
+        call.on('stream', (remoteStream) => {
+            remoteVideo.srcObject = remoteStream
+
+            remoteVideo.className = "primary-video"
+            localVideo.className = "secondary-video"
+        })
+
     })
-    .catch((error) => {
-        console.error("Failed to get local stream:", error);
-    });
 }
 
 function toggleVideo(b) {
@@ -99,22 +89,4 @@ function toggleAudio(b) {
     } else {
         localStream.getAudioTracks()[0].enabled = false
     }
-}
-function endCall() {
-    // Kiểm tra và dừng stream video và âm thanh cục bộ
-    if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-        localStream = null;
-    }
-
-    // Đặt lại video cho local và remote
-    localVideo.srcObject = null;
-    remoteVideo.srcObject = null;
-
-    // Ngắt kết nối peer
-    if (peer) {
-        peer.destroy();  // Ngắt kết nối hoàn toàn với peer
-    }
-
-    console.log("Call ended");
-}
+} 

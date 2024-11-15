@@ -91,12 +91,10 @@ class Call : AppCompatActivity() {
     }
 
     private fun sendCallRequest() {
-        if (!isPeerConnected) {
-            Toast.makeText(this, "You're not connected. Check your internet", Toast.LENGTH_LONG).show()
-            return
-        }
+
 
         firebaseRef.child(friendsUsername).child("incoming").setValue(username)
+        firebaseRef.child(friendsUsername).child("idIncoming").setValue(uniqueId)
         firebaseRef.child(friendsUsername).child("isAvailable").addValueEventListener(object:
             ValueEventListener {
             override fun onCancelled(error: DatabaseError) {}
@@ -125,7 +123,8 @@ class Call : AppCompatActivity() {
                 if (snapshot.value == null)
                     return
                 switchToControls()
-                callJavascriptFunction("javascript:startCall(\"${snapshot.value}\")")
+                Log.e("ConnIdddddddddddd", snapshot.value.toString())
+                callJavascriptFunction("javascript:startCall(\"${snapshot.value.toString()}\")")
             }
 
         })
@@ -147,7 +146,7 @@ class Call : AppCompatActivity() {
     }
 
     private fun loadVideoCall() {
-        val filePath = "file:android_asset/call.html"
+        val filePath = "file:android_asset/call.html"//"https://call-bkxs.vercel.app"
         webView.loadUrl(filePath)
 
         webView.webViewClient = object: WebViewClient() {
