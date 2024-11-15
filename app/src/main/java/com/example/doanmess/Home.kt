@@ -222,11 +222,19 @@ class Home : HandleOnlineActivity() {
     }
 
     fun checkPermissionNotify() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED){
-                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
-            }
-            else{
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permissions = arrayOf(
+                android.Manifest.permission.POST_NOTIFICATIONS,
+                android.Manifest.permission.CAMERA,
+                android.Manifest.permission.RECORD_AUDIO
+            )
+            val permissionsToRequest = permissions.filter {
+                ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+            }.toTypedArray()
+
+            if (permissionsToRequest.isNotEmpty()) {
+                requestPermissions(permissionsToRequest, 1)
+            } else {
                 ChannelController(this).createNotificationChannel()
             }
         }
