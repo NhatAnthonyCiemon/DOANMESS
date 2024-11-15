@@ -1,12 +1,16 @@
 package com.example.createuiproject
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.doanmess.R
@@ -19,6 +23,7 @@ import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.Executors
 
 class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, val isGroup: Boolean) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -108,9 +113,49 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             is MessageNoAvatarViewHolder -> holder.bind(message)
         }
     }
+    private var mediaPlayer: MediaPlayer? = null
+    private var currenAudio = ""
+    private fun setupAudioPlayer(audioPlayerView: View, progressBar: ProgressBar, audioUrl: String) {
+        val executor = Executors.newSingleThreadExecutor()
+        val handler = Handler(Looper.getMainLooper())
 
+        executor.execute {
+            try {
+                handler.post {
+                    audioPlayerView.setOnClickListener {
+                        if(currenAudio != audioUrl){
+                            progressBar.visibility = View.VISIBLE
+                            mediaPlayer?.release()
+                            mediaPlayer = null
+                            currenAudio = audioUrl
+                            mediaPlayer = MediaPlayer()
+                            mediaPlayer?.setDataSource(audioUrl)
+                            mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
+                            mediaPlayer?.prepare()
 
-
+                        }
+                        mediaPlayer?.setOnPreparedListener {
+                            progressBar.visibility = View.GONE
+                        }
+                        if (mediaPlayer?.isPlaying == true) {
+                            mediaPlayer?.pause()
+                        } else {
+                            mediaPlayer?.start()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("AudioPlayer", "Error playing audio: $e")
+                handler.post {
+                    progressBar.visibility = View.GONE
+                }
+            }
+        }
+    }
+    fun releaseResources() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
     override fun getItemCount(): Int {
         return chatMessages.size
     }
@@ -120,15 +165,16 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
-
+        private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
+        private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "audio") {
                 messageTextView.visibility = View.GONE
-                audioPlayerView.visibility = View.VISIBLE
-                setupAudioPlayer(audioPlayerView, chatMessage.content)
+                audioPlayerLayout.visibility = View.VISIBLE
+                setupAudioPlayer(audioPlayerView, progressBar,chatMessage.content)
             } else {
                 messageTextView.visibility = View.VISIBLE
-                audioPlayerView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
                 messageTextView.text = chatMessage.content
             }
             timestampTextView.text = formatTimestamp(chatMessage.time)
@@ -147,21 +193,20 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
-
+        private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
+        private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
 
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "audio") {
                 messageTextView.visibility = View.GONE
-                audioPlayerView.visibility = View.VISIBLE
-                setupAudioPlayer(audioPlayerView, chatMessage.content)
+                audioPlayerLayout.visibility = View.VISIBLE
+                setupAudioPlayer(audioPlayerView,progressBar, chatMessage.content)
             } else {
                 messageTextView.visibility = View.VISIBLE
-                audioPlayerView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
                 messageTextView.text = chatMessage.content
             }
-
             timestampTextView.text = formatTimestamp(chatMessage.time)
-
             // Update lastSenderId
             lastSenderId = chatMessage.sendId
         }
@@ -200,39 +245,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         }
     }
 
-    private fun setupAudioPlayer(audioPlayerView: View, audioUrl: String) {
-   /*     val context = audioPlayerView.context
-        if (context == null) {
-            // Handle the case where context is null
-            Log.d("ChatAdapter", "Context is null")
-            return
-        }
-        val player = ExoPlayer.Builder(context).build()
-
-        // Fetch the audio file from Firebase Storage
-        val mediaItem = MediaItem.fromUri(audioUrl)
-        player.setMediaItem(mediaItem)
-        player.prepare()
-        audioPlayerView.setOnClickListener {
-            if (player.isPlaying) {
-                player.pause()
-            } else {
-                player.play()
-            }
-        }*/
-        val mediaPlayer : MediaPlayer = MediaPlayer()
-        mediaPlayer.setDataSource(audioUrl)
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
-        mediaPlayer.prepare()
-     //   mediaPlayer.start()
-        audioPlayerView.setOnClickListener {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-            } else {
-                mediaPlayer.start()
-            }
-        }
-    }
     // ViewHolder for messages without avatar
     inner class MessageNoAvatarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
@@ -257,6 +269,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             return formatter.format(date)
         }
     }
+
 }
 
 

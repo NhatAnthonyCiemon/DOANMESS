@@ -68,6 +68,7 @@ class MainChat : AppCompatActivity() {
     private var mediaRecorder: MediaRecorder? = null
     private var audioFilePath: String? = null
     private val storage = FirebaseStorage.getInstance()
+    private lateinit var chatAdapter: ChatAdapter
     private lateinit var locationBtn: ImageButton
     data class ChatMessage(
         val content: String = "",
@@ -130,7 +131,7 @@ class MainChat : AppCompatActivity() {
 
 
         // Set up the RecyclerView
-        val chatAdapter = ChatAdapter(chatMessages, isGroup)
+        chatAdapter = ChatAdapter(chatMessages, isGroup)
         recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
         recyclerViewMessages.isVerticalScrollBarEnabled = false;
         recyclerViewMessages.adapter = chatAdapter
@@ -537,6 +538,9 @@ class MainChat : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::chatAdapter.isInitialized) {
+            chatAdapter.releaseResources()
+        }
         if (::valueEventListener.isInitialized) {
             if(intent.getBooleanExtra("isGroup", false)) {
                 database= Firebase.database.getReference("groups").child(intent.getStringExtra("uid") ?: "").child("Messages")
