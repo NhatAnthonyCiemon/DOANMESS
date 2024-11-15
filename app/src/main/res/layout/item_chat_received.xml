@@ -24,27 +24,44 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone">
-        <ProgressBar
-            android:id="@+id/audioProgressBar"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:translationZ="5dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/audioPlayerView"
-            app:layout_constraintEnd_toEndOf="@+id/audioPlayerView"
-            app:layout_constraintHorizontal_bias="0.536"
-            app:layout_constraintStart_toStartOf="@+id/audioPlayerView"
-            app:layout_constraintTop_toTopOf="@+id/audioPlayerView" />
+        <ImageView
+            android:id="@+id/playButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/black_play"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageView
+            android:id="@+id/pauseButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/black_pause"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+        <ProgressBar
+            android:id="@+id/audioProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="105dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:max="100"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
+        <ImageView
             android:id="@+id/audioPlayerView"
-            android:layout_width="120dp"
-            android:layout_height="30dp"
+            android:layout_width="150dp"
+            android:layout_height="45dp"
             android:src="@drawable/audio_player_background"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView

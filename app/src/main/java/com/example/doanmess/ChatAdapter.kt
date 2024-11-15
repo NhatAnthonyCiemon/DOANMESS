@@ -105,6 +105,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        Log.d("ChatAdapter", "onBindViewHolder: $position")
         val message = chatMessages[position]
 
         when (holder) {
@@ -114,44 +115,116 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             is MessageNoAvatarViewHolder -> holder.bind(message)
         }
     }
-    private var mediaPlayer: MediaPlayer? = null
-    private var currenAudio = ""
-    private fun setupAudioPlayer(audioPlayerView: View, progressBar: ProgressBar, audioUrl: String) {
-        val executor = Executors.newSingleThreadExecutor()
-        val handler = Handler(Looper.getMainLooper())
+    private var currentMediaPlayer: MediaPlayer? = null
+    private var currentProgressBar: ProgressBar? = null
+    private var currentPlayButton: ImageView? = null
+    private var currentPauseButton: ImageView? = null
+    private var currentAudioUrl: String? = null
+    private var currentHandler: Handler? = null
 
-        executor.execute {
-            try {
-                handler.post {
-                    audioPlayerView.setOnClickListener {
-                        if(currenAudio != audioUrl){
-                            mediaPlayer?.release()
-                            mediaPlayer = null
-                            currenAudio = audioUrl
-                            mediaPlayer = MediaPlayer()
-                            mediaPlayer?.setDataSource(audioUrl)
-                            mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
-                            mediaPlayer?.prepare()
+    private fun setupAudioPlayer(
+        playButton: ImageView,
+        pauseButton: ImageView,
+        progressBar: ProgressBar,
+        audioUrl: String
+    ) {
+        if (audioUrl == currentAudioUrl && currentMediaPlayer != null) {
+            progressBar.progress = 0
+            currentMediaPlayer?.release()
+            currentMediaPlayer = null
+            pauseButton.visibility = View.GONE
+            playButton.visibility = View.VISIBLE
+        } else {
+            progressBar.progress = 0
+        }
 
+        playButton.setOnClickListener {
+            if (currentMediaPlayer != null && currentAudioUrl == audioUrl) {
+                Log.d("Chat", "same of audio")
+                if (currentMediaPlayer!!.isPlaying) {
+                    currentMediaPlayer?.pause()
+                    playButton.visibility = View.VISIBLE
+                    pauseButton.visibility = View.GONE
+                } else {
+                    currentMediaPlayer?.start()
+                    playButton.visibility = View.GONE
+                    pauseButton.visibility = View.VISIBLE
+
+                    currentHandler?.removeCallbacksAndMessages(null)
+                    val handler = Handler(Looper.getMainLooper())
+                    currentHandler = handler
+                    handler.post(object : Runnable {
+                        override fun run() {
+                            if (currentMediaPlayer != null && currentMediaPlayer!!.isPlaying) {
+                                progressBar.progress = currentMediaPlayer!!.currentPosition
+                                handler.postDelayed(this, 100)
+                            }
                         }
-                        if (mediaPlayer?.isPlaying == true) {
-                            mediaPlayer?.pause()
-                        } else {
-                            mediaPlayer?.start()
-                        }
+                    })
+                }
+            } else {
+                Log.d("Chat", "diff of audio")
+                currentMediaPlayer?.release()
+                currentMediaPlayer = null
+                currentPlayButton?.visibility = View.VISIBLE
+                currentPauseButton?.visibility = View.GONE
+                currentProgressBar?.progress = 0
+
+                currentHandler?.removeCallbacksAndMessages(null)
+
+                currentMediaPlayer = MediaPlayer().apply {
+                    setOnErrorListener { mp, what, extra ->
+                        Log.e("Chat", "Error occurred: what=$what, extra=$extra")
+                        playButton.visibility = View.VISIBLE
+                        pauseButton.visibility = View.GONE
+                        true
                     }
+                    setOnPreparedListener {
+                        it.start()
+                        playButton.visibility = View.GONE
+                        pauseButton.visibility = View.VISIBLE
+
+                        progressBar.max = it.duration
+
+                        val handler = Handler(Looper.getMainLooper())
+                        currentHandler = handler
+                        handler.post(object : Runnable {
+                            override fun run() {
+                                if (currentMediaPlayer != null && currentMediaPlayer!!.isPlaying) {
+                                    progressBar.progress = currentMediaPlayer!!.currentPosition
+                                    handler.postDelayed(this, 100)
+                                }
+                            }
+                        })
+                    }
+                    setOnCompletionListener {
+                        playButton.visibility = View.VISIBLE
+                        pauseButton.visibility = View.GONE
+                        currentMediaPlayer?.release()
+                        currentMediaPlayer = null
+                        progressBar.progress = 0
+                    }
+                    setDataSource(audioUrl)
+                    setAudioStreamType(AudioManager.STREAM_MUSIC)
+                    prepareAsync()
                 }
-            } catch (e: Exception) {
-                Log.e("AudioPlayer", "Error playing audio: $e")
-                handler.post {
-                    progressBar.visibility = View.GONE
-                }
+
+                currentAudioUrl = audioUrl
+                currentPlayButton = playButton
+                currentPauseButton = pauseButton
+                currentProgressBar = progressBar
             }
+        }
+
+        pauseButton.setOnClickListener {
+            currentMediaPlayer?.pause()
+            playButton.visibility = View.VISIBLE
+            pauseButton.visibility = View.GONE
         }
     }
     fun releaseResources() {
-        mediaPlayer?.release()
-        mediaPlayer = null
+        currentMediaPlayer?.release()
+        currentMediaPlayer = null
     }
     override fun getItemCount(): Int {
         return chatMessages.size
@@ -164,26 +237,27 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
         private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
         private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
+        private val playButton: ImageView = itemView.findViewById(R.id.playButton)
+        private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
+        private val loadingBar : ProgressBar = itemView.findViewById(R.id.LoadingBar)
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "audio") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
-                if(chatMessage.isSent){
-                    progressBar.visibility = View.GONE
-                    setupAudioPlayer(audioPlayerView, progressBar,chatMessage.content)
-                }
-                else
-                {
+                if (chatMessage.isSent) {
+                    loadingBar.visibility = View.GONE
                     progressBar.visibility = View.VISIBLE
+                    setupAudioPlayer(playButton, pauseButton, progressBar, chatMessage.content)
+                } else {
+                    loadingBar.visibility = View.VISIBLE
+                    progressBar.visibility = View.GONE
                 }
-
             } else {
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
                 messageTextView.text = chatMessage.content
             }
             timestampTextView.text = formatTimestamp(chatMessage.time)
-            // Update lastSenderId
             lastSenderId = chatMessage.sendId
         }
         private fun formatTimestamp(timestamp: Long): String {
@@ -200,22 +274,22 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
         private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
         private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
-
+        private val playButton: ImageView = itemView.findViewById(R.id.playButton)
+        private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "audio") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
-                setupAudioPlayer(audioPlayerView,progressBar, chatMessage.content)
+                progressBar.visibility = View.VISIBLE
+                setupAudioPlayer(playButton, pauseButton, progressBar, chatMessage.content)
             } else {
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
                 messageTextView.text = chatMessage.content
             }
             timestampTextView.text = formatTimestamp(chatMessage.time)
-            // Update lastSenderId
             lastSenderId = chatMessage.sendId
         }
-
         private fun formatTimestamp(timestamp: Long): String {
             val date = Date(timestamp)
             val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
