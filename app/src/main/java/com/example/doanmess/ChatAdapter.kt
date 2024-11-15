@@ -125,7 +125,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 handler.post {
                     audioPlayerView.setOnClickListener {
                         if(currenAudio != audioUrl){
-                            progressBar.visibility = View.VISIBLE
                             mediaPlayer?.release()
                             mediaPlayer = null
                             currenAudio = audioUrl
@@ -134,9 +133,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                             mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
                             mediaPlayer?.prepare()
 
-                        }
-                        mediaPlayer?.setOnPreparedListener {
-                            progressBar.visibility = View.GONE
                         }
                         if (mediaPlayer?.isPlaying == true) {
                             mediaPlayer?.pause()
@@ -172,7 +168,15 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             if (chatMessage.type == "audio") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
-                setupAudioPlayer(audioPlayerView, progressBar,chatMessage.content)
+                if(chatMessage.isSent){
+                    progressBar.visibility = View.GONE
+                    setupAudioPlayer(audioPlayerView, progressBar,chatMessage.content)
+                }
+                else
+                {
+                    progressBar.visibility = View.VISIBLE
+                }
+
             } else {
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE

@@ -78,7 +78,8 @@ class MainChat : AppCompatActivity() {
         val type: String = "",
      //   val status: Boolean = false,
         val time: Long = 0L,
-        var showSenderInfo: Boolean = false
+        var showSenderInfo: Boolean = false,
+        var isSent : Boolean = false
     ) {
         var senderName: String = ""
         var avatarUrl: String = ""
@@ -171,7 +172,8 @@ class MainChat : AppCompatActivity() {
                                 sendId = sendId,
                                 recvId = recvId,
                                 time = time,
-                                type = type
+                                type = type,
+                                isSent =true
                             ).apply {
                                 this.senderName = senderName
                                 this.avatarUrl = avatarUrl
@@ -347,15 +349,17 @@ class MainChat : AppCompatActivity() {
                     .child(targetUserUid).child("Status").setValue(true)
                 Firebase.database.getReference("users").child(targetUserUid)
                     .child(currentUserUid).child("Status").setValue(false)
-                /*val chatMessage = ChatMessage(
+                val chatMessage = ChatMessage(
                     content = message,
                     sendId = currentUserUid ?: "",
                     recvId = targetUserUid,
                     //   status = false,
-                    time = System.currentTimeMillis()
-                )*/
-                //  chatMessages.add(chatMessage)
-                //  chatAdapter.notifyDataSetChanged()
+                    time = System.currentTimeMillis(),
+                    isSent = false,
+                    type = type
+                )
+              //  chatMessages.add(chatMessage)
+            //   chatAdapter.notifyItemInserted(chatMessages.size - 1)
                 recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
                 message_input.text.clear()
                 // Save the message to the database
@@ -363,7 +367,7 @@ class MainChat : AppCompatActivity() {
                     "Content" to message,
                     "SendId" to currentUserUid,
                     "RecvId" to targetUserUid,
-                    "Time" to System.currentTimeMillis(),
+                    "Time" to chatMessage.time,
                     "Type" to type
                 )
                 Firebase.database.getReference("users").child(currentUserUid!!)
@@ -500,7 +504,18 @@ class MainChat : AppCompatActivity() {
         }
     }
     private fun stopRecordingAndSave() {
-
+        val chatMessage = ChatMessage(
+            content = "",
+            sendId = currentUserUid ?: "",
+            recvId = targetUserUid,
+            //   status = false,
+            time = System.currentTimeMillis(),
+            isSent = false,
+            type = "audio"
+        )
+        chatMessages.add(chatMessage)
+        chatAdapter.notifyItemInserted(chatMessages.size - 1)
+        recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
         mediaRecorder?.apply {
             try {
                 stop()
@@ -514,8 +529,6 @@ class MainChat : AppCompatActivity() {
         mediaRecorder = null
 
         val wavFilePath = audioFilePath
-
-
         val mp3FilePath = "${externalCacheDir?.absolutePath}/audiorecord123.mp3"
         val audioFile = File(mp3FilePath)
         if (audioFile.exists()) {
@@ -528,17 +541,16 @@ class MainChat : AppCompatActivity() {
                 if (returnCode == RETURN_CODE_SUCCESS) {
                     val audioFileUri = Uri.fromFile(File(mp3FilePath))
                     val audioRef = storage.reference.child("audio/${UUID.randomUUID()}.mp3")
-
                     audioRef.putFile(audioFileUri)
                         .addOnSuccessListener {
                             audioRef.downloadUrl.addOnSuccessListener { uri ->
                                 //send link to that audio with type audio
                                 sendMessage(uri.toString(), "audio")
                             }
-                            Toast.makeText(this@MainChat, "Recording saved", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainChat, "Recording sent", Toast.LENGTH_SHORT).show()
                         }
                         .addOnFailureListener {
-                            Toast.makeText(this@MainChat, "Failed to save recording", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainChat, "Failed to send recording", Toast.LENGTH_SHORT).show()
                         }
                 } else {
                     Toast.makeText(this@MainChat, "Failed to convert recording", Toast.LENGTH_SHORT).show()
