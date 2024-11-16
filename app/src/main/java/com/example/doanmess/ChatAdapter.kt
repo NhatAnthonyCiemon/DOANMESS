@@ -105,7 +105,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        Log.d("ChatAdapter", "onBindViewHolder: $position")
         val message = chatMessages[position]
 
         when (holder) {
@@ -277,6 +276,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val playButton: ImageView = itemView.findViewById(R.id.playButton)
         private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
         fun bind(chatMessage: MainChat.ChatMessage) {
+
             if (chatMessage.type == "audio") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
@@ -303,12 +303,24 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val avatarImageView: ImageView = itemView.findViewById(R.id.avatarImageView)
         private val senderNameTextView: TextView = itemView.findViewById(R.id.senderNameTextView)
-
+        private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
+        private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
+        private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
+        private val playButton: ImageView = itemView.findViewById(R.id.playButton)
+        private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
         fun bind(chatMessage: MainChat.ChatMessage) {
-            messageTextView.text = chatMessage.content
+            if (chatMessage.type == "audio") {
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.VISIBLE
+                progressBar.visibility = View.VISIBLE
+                setupAudioPlayer(playButton, pauseButton, progressBar, chatMessage.content)
+            } else {
+                messageTextView.visibility = View.VISIBLE
+                audioPlayerLayout.visibility = View.GONE
+                messageTextView.text = chatMessage.content
+            }
             timestampTextView.text = formatTimestamp(chatMessage.time)
             senderNameTextView.text = chatMessage.senderName
-
             // Load actual avatar URL here
             Glide.with(itemView.context)
                 .load(chatMessage.avatarUrl) // Use the actual avatar URL
@@ -328,6 +340,11 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
     inner class MessageNoAvatarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
+        private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
+        private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
+        private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
+        private val playButton: ImageView = itemView.findViewById(R.id.playButton)
+        private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
 //
 //        fun bind(chatMessage: MainChat.ChatMessage) {
 //            messageTextView.text = chatMessage.content
@@ -338,7 +355,16 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 //        private val avatarImageView: ImageView = itemView.findViewById(R.id.avatarImageView)
 
         fun bind(chatMessage: MainChat.ChatMessage) {
-            messageTextView.text = chatMessage.content
+            if (chatMessage.type == "audio") {
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.VISIBLE
+                progressBar.visibility = View.VISIBLE
+                setupAudioPlayer(playButton, pauseButton, progressBar, chatMessage.content)
+            } else {
+                messageTextView.visibility = View.VISIBLE
+                audioPlayerLayout.visibility = View.GONE
+                messageTextView.text = chatMessage.content
+            }
             timestampTextView.text = formatTimestamp(chatMessage.time)
 
         }

@@ -21,8 +21,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
-import com.arthenica.mobileffmpeg.FFmpeg
 import com.bumptech.glide.Glide
 import com.example.doanmess.InforChat
 import com.example.doanmess.MessageController
@@ -44,11 +42,17 @@ import java.io.IOException
 import java.util.UUID
 import android.Manifest
 import android.location.Location
+import android.os.Build
 import androidx.core.app.ActivityCompat
+import com.arthenica.mobileffmpeg.Config
+import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
+import com.arthenica.mobileffmpeg.FFmpeg
+import com.arthenica.mobileffmpeg.Level
 import com.example.createuiproject.ChatAdapter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
+
 
 class MainChat : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -99,7 +103,6 @@ class MainChat : AppCompatActivity() {
         auth = Firebase.auth
         currentUserUid = auth.currentUser!!.uid
         targetUserUid = intent.getStringExtra("uid") ?: return
-
         isGroup = intent.getBooleanExtra("isGroup", false)
         // Set the user name and avatar
         val name = intent.getStringExtra("name") ?: "User"
@@ -221,17 +224,17 @@ class MainChat : AppCompatActivity() {
                         val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                         val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
                         val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
-
+                        val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                         val chatMessage = ChatMessage(
                             content = content,
                             sendId = sendId,
                             recvId = recvId,
-                            time = time
+                            time = time,
+                            type = type,
+                            isSent = true
                         )
-
                         tempMessages.add(chatMessage)
                     }
-
                     tempMessages.sortBy { it.time }
                     chatMessages.addAll(tempMessages) // Update chatMessages with sorted list
                     chatAdapter.notifyDataSetChanged() // Notify adapter of data change
@@ -386,7 +389,7 @@ class MainChat : AppCompatActivity() {
             }
         }
         else {
-            if (message.isNotEmpty() || type != "text") {
+            if (message.isNotEmpty()) {
                 Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
                 val groupData = Firebase.firestore.collection("groups").document(targetUserUid)
                 if(groupData != null) {
@@ -517,6 +520,7 @@ class MainChat : AppCompatActivity() {
         chatAdapter.notifyItemInserted(chatMessages.size - 1)
         recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
         mediaRecorder?.apply {
+            Log.d("MainChat", "Stopping recording")
             try {
                 stop()
             } catch (e: RuntimeException) {
@@ -527,37 +531,24 @@ class MainChat : AppCompatActivity() {
             }
         }
         mediaRecorder = null
-
         val wavFilePath = audioFilePath
-        val mp3FilePath = "${externalCacheDir?.absolutePath}/audiorecord123.mp3"
-        val audioFile = File(mp3FilePath)
-        if (audioFile.exists()) {
-            audioFile.delete()
-        }
-        // Convert wav to mp3 using FFmpeg
         wavFilePath?.let {
-            val command = arrayOf("-i", it, mp3FilePath)
-            FFmpeg.executeAsync(command) { _, returnCode ->
-                if (returnCode == RETURN_CODE_SUCCESS) {
-                    val audioFileUri = Uri.fromFile(File(mp3FilePath))
-                    val audioRef = storage.reference.child("audio/${UUID.randomUUID()}.mp3")
-                    audioRef.putFile(audioFileUri)
-                        .addOnSuccessListener {
-                            audioRef.downloadUrl.addOnSuccessListener { uri ->
-                                //send link to that audio with type audio
-                                sendMessage(uri.toString(), "audio")
-                            }
-                            Toast.makeText(this@MainChat, "Recording sent", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(this@MainChat, "Failed to send recording", Toast.LENGTH_SHORT).show()
-                        }
-                } else {
-                    Toast.makeText(this@MainChat, "Failed to convert recording", Toast.LENGTH_SHORT).show()
+            val audioFileUri = Uri.fromFile(File(it))
+            val audioRef = storage.reference.child("audio/${UUID.randomUUID()}.wav")
+            audioRef.putFile(audioFileUri)
+                .addOnSuccessListener {
+                    audioRef.downloadUrl.addOnSuccessListener { uri ->
+                        sendMessage(uri.toString(), "audio")
+                    }
+                    Toast.makeText(this@MainChat, "Recording sent", Toast.LENGTH_SHORT).show()
                 }
-            }
+                .addOnFailureListener {
+                    Toast.makeText(this@MainChat, "Failed to send recording", Toast.LENGTH_SHORT).show()
+                }
         }
     }
+
+
     override fun onResume() {
         super.onResume()
         checkBlockedStatus()
