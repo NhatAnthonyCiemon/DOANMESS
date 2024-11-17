@@ -258,8 +258,6 @@ class MainChat : AppCompatActivity() {
             if (::chatAdapter.isInitialized) {
                 chatAdapter.releaseResources()
             }
-
-
             finish()
         }
 
