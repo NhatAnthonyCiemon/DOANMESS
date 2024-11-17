@@ -224,6 +224,7 @@ class MainChat : AppCompatActivity() {
                         val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                         val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
                         val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
+
                         val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                         val chatMessage = ChatMessage(
                             content = content,
@@ -253,6 +254,12 @@ class MainChat : AppCompatActivity() {
 
         // set on click listener for the back button to navigate back to the home activity
         findViewById<ImageButton>(R.id.back_button).setOnClickListener {
+            //pause the media player if it is playing
+            if (::chatAdapter.isInitialized) {
+                chatAdapter.releaseResources()
+            }
+
+
             finish()
         }
 
@@ -453,12 +460,29 @@ class MainChat : AppCompatActivity() {
         uploadTask.addOnSuccessListener {
             storageRef.downloadUrl.addOnSuccessListener { uri ->
                 val downloadUrl = uri.toString()
-                sendMessage(downloadUrl, "media")
+
+                // Xác định loại MIME của tệp
+                val contentResolver = contentResolver
+                val mimeType = contentResolver.getType(fileUri)
+
+                // Kiểm tra loại tệp và gửi tin nhắn tương ứng
+                when {
+                    mimeType?.startsWith("image/") == true -> {
+                        sendMessage(downloadUrl, "image")
+                    }
+                    mimeType?.startsWith("video/") == true -> {
+                        sendMessage(downloadUrl, "video")
+                    }
+                    else -> {
+                        sendMessage(downloadUrl, "unknown")
+                    }
+                }
             }
         }.addOnFailureListener {
             Toast.makeText(this, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
         }
     }
+
     private fun startRecording() {
         // Release any existing MediaRecorder instance
         mediaRecorder?.release()

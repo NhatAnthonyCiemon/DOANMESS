@@ -1,6 +1,7 @@
 package com.example.createuiproject
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -10,13 +11,19 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.doanmess.MainChat
 import com.example.doanmess.R
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -222,13 +229,15 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         }
     }
     fun releaseResources() {
+        // Release the ExoPlayer
+        player.release()
         currentMediaPlayer?.release()
         currentMediaPlayer = null
     }
     override fun getItemCount(): Int {
         return chatMessages.size
     }
-
+    private lateinit var player : ExoPlayer;
     // ViewHolder for sent messages
     inner class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
@@ -236,11 +245,47 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
         private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
         private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
+        private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
+        private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
+        private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val playButton: ImageView = itemView.findViewById(R.id.playButton)
         private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
         private val loadingBar : ProgressBar = itemView.findViewById(R.id.LoadingBar)
         fun bind(chatMessage: MainChat.ChatMessage) {
-            if (chatMessage.type == "audio") {
+            if (chatMessage.type == "video") {
+                messageTextView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
+                videoMessageView.visibility = View.VISIBLE
+                audioPlayerLayout.visibility = View.GONE
+                cardVideo.visibility = View.VISIBLE
+
+                // Khởi tạo ExoPlayer từ Media3
+                player = ExoPlayer.Builder(itemView.context).build()
+                videoMessageView.player = player
+
+
+                // Thiết lập video URL
+                val mediaItem = MediaItem.fromUri(chatMessage.content)
+                player.setMediaItem(mediaItem)
+                player.prepare()
+
+            } else if (chatMessage.type == "image") {
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
+                imageMessageView.visibility = View.VISIBLE
+                Glide.with(itemView.context)
+                    .load(chatMessage.content) // Đường dẫn ảnh
+                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
+                    .placeholder(R.drawable.image_placeholder) // Ảnh chờ
+                    .error(R.drawable.image_error) // Ảnh lỗi
+                    .into(imageMessageView)
+            }
+            else if (chatMessage.type == "audio") {
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
                 if (chatMessage.isSent) {
@@ -252,6 +297,9 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     progressBar.visibility = View.GONE
                 }
             } else {
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
                 messageTextView.text = chatMessage.content
@@ -273,19 +321,57 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
         private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
         private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
+        private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
+        private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
+        private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val playButton: ImageView = itemView.findViewById(R.id.playButton)
         private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
         fun bind(chatMessage: MainChat.ChatMessage) {
+            if (chatMessage.type == "video") {
+                messageTextView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
+                videoMessageView.visibility = View.VISIBLE
+                audioPlayerLayout.visibility = View.GONE
+                cardVideo.visibility = View.VISIBLE
 
-            if (chatMessage.type == "audio") {
+                // Khởi tạo ExoPlayer từ Media3
+                player = ExoPlayer.Builder(itemView.context).build()
+                videoMessageView.player = player
+
+
+                // Thiết lập video URL
+                val mediaItem = MediaItem.fromUri(chatMessage.content)
+                player.setMediaItem(mediaItem)
+                player.prepare()
+
+            }else if (chatMessage.type == "image") {
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
+                imageMessageView.visibility = View.VISIBLE
+                videoMessageView.visibility = View.VISIBLE
+                cardVideo.visibility = View.GONE
+
+                Glide.with(itemView.context)
+                    .load(chatMessage.content) // Đường dẫn ảnh
+                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
+                    .placeholder(R.drawable.image_placeholder) // Ảnh chờ
+                    .error(R.drawable.image_error) // Ảnh lỗi
+                    .into(imageMessageView)
+            }
+            else if (chatMessage.type == "audio") {
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
                 progressBar.visibility = View.VISIBLE
                 setupAudioPlayer(playButton, pauseButton, progressBar, chatMessage.content)
             } else {
+                imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
                 messageTextView.text = chatMessage.content
+                videoMessageView.visibility = View.GONE
             }
             timestampTextView.text = formatTimestamp(chatMessage.time)
             lastSenderId = chatMessage.sendId
@@ -303,23 +389,63 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val avatarImageView: ImageView = itemView.findViewById(R.id.avatarImageView)
         private val senderNameTextView: TextView = itemView.findViewById(R.id.senderNameTextView)
+        private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
+        private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
+        private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
         private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
         private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
         private val playButton: ImageView = itemView.findViewById(R.id.playButton)
         private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
         fun bind(chatMessage: MainChat.ChatMessage) {
-            if (chatMessage.type == "audio") {
+            if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
+                videoMessageView.visibility = View.VISIBLE
+                audioPlayerLayout.visibility = View.GONE
+                cardVideo.visibility = View.VISIBLE
+                // Khởi tạo ExoPlayer từ Media3
+                player = ExoPlayer.Builder(itemView.context).build()
+                videoMessageView.player = player
+
+
+                // Thiết lập video URL
+                val mediaItem = MediaItem.fromUri(chatMessage.content)
+                player.setMediaItem(mediaItem)
+                player.prepare()
+
+            }else if (chatMessage.type == "image") {
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
+                imageMessageView.visibility = View.VISIBLE
+                videoMessageView.visibility = View.VISIBLE
+                cardVideo.visibility = View.GONE
+                Glide.with(itemView.context)
+                    .load(chatMessage.content) // Đường dẫn ảnh
+                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
+                    .placeholder(R.drawable.image_placeholder) // Ảnh chờ
+                    .error(R.drawable.image_error) // Ảnh lỗi
+                    .into(imageMessageView)
+            }
+            else if (chatMessage.type == "audio") {
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
                 progressBar.visibility = View.VISIBLE
                 setupAudioPlayer(playButton, pauseButton, progressBar, chatMessage.content)
             } else {
+                imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                cardVideo.visibility = View.GONE
                 messageTextView.text = chatMessage.content
             }
             timestampTextView.text = formatTimestamp(chatMessage.time)
+            // Update lastSenderId
+            lastSenderId = chatMessage.sendId
+
             senderNameTextView.text = chatMessage.senderName
             // Load actual avatar URL here
             Glide.with(itemView.context)
@@ -340,9 +466,12 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
     inner class MessageNoAvatarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
+        private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
+        private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayerView: ImageView = itemView.findViewById(R.id.audioPlayerView)
         private val progressBar: ProgressBar = itemView.findViewById(R.id.audioProgressBar)
-        private val audioPlayerLayout : ConstraintLayout = itemView.findViewById(R.id.audioPlayerLayout)
+        private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
+        private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val playButton: ImageView = itemView.findViewById(R.id.playButton)
         private val pauseButton: ImageView = itemView.findViewById(R.id.pauseButton)
 //
@@ -355,12 +484,46 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 //        private val avatarImageView: ImageView = itemView.findViewById(R.id.avatarImageView)
 
         fun bind(chatMessage: MainChat.ChatMessage) {
-            if (chatMessage.type == "audio") {
+            // Trong phương thức bind hoặc xử lý
+            if (chatMessage.type == "video") {
+                cardVideo.visibility = View.VISIBLE
+                messageTextView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
+                videoMessageView.visibility = View.VISIBLE
+                audioPlayerLayout.visibility = View.GONE
+
+                // Khởi tạo ExoPlayer từ Media3
+                player = ExoPlayer.Builder(itemView.context).build()
+                videoMessageView.player = player as Player
+
+                // Thiết lập video URL
+                val mediaItem = MediaItem.fromUri(chatMessage.content)
+                player.setMediaItem(mediaItem)
+                player.prepare()
+            } else if (chatMessage.type == "image") {
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
+                imageMessageView.visibility = View.VISIBLE
+                Glide.with(itemView.context)
+                    .load(chatMessage.content) // Đường dẫn ảnh
+                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
+                    .placeholder(R.drawable.image_placeholder) // Ảnh chờ
+                    .error(R.drawable.image_error) // Ảnh lỗi
+                    .into(imageMessageView)
+            }
+            else if (chatMessage.type == "audio") {
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
                 progressBar.visibility = View.VISIBLE
                 setupAudioPlayer(playButton, pauseButton, progressBar, chatMessage.content)
             } else {
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
                 messageTextView.text = chatMessage.content

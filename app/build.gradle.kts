@@ -69,10 +69,16 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation(libs.firebase.messaging.ktx)
-    implementation(libs.play.services.location) // Thêm Glide
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.media3.ui) // Thêm Glide
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0") // Thêm Glide
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
+
+
 
 }
