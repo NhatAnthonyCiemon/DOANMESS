@@ -78,40 +78,40 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0" />
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                app:cardCornerRadius="16dp"
-                android:layout_margin="8dp"
-                app:cardBackgroundColor="@android:color/black"
-                android:layout_gravity="center"
-                android:visibility="gone"
-                android:id="@+id/cardVideo"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <androidx.media3.ui.PlayerView
-                    android:id="@+id/videoMessageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone" />
-            </androidx.cardview.widget.CardView>
-            <ImageView
-                android:id="@+id/imageMessageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxWidth="200dp"
-                android:maxHeight="200dp"
-                android:adjustViewBounds="true"
-                android:visibility="gone"
-                android:scaleType="centerCrop"
-                android:layout_margin="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="@drawable/image_corner_radius" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.cardview.widget.CardView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            app:cardCornerRadius="16dp"
+            android:layout_margin="8dp"
+            app:cardBackgroundColor="@android:color/black"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:id="@+id/cardVideo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/videoMessageView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+        </androidx.cardview.widget.CardView>
+        <ImageView
+            android:id="@+id/imageMessageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="200dp"
+            android:maxHeight="200dp"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            android:scaleType="centerCrop"
+            android:layout_margin="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/image_corner_radius" />
         <TextView
             android:id="@+id/timestampTextView"
             android:layout_width="wrap_content"

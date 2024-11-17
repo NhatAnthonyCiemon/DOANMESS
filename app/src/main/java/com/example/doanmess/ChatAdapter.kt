@@ -333,12 +333,9 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 videoMessageView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
                 cardVideo.visibility = View.VISIBLE
-
                 // Khởi tạo ExoPlayer từ Media3
                 player = ExoPlayer.Builder(itemView.context).build()
                 videoMessageView.player = player
-
-
                 // Thiết lập video URL
                 val mediaItem = MediaItem.fromUri(chatMessage.content)
                 player.setMediaItem(mediaItem)
