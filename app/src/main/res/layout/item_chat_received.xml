@@ -23,6 +23,7 @@
         android:id="@+id/audioPlayerLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
         android:visibility="gone">
 
         <androidx.cardview.widget.CardView
@@ -71,7 +72,24 @@
             app:layout_constraintStart_toStartOf="@+id/audioPlayerView"
             app:layout_constraintTop_toTopOf="@+id/audioPlayerView" />
 
+        <ImageView
+            android:id="@+id/playButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/black_play"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
+        <ImageView
+            android:id="@+id/pauseButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/black_pause"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <ProgressBar
             android:id="@+id/audioProgressBar"
