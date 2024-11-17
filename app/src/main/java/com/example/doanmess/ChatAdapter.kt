@@ -428,6 +428,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     .into(imageMessageView)
             }
             else if (chatMessage.type == "audio") {
+                messageTextView.visibility = View.GONE
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
