@@ -74,6 +74,7 @@ class Call : AppCompatActivity() {
             voiceBackgroundImg.visibility = View.VISIBLE
         }
         uniqueId = getUniqueID()
+        setupWebView()
         if(call){
             acceptBtnCard.visibility = View.GONE
             rejectBtnCard.visibility = View.GONE
@@ -201,7 +202,7 @@ class Call : AppCompatActivity() {
                 finish()
             }
         }
-        setupWebView()
+
     }
 
 
