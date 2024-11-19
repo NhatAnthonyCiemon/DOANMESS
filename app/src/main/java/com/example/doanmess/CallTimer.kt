@@ -8,12 +8,19 @@ class CallTimer(private val timerTextView: TextView) {
     private val handler = Handler(Looper.getMainLooper())
     private var isRunning = false
 
-    // Hàm định dạng thời gian (hh:mm:ss)
+    // Hàm định dạng thời gian (mm:ss hoặc hh:mm:ss)
     private fun formatTime(seconds: Int): String {
         val hours = seconds / 3600
         val minutes = (seconds % 3600) / 60
         val secs = seconds % 60
-        return String.format("%02d:%02d:%02d", hours, minutes, secs)
+
+        return if (hours > 0) {
+            // Nếu có giờ, hiển thị hh:mm:ss
+            String.format("%02d:%02d:%02d", hours, minutes, secs)
+        } else {
+            // Nếu không có giờ, hiển thị mm:ss
+            String.format("%02d:%02d", minutes, secs)
+        }
     }
 
     // Runnable để cập nhật thời gian
@@ -45,6 +52,6 @@ class CallTimer(private val timerTextView: TextView) {
     fun reset() {
         stop()
         seconds = 0
-        timerTextView.text = formatTime(seconds)
+        timerTextView.text = "" // Xóa TextView khi reset
     }
 }
