@@ -1,104 +1,99 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <link href="./style.css" rel="stylesheet" />
 </head>
+
 <body>
-    <script src="peerjs.js"></script>
-    <style>
-        html{
-            background-color: transparent;
-        }
-    </style>
-    <script>
-        let peer;
-        async function init(userId) {
-            async function getIceServers() {
-                const response = await fetch(
-                    "https://global.xirsys.net/_turn/MyFirstApp",
-                    {
-                        method: "PUT",
-                        headers: {
-                            Authorization:
-                                "Basic " +
-                                btoa("nhat:67e43036-a35e-11ef-8fc0-0242ac150002"),
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-                const iceServers = await response.json();
-                return iceServers.v.iceServers; // Danh sách các ICE servers
-            }
+<script src="peerjs.js"></script>
 
-            // Sử dụng các ICE servers từ Xirsys trong cấu hình WebRTC
-            getIceServers().then((iceServers) => {
-                peer = new Peer(userId, {
-                    host: "0.peerjs.com",
-                    port: 443,
-                    secure: true,
-                    config: { iceServers: iceServers },
-                });
+<audio id="remote-audio" autoplay></audio> <!-- Audio của người nhận -->
+<audio id="local-audio" autoplay muted></audio> <!-- Audio của chính bạn -->
 
-                console.log(`Peer initialized with ID: ${userId}`);
-                peer.on("open", () => {});
-                listen();
+<script>
+    const localAudio = document.getElementById("local-audio");
+    const remoteAudio = document.getElementById("remote-audio");
+
+    let peer, localStream;
+
+    // Khởi tạo PeerJS
+    async function init(userId) {
+        const iceServers = await getIceServers();
+        peer = new Peer(userId, {
+            host: "0.peerjs.com",
+            port: 443,
+            secure: true,
+            config: { iceServers },
+        });
+
+        console.log("Peer initialized with ID:", userId);
+        peer.on("open", () => console.log("Connected to PeerJS server."));
+        peer.on("error", (err) => console.error("Peer error:", err));
+
+        listen();
+    }
+
+    // Lấy danh sách ICE servers
+    async function getIceServers() {
+        try {
+            const response = await fetch("https://global.xirsys.net/_turn/MyFirstApp", {
+                method: "PUT",
+                headers: {
+                    Authorization: "Basic " + btoa("nhat:67e43036-a35e-11ef-8fc0-0242ac150002"),
+                    "Content-Type": "application/json",
+                },
             });
+            const iceServers = await response.json();
+            return iceServers.v.iceServers;
+        } catch (err) {
+            console.error("Failed to fetch ICE servers:", err);
+            return [{ urls: "stun:stun.l.google.com:19302" }];
         }
+    }
 
-        let localStream;
-
-        // Hàm nhận cuộc gọi
-        function listen() {
-            peer.on("call", (call) => {
-                navigator.getUserMedia(
-                    { audio: true, video: false }, // Chỉ yêu cầu audio
-                    (stream) => {
-                        localStream = stream;
-                        call.answer(stream); // Trả lời cuộc gọi với audio stream
-
-                        call.on("stream", (remoteStream) => {
-                            console.log("Voice call connected to remote user.");
-                            // Bạn có thể bổ sung logic tại đây nếu cần hiển thị trạng thái
-                        });
-                    },
-                    (err) => {
-                        console.error("Failed to access microphone:", err);
-                    }
-                );
-            });
-        }
-
-        // Hàm bắt đầu cuộc gọi
-        function startCall(otherUserId) {
-            navigator.getUserMedia(
-                { audio: true, video: false }, // Chỉ yêu cầu audio
-                (stream) => {
+    // Lắng nghe cuộc gọi đến
+    function listen() {
+        peer.on("call", (call) => {
+            navigator.mediaDevices.getUserMedia({ audio: true }) // Chỉ yêu cầu microphone
+                .then((stream) => {
+                    localAudio.srcObject = stream; // Phát âm thanh của chính mình
                     localStream = stream;
 
-                    const call = peer.call(otherUserId, stream);
-                    if (!call) {
-                        console.error("Call failed to connect.");
-                        return;
-                    }
+                    call.answer(stream); // Trả lời cuộc gọi
 
-                    console.log("Voice call started.");
                     call.on("stream", (remoteStream) => {
-                        console.log("Connected to remote user's voice stream.");
-                        // Bạn có thể bổ sung logic tại đây nếu cần hiển thị trạng thái
+                        remoteAudio.srcObject = remoteStream; // Phát âm thanh từ người gọi đến
+                        console.log("Audio call connected.");
                     });
-                },
-                (err) => {
-                    console.error("Failed to access microphone:", err);
-                }
-            );
-        }
+                })
+                .catch((err) => console.error("Failed to access microphone:", err));
+        });
+    }
 
-        // Bật/tắt micro
-        function toggleAudio(b) {
-            if (localStream) {
-                localStream.getAudioTracks()[0].enabled = b === "true";
-            }
+    // Bắt đầu cuộc gọi
+    function startCall(otherUserId) {
+        navigator.mediaDevices.getUserMedia({ audio: true }) // Chỉ yêu cầu microphone
+            .then((stream) => {
+                localAudio.srcObject = stream; // Phát âm thanh của chính mình
+                localStream = stream;
+
+                const call = peer.call(otherUserId, stream); // Gửi cuộc gọi
+                call.on("stream", (remoteStream) => {
+                    remoteAudio.srcObject = remoteStream; // Nhận âm thanh từ người kia
+                    console.log("Audio call started.");
+                });
+            })
+            .catch((err) => console.error("Failed to access microphone:", err));
+    }
+
+    // Bật/tắt microphone
+    function toggleAudio(enabled) {
+        if (localStream) {
+            localStream.getAudioTracks()[0].enabled = enabled === "true";
         }
-    </script>
+    }
+</script>
 </body>
+
 </html>
