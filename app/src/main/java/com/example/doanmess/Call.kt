@@ -28,6 +28,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
@@ -42,7 +43,7 @@ class Call : AppCompatActivity() {
     var uniqueId = ""
     var isPeerConnected = false
 
-    var firebaseRef =  Firebase.database.getReference("calls")
+    var firebaseRef: DatabaseReference = Firebase.database.reference.child("call")
     val webView by lazy { findViewById<WebView>(R.id.webView) }
     val acceptBtnCard by lazy { findViewById<CardView>(R.id.acceptBtnCard) }
     val rejectBtnCard by lazy { findViewById<CardView>(R.id.rejectBtnCard) }
@@ -72,6 +73,7 @@ class Call : AppCompatActivity() {
         if(!isVideoCall){
             toggleVideoBtn.visibility = View.GONE
             voiceBackgroundImg.visibility = View.VISIBLE
+            firebaseRef= Firebase.database.reference.child("callvoices")
         }
         uniqueId = getUniqueID()
         setupWebView()
