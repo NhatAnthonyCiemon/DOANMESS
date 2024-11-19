@@ -37,6 +37,7 @@ class Home : HandleOnlineActivity() {
     private lateinit var auth: FirebaseAuth
     private var User: FirebaseUser? =null
     private var dbfirestore = Firebase.firestore
+    var call = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

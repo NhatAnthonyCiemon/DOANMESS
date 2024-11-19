@@ -81,6 +81,34 @@ class MessageController {
                 Log.e("Error", e.toString())
             }
     }
+    fun callVideoFriend(uid_other: String, uid: String){
+        Firebase.firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val name = document.get("Name") as? String ?: ""
+                    val content = name +" đã gọi video"
+                    val title = "Cuộc gọi video mới"
+                    sendAPIRequest("https://android-backend-3day.vercel.app/callperson/$uid_other/$uid/$content/$title")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Error", e.toString())
+            }
+    }
+    fun callVoiceFriend(uid_other: String, uid: String){
+        Firebase.firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val name = document.get("Name") as? String ?: ""
+                    val content = name +" đã gọi voice"
+                    val title = "Cuộc gọi voice mới"
+                    sendAPIRequest("https://android-backend-3day.vercel.app/callvoiceperson/$uid_other/$uid/$content/$title")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Error", e.toString())
+            }
+    }
     fun sendAPIRequest(url: String) {
         CoroutineScope(Dispatchers.IO).launch {
             var connection: HttpURLConnection? = null

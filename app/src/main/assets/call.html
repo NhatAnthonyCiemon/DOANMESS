@@ -8,7 +8,7 @@
         <script src="peerjs.js"></script>
 
         <video class="secondary-video" autoplay id="remote-video"></video>
-        <video class="primary-video" autoplay id="local-video"></video>
+        <video class="primary-video" autoplay muted id="local-video"></video>
 
         <script>
 
@@ -66,7 +66,7 @@
               }, (stream) => {
                   localVideo.srcObject = stream
                   localStream = stream
-
+                  localVideo.muted = true;
                   call.answer(stream)
                   call.on('stream', (remoteStream) => {
                       remoteVideo.srcObject = remoteStream
@@ -89,7 +89,7 @@
 
               localVideo.srcObject = stream
               localStream = stream
-
+               localVideo.muted = true;
               const call = peer.call(otherUserId, stream)
               if (!call){
                   Android.onCallError()

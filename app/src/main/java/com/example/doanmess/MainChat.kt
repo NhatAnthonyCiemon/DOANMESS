@@ -75,6 +75,8 @@ class MainChat : AppCompatActivity() {
     private val storage = FirebaseStorage.getInstance()
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var locationBtn: ImageButton
+    private lateinit var videoCallBtn: ImageButton
+    private lateinit var callVoiceBtn: ImageButton
     data class ChatMessage(
         val content: String = "",
         val sendId: String = "",
@@ -135,7 +137,8 @@ class MainChat : AppCompatActivity() {
 //        })
 
 
-
+        videoCallBtn = findViewById(R.id.videoCallBtn)
+        callVoiceBtn = findViewById(R.id.callVoiceBtn)
         // Set up the RecyclerView
         chatAdapter = ChatAdapter(chatMessages, isGroup)
         recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
@@ -328,6 +331,22 @@ class MainChat : AppCompatActivity() {
         locationBtn.setOnClickListener {
             //send current location
             sendCurrentLocation()
+        }
+        videoCallBtn.setOnClickListener {
+            val intent = Intent(this, Call::class.java)
+            intent.putExtra("friendId", targetUserUid)
+            intent.putExtra("call", true)
+            intent.putExtra("isVideoCall", true)
+            startActivity(intent)
+            MessageController().callVideoFriend(targetUserUid, currentUserUid)
+        }
+        callVoiceBtn.setOnClickListener {
+            val intent = Intent(this, Call::class.java)
+            intent.putExtra("friendId", targetUserUid)
+            intent.putExtra("call", true)
+            intent.putExtra("isVideoCall", false)
+            startActivity(intent)
+            MessageController().callVoiceFriend(targetUserUid, currentUserUid)
         }
     }
 

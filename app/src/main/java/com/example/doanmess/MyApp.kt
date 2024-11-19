@@ -17,6 +17,12 @@ class MyApp: Application() {
             )
             val notificationManager = getSystemService(android.app.NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
+            val channel2 = android.app.NotificationChannel(
+                "CALL_CHANNEL",
+                "Call Notifications",
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationManager.createNotificationChannel(channel2)
         }
     }
 

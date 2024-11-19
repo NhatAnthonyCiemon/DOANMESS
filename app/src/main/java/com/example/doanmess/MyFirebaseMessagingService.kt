@@ -34,8 +34,8 @@ import java.net.URL
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        val title = remoteMessage.notification?.title ?: "Default Title"
-        val message = remoteMessage.notification?.body ?: "Default Message"
+        var title = remoteMessage.notification?.title ?: "Default Title"
+        var message = remoteMessage.notification?.body ?: "Default Message"
         val uid = remoteMessage.data["uid"] ?: "Default UID"
 
         val type = remoteMessage.data["type"] ?: "Default Type"
@@ -56,7 +56,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         showHighPriorityNotification(this, title, message,"",id_group)
                     }
             }
-            else{
+            else if(type =="personal"){
                 Firebase.firestore.collection("users").document(uid).get()
                     .addOnSuccessListener { document ->
                         if (document.exists()) {
@@ -66,6 +66,34 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     }
                     .addOnFailureListener { e ->
                         showHighPriorityNotification(this, title, message,"",uid)
+                    }
+            }
+            else if(type =="call"){
+                title = remoteMessage.data["title"] ?: "Default Title"
+                message = remoteMessage.data["body"] ?: "Default Message"
+                Firebase.firestore.collection("users").document(uid).get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val url = document.get("Avatar") as? String ?: ""
+                            showHighPriorityNotificationCall(this, title, message,url,uid,true)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        showHighPriorityNotificationCall(this, title, message,"",uid,true)
+                    }
+            }
+            else if (type =="callvoice"){
+                title = remoteMessage.data["title"] ?: "Default Title"
+                message = remoteMessage.data["body"] ?: "Default Message"
+                Firebase.firestore.collection("users").document(uid).get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val url = document.get("Avatar") as? String ?: ""
+                            showHighPriorityNotificationCall(this, title, message,url,uid,false)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        showHighPriorityNotificationCall(this, title, message,"",uid,false)
                     }
             }
         }
@@ -123,7 +151,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             if(url != ""){
                 GlobalScope.launch {
                     bitmapAvatar = loadBitmapFromUrl(url,id)
-                    val intent = Intent(context, MainChat::class.java).apply {
+                    val intent = Intent(context, Home::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     }
 
@@ -146,8 +174,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 }
             }
             else{
-                val intent = Intent(context, MainChat::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                val intent = Intent(context, Home::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
 
                 val pendingIntent: PendingIntent =
@@ -170,7 +198,94 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         }
     }
+    private fun showHighPriorityNotificationCall(context: Context, title: String, message: String, url: String, id: String,isVideo: Boolean) {
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            val channelId = "MESSAGE"
+            var bitmapAvatar: Bitmap? = null
+            if (url != "") {
+                GlobalScope.launch {
+                    bitmapAvatar = loadBitmapFromUrl(url, id)
+                    var intent: Intent? = null
+                    if(isVideo){
+                        intent = Intent(context, Call::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            putExtra("friendId", id)
+                            putExtra("call", false)
+                            putExtra("isVideoCall", true)
+                        }
+                    }
+                    else{
+                        intent = Intent(context, Call::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            putExtra("friendId", id)
+                            putExtra("call", false)
+                            putExtra("isVideoCall", false)
+                        }
+                    }
 
+                    val pendingIntent: PendingIntent = PendingIntent.getActivity(
+                        context,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+
+                    val builder = NotificationCompat.Builder(context, channelId)
+                        .setSmallIcon(R.drawable.checkmark2)
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setAutoCancel(true)
+                        .setLargeIcon(bitmapAvatar)
+                        .setContentIntent(pendingIntent)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+                    with(NotificationManagerCompat.from(context)) {
+                        notify(getTimeCurrent(), builder.build())
+                    }
+                }
+            } else {
+                var intent: Intent? = null
+                if(isVideo){
+                    intent = Intent(context, Call::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        putExtra("friendId", id)
+                        putExtra("call", false)
+                        putExtra("isVideoCall", true)
+                    }
+                }
+                else{
+                    intent = Intent(context, Call::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        putExtra("friendId", id)
+                        putExtra("call", false)
+                        putExtra("isVideoCall", false)
+                    }
+                }
+
+                val pendingIntent: PendingIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val builder = NotificationCompat.Builder(context, channelId)
+                    .setSmallIcon(R.drawable.checkmark2)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+                with(NotificationManagerCompat.from(context)) {
+                    notify(getTimeCurrent(), builder.build())
+                }
+            }
+        }
+    }
     fun getTimeCurrent(): Int {
         return System.currentTimeMillis().toInt()
     }

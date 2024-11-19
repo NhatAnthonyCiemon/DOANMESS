@@ -362,6 +362,7 @@ class AllChatFra : Fragment() {
     }
 
     fun PauseRealTimeListen() {
+        list.clear()
         if (::userListener.isInitialized) {
             Firebase.database.getReference("users").child(User!!.uid).removeEventListener(userListener)
             userListener = object : ValueEventListener {
