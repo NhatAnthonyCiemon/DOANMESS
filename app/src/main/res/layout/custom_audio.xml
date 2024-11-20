@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#A1303030"
+    android:paddingHorizontal="7dp"
+>
+    <ImageButton
+        android:id="@id/exo_play_pause"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_gravity="center"
+        android:background="?attr/selectableItemBackground"
+        android:contentDescription="@string/exo_controls_play_description"
+        android:src="@drawable/baseline_play_circle_filled_24" />
+
+    <androidx.media3.ui.DefaultTimeBar
+        android:id="@id/exo_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:played_color="@color/white"
+        app:unplayed_color="@color/white"
+        app:buffered_color="@color/white"
+        app:scrubber_color="@color/white" />
+
+</LinearLayout>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -15,68 +16,53 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-
         android:textColor="@android:color/white"
         android:textSize="12sp" />
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <androidx.cardview.widget.CardView
+        android:layout_marginHorizontal="8dp"
+        android:padding="5dp"
         android:id="@+id/audioPlayerLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone">
-        <ImageView
-            android:id="@+id/playButton"
-            android:layout_width="40dp"
+        app:cardCornerRadius="40dp"
+        android:visibility="gone"
+       >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="200dp"
             android:layout_height="40dp"
-            android:src="@drawable/black_play"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <ImageView
-            android:id="@+id/pauseButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/black_pause"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <ProgressBar
-            android:id="@+id/LoadingBar"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:translationZ="5dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/audioPlayerView"
-            app:layout_constraintEnd_toEndOf="@+id/audioPlayerView"
-            app:layout_constraintHorizontal_bias="0.536"
-            app:layout_constraintStart_toStartOf="@+id/audioPlayerView"
-            app:layout_constraintTop_toTopOf="@+id/audioPlayerView" />
+            android:background="#C6323131"
+            >
 
 
 
-        <ProgressBar
-            android:id="@+id/audioProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="105dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            <ProgressBar
+                android:indeterminateTint="@color/white"
+                android:id="@+id/LoadingBar"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:translationZ="5dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf= "parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            android:max="100"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/audioPlayerView"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:visibility="gone"
+                app:controller_layout_id="@layout/custom_audio"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/audioPlayerView"
-            android:layout_width="150dp"
-            android:layout_height="45dp"
-            android:src="@drawable/audio_player_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
         android:layout_width="200dp"
@@ -118,10 +104,10 @@
         android:background="@drawable/rounded_background_white"
         android:textColor="@android:color/holo_orange_dark"
         android:padding="10dp"
+        android:layout_marginHorizontal="8dp"
         android:layout_gravity="end"
         android:text="Sent message"
-        android:maxWidth="250dp"
-        android:layout_marginStart="5dp"/>
+        android:maxWidth="250dp" />
 
      <!-- Add padding for timestamp -->
 

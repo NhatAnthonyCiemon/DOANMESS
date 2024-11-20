@@ -78,6 +78,7 @@ class MainChat : AppCompatActivity() {
     private lateinit var videoCallBtn: ImageButton
     private lateinit var callVoiceBtn: ImageButton
     data class ChatMessage(
+        val chatId : String = "",
         val content: String = "",
         val sendId: String = "",
         val recvId: String = "",
@@ -174,6 +175,7 @@ class MainChat : AppCompatActivity() {
                             val type =
                                 messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                             val chatMessage = ChatMessage(
+                                chatId = messageSnapshot.key ?: "",
                                 content = content,
                                 sendId = sendId,
                                 recvId = recvId,
@@ -230,6 +232,7 @@ class MainChat : AppCompatActivity() {
 
                         val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                         val chatMessage = ChatMessage(
+                            chatId = messageSnapshot.key ?: "",
                             content = content,
                             sendId = sendId,
                             recvId = recvId,
