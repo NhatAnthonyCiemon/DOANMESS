@@ -25,6 +25,7 @@
 
             android:textColor="@android:color/white" />
         <androidx.cardview.widget.CardView
+            android:layout_marginEnd="5dp"
             android:padding="5dp"
             android:id="@+id/audioPlayerLayout"
             android:layout_width="wrap_content"

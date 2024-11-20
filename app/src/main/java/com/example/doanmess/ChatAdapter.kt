@@ -131,7 +131,9 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
     fun releaseResources() {
         // Release the ExoPlayer
         if(::player.isInitialized) player.release()
-        if(::audioPlayer.isInitialized) audioPlayer.release()
+        for((_, player) in audioPlayerLists){
+            player.release()
+        }
     }
     override fun getItemCount(): Int {
         return chatMessages.size
@@ -157,12 +159,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 cardVideo.visibility = View.VISIBLE
 
                 // Khởi tạo ExoPlayer từ Media3
-                player = ExoPlayer.Builder(itemView.context).build()
+        /*        player = ExoPlayer.Builder(itemView.context).build()
                 videoMessageView.player = player
                 // Thiết lập video URL
                 val mediaItem = MediaItem.fromUri(chatMessage.content)
                 player.setMediaItem(mediaItem)
-                player.prepare()
+                player.prepare()*/
+                setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
 
             } else if (chatMessage.type == "image") {
                 cardVideo.visibility = View.GONE
@@ -186,7 +189,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 if (chatMessage.isSent) {
                     loadingBar.visibility = View.GONE
                     audioPlayerView.visibility= View.VISIBLE
-                    setupAudioPlayer(itemView.context, audioPlayerView, chatMessage.content)
+                    setupAudioPlayer(chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
                 } else {
                     audioPlayerView.visibility= View.GONE
                     loadingBar.visibility = View.VISIBLE
@@ -208,15 +211,32 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             return formatter.format(date)
         }
     }
-
-    private fun setupAudioPlayer(context: Context, audioPlayerView: PlayerView, content: String) {
-        audioPlayer = ExoPlayer.Builder(context).build()
-        val mediaItem = MediaItem.fromUri(content)
-        audioPlayer.setMediaItem(mediaItem)
-        audioPlayer.prepare()
-        audioPlayerView.player = audioPlayer
+    val audioPlayerLists : MutableMap<String,ExoPlayer> = mutableMapOf()
+    private fun setupAudioPlayer(chatId:String, context: Context, audioPlayerView: PlayerView, content: String) {
+        if(!audioPlayerLists.containsKey(chatId)){
+            val tmp = ExoPlayer.Builder(context).build()
+            val mediaItem = MediaItem.fromUri(content)
+            tmp!!.setMediaItem(mediaItem)
+            audioPlayerLists[chatId] = tmp
+      //      tmp.pause()
+        }
+        val tmp = audioPlayerLists[chatId]
+       // audioPlayer.prepare()
+        audioPlayerView.player = tmp
     }
-
+    fun setUpVideoPlayer(chatId:String, context: Context, playerView: PlayerView, content: String){
+        if(!audioPlayerLists.containsKey(chatId)){
+            val tmp = ExoPlayer.Builder(context).build()
+            audioPlayerLists[chatId] = tmp
+            // Thiết lập video URL
+            val mediaItem = MediaItem.fromUri(content)
+            tmp!!.setMediaItem(mediaItem)
+        }
+        val tmp = audioPlayerLists[chatId]
+        tmp!!.prepare()
+        // Khởi tạo ExoPlayer từ Media3
+        playerView.player = tmp
+    }
     // ViewHolder for received messages
     inner class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
@@ -234,12 +254,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 audioPlayerLayout.visibility = View.GONE
                 cardVideo.visibility = View.VISIBLE
                 // Khởi tạo ExoPlayer từ Media3
-                player = ExoPlayer.Builder(itemView.context).build()
+     /*           player = ExoPlayer.Builder(itemView.context).build()
                 videoMessageView.player = player
                 // Thiết lập video URL
                 val mediaItem = MediaItem.fromUri(chatMessage.content)
                 player.setMediaItem(mediaItem)
-                player.prepare()
+                player.prepare()*/
+                setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
 
             }else if (chatMessage.type == "image") {
                 messageTextView.visibility = View.GONE
@@ -262,8 +283,9 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
                 audioPlayerView.visibility= View.VISIBLE
-                setupAudioPlayer(itemView.context, audioPlayerView, chatMessage.content)
+                setupAudioPlayer(chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             } else {
+                cardVideo.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
@@ -299,15 +321,15 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 audioPlayerLayout.visibility = View.GONE
                 cardVideo.visibility = View.VISIBLE
                 // Khởi tạo ExoPlayer từ Media3
-                player = ExoPlayer.Builder(itemView.context).build()
+            /*    player = ExoPlayer.Builder(itemView.context).build()
                 videoMessageView.player = player
 
 
                 // Thiết lập video URL
                 val mediaItem = MediaItem.fromUri(chatMessage.content)
                 player.setMediaItem(mediaItem)
-                player.prepare()
-
+                player.prepare()*/
+                setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
             }else if (chatMessage.type == "image") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.GONE
@@ -327,9 +349,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
-
-                setupAudioPlayer(itemView.context, audioPlayerView, chatMessage.content)
+                audioPlayerView.visibility= View.VISIBLE
+                setupAudioPlayer(chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             } else {
+                cardVideo.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
@@ -385,13 +408,14 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 audioPlayerLayout.visibility = View.GONE
 
                 // Khởi tạo ExoPlayer từ Media3
-                player = ExoPlayer.Builder(itemView.context).build()
+            /*    player = ExoPlayer.Builder(itemView.context).build()
                 videoMessageView.player = player as Player
 
                 // Thiết lập video URL
                 val mediaItem = MediaItem.fromUri(chatMessage.content)
                 player.setMediaItem(mediaItem)
-                player.prepare()
+                player.prepare()*/
+                setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
             } else if (chatMessage.type == "image") {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
@@ -411,7 +435,8 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
-                setupAudioPlayer(itemView.context, audioPlayerView, chatMessage.content)
+                audioPlayerView.visibility= View.VISIBLE
+                setupAudioPlayer(chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             } else {
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
