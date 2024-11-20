@@ -96,6 +96,21 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         showHighPriorityNotificationCall(this, title, message,"",uid,false)
                     }
             }
+            else if(type =="callgroup"){
+                title = remoteMessage.data["title"] ?: "Default Title"
+                message = remoteMessage.data["body"] ?: "Default Message"
+                val id_group = remoteMessage.data["idGroup"] ?: "Default ID Group"
+                Firebase.firestore.collection("groups").document(id_group).get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val url = document.get("Avatar") as? String ?: ""
+                            showHighPriorityNotificationCallGroup(this, title, message,url,id_group,true)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        showHighPriorityNotificationCallGroup(this, title, message,"",id_group,true)
+                    }
+            }
         }
     }
     override fun onNewToken(token: String) {
@@ -135,9 +150,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             .addOnFailureListener { e -> Log.w("TAG", "Error updating document", e) }
 
     }
-
-
-
 
     private fun showHighPriorityNotification(context: Context, title: String, message: String,url : String,id : String) {
 
@@ -286,6 +298,96 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
         }
     }
+
+    private fun showHighPriorityNotificationCallGroup(context: Context, title: String, message: String, url: String, id: String,isVideo: Boolean){
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            val channelId = "MESSAGE"
+            var bitmapAvatar: Bitmap? = null
+            if (url != "") {
+                GlobalScope.launch {
+                    bitmapAvatar = loadBitmapFromUrl(url, id)
+                    var intent: Intent? = null
+                    if(isVideo){
+                        intent = Intent(context, CallGroup::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            putExtra("groupId", id)
+                            putExtra("call", false)
+                            putExtra("isVideoCall", true)
+                        }
+                    }
+                    else{
+                        intent = Intent(context, CallGroup::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            putExtra("groupId", id)
+                            putExtra("call", false)
+                            putExtra("isVideoCall", false)
+                        }
+                    }
+
+                    val pendingIntent: PendingIntent = PendingIntent.getActivity(
+                        context,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+
+                    val builder = NotificationCompat.Builder(context, channelId)
+                        .setSmallIcon(R.drawable.checkmark2)
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setAutoCancel(true)
+                        .setLargeIcon(bitmapAvatar)
+                        .setContentIntent(pendingIntent)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+                    with(NotificationManagerCompat.from(context)) {
+                        notify(getTimeCurrent(), builder.build())
+                    }
+                }
+            } else {
+                var intent: Intent? = null
+                if(isVideo){
+                    intent = Intent(context, CallGroup::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        putExtra("groupId", id)
+                        putExtra("call", false)
+                        putExtra("isVideoCall", false)
+                    }
+                }
+                else{
+                    intent = Intent(context, CallGroup::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        putExtra("groupId", id)
+                        putExtra("call", false)
+                        putExtra("isVideoCall", false)
+                    }
+                }
+
+                val pendingIntent: PendingIntent = PendingIntent.getActivity(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val builder = NotificationCompat.Builder(context, channelId)
+                    .setSmallIcon(R.drawable.checkmark2)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+                with(NotificationManagerCompat.from(context)) {
+                    notify(getTimeCurrent(), builder.build())
+                }
+            }
+        }
+    }
+
     fun getTimeCurrent(): Int {
         return System.currentTimeMillis().toInt()
     }

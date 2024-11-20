@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeerJS Group Video Call</title>
+    <link rel="stylesheet" href="./reset.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .video__contain {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            grid-template-rows: repeat(1, 1fr);
+            width: 100%;
+
+            background-color: #f0f0f0;
+            justify-content: center;
+        }
+
+        .video__item {
+            width: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+<div class="video__contain">
+    <video class="video__item" id="local-video" class="primary-video" autoplay muted></video>
+</div>
+<script src="./peerjs.js"></script>
+<script>
+    let localVideo = document.getElementById("local-video");
+    let remoteVideos = document.querySelector(".video__contain");
+    let peer;
+    let localStream;
+    let peerConnections = {};
+    const video__contain = document.querySelector(".video__contain");
+    //lấy chiêu rộng và chiều cao của video__contain
+    window.addEventListener("resize", widthAndHeight);
+    function widthAndHeight() {
+        const video__contain = document.querySelector(".video__contain");
+        const video__item = document.querySelectorAll(".video__item");
+        console.log(video__item.length);
+        const video__itemLength = video__item.length;
+        if (video__itemLength === 1) {
+            video__contain.style.gridTemplateColumns = "repeat(1, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(1, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight + "px";
+            });
+
+        } else if (video__itemLength === 2) {
+            video__contain.style.gridTemplateColumns = "repeat(1, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(2, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 2 + "px";
+            });
+
+        } else if (video__itemLength === 3) {
+            video__contain.style.gridTemplateColumns = "repeat(2, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(2, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 2 + "px";
+            });
+        } else if (video__itemLength === 4) {
+            video__contain.style.gridTemplateColumns = "repeat(2, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(2, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 2 + "px";
+            });
+        } else if (video__itemLength === 5) {
+            video__contain.style.gridTemplateColumns = "repeat(2, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(3, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 3 + "px";
+            });
+        } else if (video__itemLength === 6) {
+            video__contain.style.gridTemplateColumns = "repeat(2, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(3, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 3 + "px";
+            });
+        } else if (video__itemLength > 6) {
+            video__contain.style.gridTemplateColumns = "repeat(3, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(3, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 3 + "px";;
+            });
+        }
+
+    }
+    // Thiết lập PeerJS
+    function init(userId) {
+        async function getIceServers() {
+            const response = await fetch(
+                "https://global.xirsys.net/_turn/MyFirstApp",
+                {
+                    method: "PUT",
+                    headers: {
+                        Authorization: "Basic " + btoa("nhat:67e43036-a35e-11ef-8fc0-0242ac150002"),
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            const iceServers = await response.json();
+            return iceServers.v.iceServers;
+        }
+
+        // Sử dụng các ICE servers từ Xirsys trong cấu hình WebRTC
+        getIceServers().then((iceServers) => {
+            peer = new Peer(userId, {
+                host: "0.peerjs.com",
+                port: 443,
+                secure: true,
+                config: {
+                    iceServers: iceServers,
+                },
+            });
+
+            peer.on("open", () => {
+                console.log(`Peer opened with ID: ${peer.id}`);
+            });
+
+            listenForCalls();
+        });
+    }
+
+    // Lắng nghe cuộc gọi đến
+    function listenForCalls() {
+        peer.on("call", (call) => {
+            navigator.getUserMedia(
+                { audio: true, video: true },
+                (stream) => {
+                    localVideo.srcObject = stream;
+                    localStream = stream;
+                    localVideo.muted = true;
+
+                    call.answer(stream);
+
+                    // Lưu kết nối và xử lý stream của người gọi
+                    peerConnections[call.peer] = call;
+
+                    call.on("stream", (remoteStream) => {
+                        addRemoteVideo(call.peer, remoteStream);
+                    });
+                }
+            );
+        });
+    }
+
+    // Thêm video của thành viên vào giao diện
+    function addRemoteVideo(peerId, stream) {
+        let video = document.getElementById(peerId);
+        if (!video) {
+            video = document.createElement("video");
+            video.id = peerId;
+            video.autoplay = true;
+            video.className = "video__item";
+            remoteVideos.appendChild(video);
+            widthAndHeight();
+        }
+        video.srcObject = stream;
+    }
+
+    // Gọi nhóm (tất cả thành viên trong danh sách)
+    function startGroupCall(memberId) {
+        navigator.getUserMedia(
+            { audio: true, video: true },
+            (stream) => {
+                localVideo.srcObject = stream;
+                localStream = stream;
+                localVideo.muted = true;
+                if (memberId === peer.id) return; // Không gọi chính mình
+                const call = peer.call(memberId, stream);
+
+                // Lưu kết nối và xử lý stream của người gọi
+                peerConnections[memberId] = call;
+
+                call.on("stream", (remoteStream) => {
+                    addRemoteVideo(memberId, remoteStream);
+                });
+
+            }
+        );
+
+    }
+
+    // Khởi tạo peer với userId
+
+
+    // Xử lý khi người dùng bật/tắt video
+    function toggleVideo(b) {
+        if (b == "true") {
+            localStream.getVideoTracks()[0].enabled = true;
+        } else {
+            localStream.getVideoTracks()[0].enabled = false;
+        }
+    }
+
+    // Xử lý khi người dùng bật/tắt audio
+    function toggleAudio(b) {
+        if (b == "true") {
+            localStream.getAudioTracks()[0].enabled = true;
+        } else {
+            localStream.getAudioTracks()[0].enabled = false;
+        }
+    }
+    function deleteRemoteVideo(peerId) {
+            let video = document.getElementById(peerId);
+            if (video) {
+                video.remove();
+                widthAndHeight();
+            }
+        }
+</script>
+</body>
+
+</html>

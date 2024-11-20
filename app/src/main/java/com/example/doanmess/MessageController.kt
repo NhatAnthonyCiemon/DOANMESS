@@ -95,6 +95,21 @@ class MessageController {
                 Log.e("Error", e.toString())
             }
     }
+
+    fun callVideoGroup(idGroup: String, uid: String){
+        Firebase.firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val name = document.get("Name") as? String ?: ""
+                    val content = name +" đã gọi video"
+                    sendAPIRequest("https://android-backend-3day.vercel.app/callgroup/$idGroup/$uid/$content")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Error", e.toString())
+            }
+    }
+
     fun callVoiceFriend(uid_other: String, uid: String){
         Firebase.firestore.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
