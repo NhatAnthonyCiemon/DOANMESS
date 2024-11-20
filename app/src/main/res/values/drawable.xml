@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="exo_styled_controls_pause">
+        @drawable/baseline_pause_circle_24
+    </drawable>
+
+    <drawable name="exo_styled_controls_play">
+        @drawable/baseline_play_24
+    </drawable>
+</resources>
