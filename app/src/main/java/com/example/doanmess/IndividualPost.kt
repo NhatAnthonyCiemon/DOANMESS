@@ -21,7 +21,7 @@ class IndividualPost : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var postAdapter: PostAdapter
     private lateinit var backBtn: ImageButton
-    private lateinit var messageBtn: Button
+    private lateinit var messageBtn: ImageButton
     private var currentUser = ""
     private var targetUser = ""
     private val postList = mutableListOf<Post>()
@@ -60,9 +60,15 @@ class IndividualPost : AppCompatActivity() {
             startActivity(intent)
         }
 
+      //  loadPosts()
+    }
+    override fun onResume() {
+        super.onResume()
+        Log.d("PostActivity", "onResume")
+        postList.clear()
+        postAdapter.notifyDataSetChanged()
         loadPosts()
     }
-
     private fun loadPosts() {
         val firestore = FirebaseFirestore.getInstance()
         firestore.collection("users").document(targetUser).get()
@@ -125,6 +131,10 @@ class IndividualPost : AppCompatActivity() {
             }
     }
 
+    override fun onPause() {
+        super.onPause()
+        postAdapter.releaseAllPlayers()
+    }
     private fun navigateToIndividualPost(post: Post) {
         // do nothing
     }

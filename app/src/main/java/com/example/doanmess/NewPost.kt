@@ -7,6 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -17,6 +18,9 @@ import android.widget.ImageView
 import android.widget.MediaController
 import android.widget.Toast
 import android.widget.VideoView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -28,10 +32,10 @@ class NewPost : AppCompatActivity() {
     private lateinit var chooseMediaButton: Button
     private lateinit var uploadPostButton: Button
     private lateinit var imagePreview: ImageView
-    private lateinit var videoPreview: VideoView
+    private lateinit var videoPreview: PlayerView
     private lateinit var backgound: ImageView
     private var selectedMediaUri: Uri? = null
-
+    private var audioPlayer : ExoPlayer? =null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -58,6 +62,7 @@ class NewPost : AppCompatActivity() {
         uploadPostButton.setOnClickListener {
             uploadPost()
         }
+
     }
 
     private fun chooseMedia() {
@@ -78,25 +83,31 @@ class NewPost : AppCompatActivity() {
                 Log.d("NewPost", "Selected media: $uri, MIME type: $mimeType")
            //     backgound.visibility = ImageView.VISIBLE
                 if (mimeType?.startsWith("video/") == true) {
-                    videoPreview.setVideoURI(uri)
-                    videoPreview.visibility = VideoView.VISIBLE
-                    videoPreview.setOnPreparedListener {
-                        val mediaController = MediaController(this)
-                        videoPreview.setMediaController(mediaController)
-                        videoPreview.requestFocus()
-                        mediaController.setAnchorView(videoPreview)
-                        videoPreview.start()
-                    }
                     imagePreview.visibility = ImageView.GONE
-                } else if (mimeType?.startsWith("image/") == true) {
+                    videoPreview.visibility = VideoView.VISIBLE
+                    audioPlayer= ExoPlayer.Builder(videoPreview.context).build()
+                    val mediaItem = MediaItem.fromUri(uri)
+                    audioPlayer?.setMediaItem(mediaItem)
+                    videoPreview.player = audioPlayer
+                    audioPlayer?.prepare()
+                }
+                else if (mimeType?.startsWith("image/") == true) {
+                    backgound.visibility = ImageView.VISIBLE
                     imagePreview.setImageURI(uri)
                     imagePreview.visibility = ImageView.VISIBLE
                     videoPreview.visibility = VideoView.GONE
+                }else {
+                    // Handle other MIME types or show an error message
+                    Toast.makeText(this, "Unsupported media type", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        audioPlayer?.release()
+    }
     private fun uploadPost() {
         uploadPostButton.isEnabled = false
         val title = titleEditText.text.toString()

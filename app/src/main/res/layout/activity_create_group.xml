@@ -90,7 +90,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:text="Create Group"
-        android:textColor="#CFB369"
+        android:textColor="#fda13a"
         android:textSize="35dp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@+id/imageView9"

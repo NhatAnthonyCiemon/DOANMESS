@@ -58,6 +58,11 @@ class PostActivity : AppCompatActivity() {
         postAdapter.notifyDataSetChanged()
         loadPosts()
     }
+
+    override fun onPause() {
+        super.onPause()
+        postAdapter.releaseAllPlayers()
+    }
     private fun loadPosts() {
         val firestore = FirebaseFirestore.getInstance()
         val friendsRef = firestore.collection("users").document(currentUser)

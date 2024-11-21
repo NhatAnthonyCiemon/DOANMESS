@@ -9,54 +9,62 @@
 
     <ImageButton
         android:id="@+id/back_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@drawable/arrow_back"
-        app:layout_constraintBottom_toBottomOf="@+id/textView8"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textView8" />
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/messenger"
+        app:layout_constraintBottom_toBottomOf="@+id/addPost"
+        app:layout_constraintEnd_toStartOf="@+id/addPost"
+        app:layout_constraintTop_toTopOf="@+id/addPost"
+        app:layout_constraintVertical_bias="0.0"
+        android:translationZ="10dp"/>
 
     <TextView
         android:id="@+id/textView8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="New Posts"
-        android:textColor="#CFB369"
+        android:layout_marginStart="16dp"
+        android:text="DOANMESS"
         android:textSize="30dp"
+        android:fontFamily="@font/dancing"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/addPost"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toEndOf="@+id/back_button"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:translationZ="10dp"/>
 
     <ImageButton
         android:id="@+id/addPost"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@drawable/baseline_add_24"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/instagram"
         app:layout_constraintBottom_toBottomOf="@+id/textView8"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textView8" />
+        app:layout_constraintTop_toTopOf="@+id/textView8"
+        android:translationZ="10dp"/>
 
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"
-        android:layout_height="5dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="57dp"
         android:background="#A1A8A8A8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:translationZ="10dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_marginTop="8dp"
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view" />
+        app:layout_constraintTop_toBottomOf="@+id/view"
+        app:layout_constraintVertical_bias="0.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>
