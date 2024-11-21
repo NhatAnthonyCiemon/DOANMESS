@@ -19,12 +19,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
+import com.google.firebase.database.*
 import com.google.firebase.firestore.firestore
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
@@ -33,321 +28,244 @@ import java.io.IOException
 import java.util.UUID
 
 class CallGroup : AppCompatActivity() {
-    var userId = Firebase.auth.currentUser?.uid ?: ""
-    var groupId = ""
-    var uniqueId = ""
-    var isPeerConnected = false
-    var map_peer = mutableMapOf<String, String>()
-    var firebaseRef: DatabaseReference =   Firebase.database.getReference("callGroups")
-    val webView by lazy { findViewById<WebView>(R.id.webView) }
-    val acceptBtnCard by lazy { findViewById<CardView>(R.id.acceptBtnCard) }
-    val rejectBtnCard by lazy { findViewById<CardView>(R.id.rejectBtnCard) }
-    val endCallBtnCard by lazy { findViewById<CardView>(R.id.endCallBtnCard) }
-    val avatarCallCard by lazy { findViewById<CardView>(R.id.avatarCallCard) }
-    val timeTxt by lazy { findViewById<TextView>(R.id.timeTxt) }
-    val avatarCall by lazy { findViewById<ImageView>(R.id.avatarCall) }
-    val voiceBackgroundImg by lazy { findViewById<ImageView>(R.id.voiceBackgroundImg) }
-    val toggleAudioBtn by lazy { findViewById<ImageView>(R.id.toggleAudioBtn) }
-    val toggleVideoBtn by lazy { findViewById<ImageView>(R.id.toggleVideoBtn) }
-    val NameOtherTxt by lazy { findViewById<TextView>(R.id.NameOtherTxt) }
-    val callControlLayout by lazy { findViewById<LinearLayout>(R.id.callControlLayout) }
-    var call = false
-    var called = false
-    var isAudio = true
-    var isVideo = true
-    var isVideoCall = false
+    private val userId = Firebase.auth.currentUser?.uid ?: ""
+    private var groupId = ""
+    private var uniqueId = ""
+    private var isPeerConnected = false
+    private val mapPeer = mutableMapOf<String, String>()
+    private lateinit var firebaseRef: DatabaseReference
+    private val webView by lazy { findViewById<WebView>(R.id.webView) }
+    private val acceptBtnCard by lazy { findViewById<CardView>(R.id.acceptBtnCard) }
+    private val rejectBtnCard by lazy { findViewById<CardView>(R.id.rejectBtnCard) }
+    private val endCallBtnCard by lazy { findViewById<CardView>(R.id.endCallBtnCard) }
+    private val avatarCallCard by lazy { findViewById<CardView>(R.id.avatarCallCard) }
+    private val timeTxt by lazy { findViewById<TextView>(R.id.timeTxt) }
+    private val avatarCall by lazy { findViewById<ImageView>(R.id.avatarCall) }
+    private val voiceBackgroundImg by lazy { findViewById<ImageView>(R.id.voiceBackgroundImg) }
+    private val toggleAudioBtn by lazy { findViewById<ImageView>(R.id.toggleAudioBtn) }
+    private val toggleVideoBtn by lazy { findViewById<ImageView>(R.id.toggleVideoBtn) }
+    private val nameOtherTxt by lazy { findViewById<TextView>(R.id.NameOtherTxt) }
+    private val callControlLayout by lazy { findViewById<LinearLayout>(R.id.callControlLayout) }
+    private var call = false
+    private var called = false
+    private var isAudio = true
+    private var isVideo = true
+    private var isVideoCall = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_call_group)
+        setupWindowInsets()
+        initializeVariables()
+        setupWebView()
+        if (call) setupCallerUI() else setupReceiverUI()
+        setupButtonListeners()
+    }
+
+    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+
+    private fun initializeVariables() {
         groupId = intent.getStringExtra("groupId") ?: ""
         call = intent.getBooleanExtra("call", false)
         isVideoCall = intent.getBooleanExtra("isVideoCall", false)
-        if(!isVideoCall){
-            toggleVideoBtn.visibility = View.GONE
-            voiceBackgroundImg.visibility = View.VISIBLE
-            firebaseRef=  Firebase.database.getReference("callGroupsvoices")
+        uniqueId = UUID.randomUUID().toString()
+        firebaseRef = Firebase.database.getReference(if (isVideoCall) "callGroups" else "callGroupsvoices")
+    }
+
+    private fun setupWebView() {
+        webView.apply {
+            webChromeClient = object : WebChromeClient() {
+                override fun onPermissionRequest(request: PermissionRequest?) {
+                    request?.grant(request.resources)
+                }
+            }
+            settings.javaScriptEnabled = true
+            settings.mediaPlaybackRequiresUserGesture = false
+            addJavascriptInterface(JavascriptInterfaceVer(this@CallGroup), "Android")
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    initializePeer()
+                }
+            }
+            loadUrl(if (isVideoCall) "https://call-bkxs.vercel.app" else "file:android_asset/callgroupvoice.html")
         }
-        uniqueId = getUniqueID()
-        setupWebView()
-        if(call){
-            acceptBtnCard.visibility = View.GONE
-            rejectBtnCard.visibility = View.GONE
-            endCallBtnCard.visibility = View.VISIBLE
-            avatarCallCard.visibility = View.VISIBLE
-            Firebase.firestore.collection("groups").document(groupId).get().addOnSuccessListener { document ->
-                val avatar = document.getString("Avatar")
-                (this@CallGroup as? LifecycleOwner)?.lifecycleScope?.launch {
-                    try {
-                        val ImageLoader = ImageLoader(this@CallGroup)
-                        val path = ImageLoader.checkFile(avatar!!, groupId)
-                        if(path != avatar && File(path).exists()) {
-                            Picasso.get().load(File(path)).into(avatarCall)
-                        }
-                        else {
-                            Picasso.get().load(avatar).into(avatarCall)
-                        }
+    }
+
+    private fun setupCallerUI() {
+        acceptBtnCard.visibility = View.GONE
+        rejectBtnCard.visibility = View.GONE
+        endCallBtnCard.visibility = View.VISIBLE
+        avatarCallCard.visibility = View.VISIBLE
+        loadGroupInfo()
+        firebaseRef.child(groupId).child(userId).setValue(uniqueId)
+        firebaseRef.child(groupId).addChildEventListener(childEventListener)
+    }
+
+    private fun setupReceiverUI() {
+        callControlLayout.visibility = View.GONE
+        endCallBtnCard.visibility = View.GONE
+        avatarCallCard.visibility = View.VISIBLE
+        loadGroupInfo()
+        firebaseRef.child(groupId).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists()) finish()
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    private fun loadGroupInfo() {
+        Firebase.firestore.collection("groups").document(groupId).get().addOnSuccessListener { document ->
+            val avatar = document.getString("Avatar")
+            val name = document.getString("Name")
+            nameOtherTxt.text = name
+            (this@CallGroup as? LifecycleOwner)?.lifecycleScope?.launch {
+                try {
+                    val imageLoader = ImageLoader(this@CallGroup)
+                    val path = imageLoader.checkFile(avatar!!, groupId)
+                    if (path != avatar && File(path).exists()) {
+                        Picasso.get().load(File(path)).into(avatarCall)
+                    } else {
+                        Picasso.get().load(avatar).into(avatarCall)
                     }
-                    catch (e: IOException) {
-                        e.printStackTrace()
-                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
             }
-            Firebase.firestore.collection("groups").document(groupId).get().addOnSuccessListener { document ->
-                val name = document.getString("Name")
-                NameOtherTxt.text = name
-            }
-            firebaseRef.child(groupId).child(userId).setValue(uniqueId)
-            firebaseRef.child(groupId).addChildEventListener(object : ChildEventListener {
-                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                    // Một phần tử mới được thêm vào
-                    val key = snapshot.key.toString() // Key của trường con (VD: ENEHBGCHHNbSvr6628p1L6hh8wS2)
-                    val value = snapshot.value.toString() // Giá trị của trường con
-
-                    if (key != userId && map_peer[key] == null) {
-                        // Thêm vào map và xử lý logic kết nối
-                        map_peer[key] = value
-                        listenForConnId(value)
-                    }
-                }
-
-                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-
-                }
-
-                override fun onChildRemoved(snapshot: DataSnapshot) {
-                    // Một trường con bị xóa
-                    val key = snapshot.key.toString() // Key của trường con bị xóa
-                    val peerId = map_peer[key] // Lấy giá trị tương ứng từ map_peer
-
-                    if (peerId != null) {
-                        // Thực hiện logic khi xóa, ví dụ: loại bỏ video
-                        callJavascriptFunction("javascript:deleteRemoteVideo(\"${peerId}\")")
-                        map_peer.remove(key)
-                    }
-                }
-
-                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                    // Không cần xử lý nếu không có yêu cầu cụ thể
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("Firebase", "Error: ${error.message}")
-                }
-            })
         }
-        else{
-            callControlLayout.visibility = View.GONE
-            endCallBtnCard.visibility = View.GONE
-            avatarCallCard.visibility = View.VISIBLE
+    }
 
-            Firebase.firestore.collection("groups").document(groupId).get().addOnSuccessListener { document ->
-                val avatar = document.getString("Avatar")
-                (this@CallGroup as? LifecycleOwner)?.lifecycleScope?.launch {
-                    try {
-                        val ImageLoader = ImageLoader(this@CallGroup)
-                        val path = ImageLoader.checkFile(avatar!!, groupId)
-                        if(path != avatar && File(path).exists()) {
-                            Picasso.get().load(File(path)).into(avatarCall)
-                        }
-                        else {
-                            Picasso.get().load(avatar).into(avatarCall)
-                        }
-                    }
-                    catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-                }
-
-            }
-            Firebase.firestore.collection("groups").document(groupId).get().addOnSuccessListener { document ->
-                val name = document.getString("Name")
-                NameOtherTxt.text = name
-            }
-
-            firebaseRef.child(groupId).addValueEventListener(object: ValueEventListener {
-                override fun onCancelled(error: DatabaseError) {}
-
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    //kiểm tra snapshot có tồn tại không
-                    if (!snapshot.exists()) {
-                        finish()
-                    }
-                }
-
-            })
-        }
-
+    private fun setupButtonListeners() {
         toggleAudioBtn.setOnClickListener {
             isAudio = !isAudio
-            callJavascriptFunction("javascript:toggleAudio(\"${isAudio}\")")
-            toggleAudioBtn.setImageResource(if (isAudio) R.drawable.ic_baseline_mic_24 else R.drawable.ic_baseline_mic_off_24 )
+            callJavascriptFunction("javascript:toggleAudio(\"$isAudio\")")
+            toggleAudioBtn.setImageResource(if (isAudio) R.drawable.ic_baseline_mic_24 else R.drawable.ic_baseline_mic_off_24)
         }
 
         toggleVideoBtn.setOnClickListener {
             isVideo = !isVideo
-            callJavascriptFunction("javascript:toggleVideo(\"${isVideo}\")")
-            toggleVideoBtn.setImageResource(if (isVideo) R.drawable.ic_baseline_videocam_24 else R.drawable.ic_baseline_videocam_off_24 )
+            callJavascriptFunction("javascript:toggleVideo(\"$isVideo\")")
+            toggleVideoBtn.setImageResource(if (isVideo) R.drawable.ic_baseline_videocam_24 else R.drawable.ic_baseline_videocam_off_24)
         }
+
         endCallBtnCard.setOnClickListener {
             firebaseRef.child(groupId).child(userId).setValue(null)
             finish()
         }
 
-    }
-
-
-
-    private fun listenForConnId(id_other: String) {
-        if(id_other == uniqueId) return
-        webView.visibility = View.VISIBLE
-        if(isVideoCall){
-            avatarCallCard.visibility = View.GONE
-            NameOtherTxt.visibility = View.GONE
-            timeTxt.visibility = View.GONE
-        }
-        else{
-            timeTxt.visibility = View.VISIBLE
-            CallTimer(timeTxt).start()
-        }
-        switchToControls()
-        callJavascriptFunction("javascript:startGroupCall(\"${id_other}\")")
-    }
-
-    private fun setupWebView() {
-
-        webView.webChromeClient = object: WebChromeClient() {
-            override fun onPermissionRequest(request: PermissionRequest?) {
-                request?.grant(request.resources)
-            }
-        }
-
-        webView.settings.javaScriptEnabled = true
-        webView.settings.mediaPlaybackRequiresUserGesture = false
-        webView.addJavascriptInterface(JavascriptInterfaceVer(this), "Android")
-
-        loadVideoCall()
-    }
-
-    private fun loadVideoCall() {
-        var filePath = "file:android_asset/callgroup.html"//"https://call-bkxs.vercel.app"
-        if(!isVideoCall){
-            filePath = "file:android_asset/callgroupvoice.html"
-        }
-        webView.loadUrl(filePath)
-
-        webView.webViewClient = object: WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                initializePeer()
-            }
-        }
-    }
-
-
-
-    private fun initializePeer() {
-
-        webView.evaluateJavascript("javascript:init(\"${uniqueId}\")") { result ->
-            // Xử lý kết quả trả về
-            if (result.isNotEmpty()) {
-                Log.d("JavaScript Result", result)  // Lỗi có thể xuất hiện ở đây
-            }
-        }
-        if(call) return
-        onCallRequest()
-
-    }
-
-    private fun onCallRequest() {
-
         acceptBtnCard.setOnClickListener {
             called = true
             webView.visibility = View.VISIBLE
-            if(isVideoCall){
+            if (isVideoCall) {
                 avatarCallCard.visibility = View.GONE
-                NameOtherTxt.visibility = View.GONE
-            }
-            else{
+                nameOtherTxt.visibility = View.GONE
+            } else {
                 timeTxt.visibility = View.VISIBLE
                 CallTimer(timeTxt).start()
             }
             firebaseRef.child(groupId).child(userId).setValue(uniqueId)
-
             acceptBtnCard.visibility = View.GONE
             rejectBtnCard.visibility = View.GONE
             endCallBtnCard.visibility = View.VISIBLE
             switchToControls()
-            firebaseRef.child(groupId).addChildEventListener(object : ChildEventListener {
-                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                    // Khi một trường con mới được thêm vào
-                    val key = snapshot.key.toString() // Key của trường con mới
-                    val value = snapshot.value.toString() // Giá trị của trường con mới
-
-                    if (key != userId && map_peer[key] == null) {
-                        // Thêm vào map và xử lý logic kết nối
-                        map_peer[key] = value
-                        listenForConnId(value)
-                    }
-                }
-
-                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-
-                }
-
-                override fun onChildRemoved(snapshot: DataSnapshot) {
-                    // Một trường con bị xóa
-                    val key = snapshot.key.toString() // Key của trường con bị xóa
-                    val peerId = map_peer[key] // Lấy giá trị tương ứng từ map_peer
-
-                    if (peerId != null) {
-                        // Thực hiện logic khi xóa, ví dụ: loại bỏ video
-                        callJavascriptFunction("javascript:deleteRemoteVideo(\"${peerId}\")")
-                        map_peer.remove(key)
-                    }
-                }
-
-                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                    // Không cần xử lý nếu không có yêu cầu cụ thể
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("Firebase", "Error: ${error.message}")
-                }
-            })
-
+            firebaseRef.child(groupId).addChildEventListener(childEventListener)
         }
 
         rejectBtnCard.setOnClickListener {
             finish()
         }
+    }
 
+    private val childEventListener = object : ChildEventListener {
+        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            val key = snapshot.key.toString()
+            val value = snapshot.value.toString()
+            if (key != userId && mapPeer[key] == null) {
+                mapPeer[key] = value
+                listenForConnId(value)
+            }
+        }
+
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+
+        override fun onChildRemoved(snapshot: DataSnapshot) {
+            val key = snapshot.key.toString()
+            val peerId = mapPeer[key]
+            if (peerId != null) {
+                callJavascriptFunction("javascript:deleteRemoteVideo(\"$peerId\")")
+                mapPeer.remove(key)
+            }
+        }
+
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+
+        override fun onCancelled(error: DatabaseError) {
+            Log.e("Firebase", "Error: ${error.message}")
+        }
+    }
+
+    private fun listenForConnId(idOther: String) {
+        if (idOther == uniqueId) return
+        webView.visibility = View.VISIBLE
+        if (isVideoCall) {
+            avatarCallCard.visibility = View.GONE
+            nameOtherTxt.visibility = View.GONE
+            timeTxt.visibility = View.GONE
+        } else {
+            timeTxt.visibility = View.VISIBLE
+            CallTimer(timeTxt).start()
+        }
+        switchToControls()
+        callJavascriptFunction("javascript:startGroupCall(\"$idOther\")")
+    }
+
+    private fun initializePeer() {
+        webView.evaluateJavascript("javascript:init(\"$uniqueId\")") { result ->
+            if (result.isNotEmpty()) {
+                Log.d("JavaScript Result", result)
+            }
+        }
+        if (!call) onCallRequest()
     }
 
     private fun switchToControls() {
         callControlLayout.visibility = View.VISIBLE
     }
 
-
-    private fun getUniqueID(): String {
-        return UUID.randomUUID().toString()
-    }
-
     private fun callJavascriptFunction(functionString: String) {
         webView.post { webView.evaluateJavascript(functionString, null) }
     }
+    private fun onCallRequest() {
+        acceptBtnCard.setOnClickListener {
+            called = true
+            webView.visibility = View.VISIBLE
+            if (isVideoCall) {
+                avatarCallCard.visibility = View.GONE
+                nameOtherTxt.visibility = View.GONE
+            } else {
+                timeTxt.visibility = View.VISIBLE
+                CallTimer(timeTxt).start()
+            }
+            firebaseRef.child(groupId).child(userId).setValue(uniqueId)
+            acceptBtnCard.visibility = View.GONE
+            rejectBtnCard.visibility = View.GONE
+            endCallBtnCard.visibility = View.VISIBLE
+            switchToControls()
+            firebaseRef.child(groupId).addChildEventListener(childEventListener)
+        }
 
-
-    fun onPeerConnected() {
-        isPeerConnected = true
+        rejectBtnCard.setOnClickListener {
+            finish()
+        }
     }
-
-
-
     override fun onDestroy() {
         firebaseRef.child(groupId).child(userId).setValue(null)
         webView.loadUrl("about:blank")

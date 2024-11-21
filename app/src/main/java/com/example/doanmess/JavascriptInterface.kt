@@ -22,7 +22,7 @@ class JavascriptInterfaceVer(val callActivity: CallGroup) {
 
     @JavascriptInterface
     public fun onPeerConnected() {
-        callActivity.onPeerConnected()
+
     }
     @JavascriptInterface
     public fun onCallReady(callId: String) {

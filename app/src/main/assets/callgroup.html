@@ -105,13 +105,15 @@
                 {
                     method: "PUT",
                     headers: {
-                        Authorization: "Basic " + btoa("nhat:67e43036-a35e-11ef-8fc0-0242ac150002"),
+                        Authorization:
+                            "Basic " +
+                            btoa("nhat:67e43036-a35e-11ef-8fc0-0242ac150002"),
                         "Content-Type": "application/json",
-                    },
+                        },
                 }
             );
             const iceServers = await response.json();
-            return iceServers.v.iceServers;
+            return iceServers.v.iceServers; // Đây là danh sách các ICE servers
         }
 
         // Sử dụng các ICE servers từ Xirsys trong cấu hình WebRTC
