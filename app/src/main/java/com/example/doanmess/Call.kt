@@ -43,7 +43,7 @@ class Call : AppCompatActivity() {
     var uniqueId = ""
     var isPeerConnected = false
 
-    var firebaseRef: DatabaseReference =   Firebase.database.getReference("calls")
+    var firebaseRef =  Firebase.database.getReference("calls")
     val webView by lazy { findViewById<WebView>(R.id.webView) }
     val acceptBtnCard by lazy { findViewById<CardView>(R.id.acceptBtnCard) }
     val rejectBtnCard by lazy { findViewById<CardView>(R.id.rejectBtnCard) }
@@ -77,7 +77,7 @@ class Call : AppCompatActivity() {
         if(!isVideoCall){
             toggleVideoBtn.visibility = View.GONE
             voiceBackgroundImg.visibility = View.VISIBLE
-            firebaseRef=  Firebase.database.getReference("callvoices")
+           firebaseRef=  Firebase.database.getReference("callvoices")
         }
         uniqueId = getUniqueID()
         setupWebView()

@@ -117,14 +117,7 @@ class CallGroup : AppCompatActivity() {
                 }
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    // Một trường con thay đổi giá trị
-                    val key = snapshot.key.toString()
-                    val value = snapshot.value.toString()
 
-                    if (map_peer[key] != value) {
-                        map_peer[key] = value
-                        Log.d("Firebase", "Child changed: Key = $key, New Value = $value")
-                    }
                 }
 
                 override fun onChildRemoved(snapshot: DataSnapshot) {
@@ -265,37 +258,13 @@ class CallGroup : AppCompatActivity() {
                 Log.d("JavaScript Result", result)  // Lỗi có thể xuất hiện ở đây
             }
         }
-        firebaseRef.child(groupId).addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Error: ${error.message}")
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    snapshot.children.forEach { childSnapshot ->
-                        val key = childSnapshot.key.toString() // Key của trường con
-                        val value = childSnapshot.value.toString() // Giá trị của trường con
-
-                        // Nếu phần tử chưa được xử lý và không trùng với uniqueId
-                        if (called && value != uniqueId && map_peer[key] == null) {
-                            map_peer[key] = value
-                            listenForConnId(value)
-                        } else if (!called) {
-                            // Gọi logic xử lý yêu cầu cuộc gọi
-                            onCallRequest(value)
-                        }
-                    }
-                } else {
-                    Log.d("Firebase", "Snapshot does not exist for groupId: $groupId")
-                }
-            }
-        })
-
+        if(call) return
+        onCallRequest()
 
     }
 
-    private fun onCallRequest(caller: String?) {
-        if (caller == null) return
+    private fun onCallRequest() {
+
         acceptBtnCard.setOnClickListener {
             called = true
             webView.visibility = View.VISIBLE
@@ -313,6 +282,44 @@ class CallGroup : AppCompatActivity() {
             rejectBtnCard.visibility = View.GONE
             endCallBtnCard.visibility = View.VISIBLE
             switchToControls()
+            firebaseRef.child(groupId).addChildEventListener(object : ChildEventListener {
+                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                    // Khi một trường con mới được thêm vào
+                    val key = snapshot.key.toString() // Key của trường con mới
+                    val value = snapshot.value.toString() // Giá trị của trường con mới
+
+                    if (key != userId && map_peer[key] == null) {
+                        // Thêm vào map và xử lý logic kết nối
+                        map_peer[key] = value
+                        listenForConnId(value)
+                    }
+                }
+
+                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+
+                }
+
+                override fun onChildRemoved(snapshot: DataSnapshot) {
+                    // Một trường con bị xóa
+                    val key = snapshot.key.toString() // Key của trường con bị xóa
+                    val peerId = map_peer[key] // Lấy giá trị tương ứng từ map_peer
+
+                    if (peerId != null) {
+                        // Thực hiện logic khi xóa, ví dụ: loại bỏ video
+                        callJavascriptFunction("javascript:deleteRemoteVideo(\"${peerId}\")")
+                        map_peer.remove(key)
+                    }
+                }
+
+                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                    // Không cần xử lý nếu không có yêu cầu cụ thể
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Firebase", "Error: ${error.message}")
+                }
+            })
+
         }
 
         rejectBtnCard.setOnClickListener {
