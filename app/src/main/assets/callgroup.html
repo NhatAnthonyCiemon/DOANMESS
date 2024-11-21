@@ -171,7 +171,7 @@
     }
 
     // Gọi nhóm (tất cả thành viên trong danh sách)
-    function startGroupCall(memberId) {
+    async function startGroupCall(memberId) {
         navigator.getUserMedia(
             { audio: true, video: true },
             (stream) => {
