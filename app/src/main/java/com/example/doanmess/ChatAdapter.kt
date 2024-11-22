@@ -25,6 +25,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.doanmess.MainChat
+import com.example.doanmess.OnMessageLongClickListener
 import com.example.doanmess.R
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -39,11 +40,13 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
 
-class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, val isGroup: Boolean) :
+class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, val isGroup: Boolean, private val listener: OnMessageLongClickListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var auth = Firebase.auth
     private var currentUser = auth.currentUser
+
+
 
     companion object {
         private const val VIEW_TYPE_SENT = 1
@@ -140,8 +143,18 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
     }
     private lateinit var player : ExoPlayer
     private lateinit var audioPlayer : ExoPlayer
+
     // ViewHolder for sent messages
     inner class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        init {
+            itemView.setOnLongClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onMessageLongClick(position, chatMessages[position])
+                }
+                true // Trả về true để xử lý sự kiện long click
+            }
+        }
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)

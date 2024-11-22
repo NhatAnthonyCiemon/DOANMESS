@@ -43,6 +43,7 @@ import java.util.UUID
 import android.Manifest
 import android.location.Location
 import android.os.Build
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
@@ -54,7 +55,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
 
 
-class MainChat : AppCompatActivity() {
+class MainChat : AppCompatActivity(), OnMessageLongClickListener {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val REQUEST_CODE_PICK_MEDIA = 100
@@ -141,7 +142,7 @@ class MainChat : AppCompatActivity() {
         videoCallBtn = findViewById(R.id.videoCallBtn)
         callVoiceBtn = findViewById(R.id.callVoiceBtn)
         // Set up the RecyclerView
-        chatAdapter = ChatAdapter(chatMessages, isGroup)
+        chatAdapter = ChatAdapter(chatMessages, isGroup, listener = this)
         recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
         recyclerViewMessages.isVerticalScrollBarEnabled = false;
         recyclerViewMessages.adapter = chatAdapter
@@ -659,4 +660,43 @@ class MainChat : AppCompatActivity() {
                 blockedMessage.visibility = View.GONE
             }
     }
+
+    override fun onMessageLongClick(position: Int, message: MainChat.ChatMessage) {
+        // Xử lý khi người dùng long click vào tin nhắn
+        showOptionsDialog(position, message)
+    }
+
+    private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
+        // Ví dụ hiển thị dialog với các tùy chọn
+        AlertDialog.Builder(this)
+            .setTitle("Tùy chọn")
+            .setMessage("Bạn muốn làm gì với tin nhắn này?")
+            .setPositiveButton("Xóa") { _, _ ->
+                deleteMessage(position)
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
+    }
+
+    private fun deleteMessage(position: Int) {
+        // xóa tin nhắn trong firebase
+        val message = chatMessages[position]
+        val messageId = message.chatId
+        if (messageId.isNotEmpty()) {
+            if (!isGroup) {
+                Firebase.database.getReference("users").child(currentUserUid)
+                    .child(targetUserUid).child("Messages").child(messageId).removeValue()
+                Firebase.database.getReference("users").child(targetUserUid)
+                    .child(currentUserUid).child("Messages").child(messageId).removeValue()
+            } else {
+                Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
+                    .child(messageId).removeValue()
+            }
+        }
+
+        chatMessages.removeAt(position)
+        recyclerViewMessages.adapter?.notifyItemRemoved(position)
+    }
+
+
 }
