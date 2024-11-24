@@ -87,7 +87,8 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
      //   val status: Boolean = false,
         val time: Long = 0L,
         var showSenderInfo: Boolean = false,
-        var isSent : Boolean = false
+        var isSent : Boolean = false,
+        val pinned : Boolean = false
     ) {
         var senderName: String = ""
         var avatarUrl: String = ""
@@ -175,6 +176,8 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
                                 messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
                             val type =
                                 messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
+                            val pinned =
+                                messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
                             val chatMessage = ChatMessage(
                                 chatId = messageSnapshot.key ?: "",
                                 content = content,
@@ -182,7 +185,8 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
                                 recvId = recvId,
                                 time = time,
                                 type = type,
-                                isSent =true
+                                isSent =true,
+                                pinned = pinned
                             ).apply {
                                 this.senderName = senderName
                                 this.avatarUrl = avatarUrl
@@ -230,7 +234,7 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
                         val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                         val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
                         val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
-
+                        val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
                         val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                         val chatMessage = ChatMessage(
                             chatId = messageSnapshot.key ?: "",
@@ -239,7 +243,8 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
                             recvId = recvId,
                             time = time,
                             type = type,
-                            isSent = true
+                            isSent = true,
+                            pinned = pinned
                         )
                         tempMessages.add(chatMessage)
                     }
@@ -398,7 +403,7 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
                     //   status = false,
                     time = System.currentTimeMillis(),
                     isSent = false,
-                    type = type
+                    type = type,
                 )
               //  chatMessages.add(chatMessage)
             //   chatAdapter.notifyItemInserted(chatMessages.size - 1)
@@ -666,17 +671,37 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         showOptionsDialog(position, message)
     }
 
-    private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
-        // Ví dụ hiển thị dialog với các tùy chọn
-        AlertDialog.Builder(this)
-            .setTitle("Tùy chọn")
-            .setMessage("Bạn muốn làm gì với tin nhắn này?")
-            .setPositiveButton("Xóa") { _, _ ->
-                deleteMessage(position)
+private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
+    val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
+
+    // Ví dụ hiển thị dialog với các tùy chọn
+    AlertDialog.Builder(this)
+        .setTitle("Tùy chọn")
+        .setMessage("Bạn muốn làm gì với tin nhắn này?")
+        .setPositiveButton("Xóa") { _, _ ->
+            deleteMessage(position)
+        }
+        .setNegativeButton("Hủy", null)
+        .setNeutralButton(neutralButton) { _, _ ->
+            // pin message
+            val messageId = message.chatId
+
+            if (messageId.isNotEmpty()) {
+                if (!isGroup) {
+                    Firebase.database.getReference("users").child(currentUserUid)
+                        .child(targetUserUid).child("Messages").child(messageId).child("Pinned").setValue(!message.pinned)
+                } else {
+                    Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
+                        .child(messageId).child("Pinned").setValue(!message.pinned)
+                }
             }
-            .setNegativeButton("Hủy", null)
-            .show()
-    }
+        }
+        .create()
+        .apply {
+            setCanceledOnTouchOutside(true)
+        }
+        .show()
+}
 
     private fun deleteMessage(position: Int) {
         // xóa tin nhắn trong firebase
