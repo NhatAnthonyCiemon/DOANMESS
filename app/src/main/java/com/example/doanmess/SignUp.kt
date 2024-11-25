@@ -49,7 +49,6 @@ class SignUp : AppCompatActivity() {
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
         btnSignUp = findViewById(R.id.btnSignUp)
         btnSignIn = findViewById(R.id.btnSignIn)
-
         btnSignUp.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -78,11 +77,17 @@ class SignUp : AppCompatActivity() {
                             firestore.collection("users").document(userId).set(user)
                                 .addOnCompleteListener { dbTask ->
                                     if (dbTask.isSuccessful) {
-                                        Toast.makeText(this, "Sign-Up successful. Please log in.", Toast.LENGTH_SHORT).show()
-                                        auth.signOut()  // Sign out the user
-                                        val intent = Intent(this, Login::class.java)
-                                        startActivity(intent)
-                                        finish()
+                                        auth.currentUser?.sendEmailVerification()
+                                            ?.addOnCompleteListener { emailTask ->
+                                                if (emailTask.isSuccessful) {
+                                                    Toast.makeText(this, "Verification email sent!", Toast.LENGTH_SHORT).show()
+                                                    val intent = Intent(this, Verification::class.java)
+                                                    startActivity(intent)
+                                                    finish()
+                                                } else {
+                                                    Toast.makeText(this, "Failed to send verification email.", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
                                     } else {
                                         Toast.makeText(this, "Failed to save user data", Toast.LENGTH_SHORT).show()
                                     }
