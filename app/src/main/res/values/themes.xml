@@ -3,6 +3,10 @@
     <style name="Base.Theme.DOANMESS" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">#FF5733</item> <!-- Màu chính -->
+        <item name="colorPrimaryDark">#C70039</item> <!-- Màu chính đậm -->
+        <item name="colorAccent">#900C3F</item> <!-- Màu nhấn -->
+
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>

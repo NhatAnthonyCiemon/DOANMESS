@@ -15,6 +15,7 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.firebase.Firebase
@@ -23,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 
 
@@ -34,6 +36,7 @@ class Home : HandleOnlineActivity() {
     lateinit var btnMore: ImageButton
     lateinit var btnGroup: Button
     lateinit var txtName: TextView
+    private val firestore = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
     private var User: FirebaseUser? =null
     private var dbfirestore = Firebase.firestore
@@ -47,6 +50,8 @@ class Home : HandleOnlineActivity() {
             v.setPadding(systemBars.left, 0 , systemBars.right, systemBars.bottom)
             insets
         }
+
+        applyDarkMode()
 
 
         // CODE DƯỚI ĐÂY LÀ DUY LÂM VIẾT THÊM ĐỂ LÀM PHẦN ĐĂNG NHẬP, NẾU CÓ MÂU THUẪN VỚI CODE CŨ THÌ BÁO ĐỂ CHỈNH LẠI NHA
@@ -301,4 +306,19 @@ class Home : HandleOnlineActivity() {
         super.onStop()
         updateOnlineStatus(false)
     }*/
+
+    fun applyDarkMode() {
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid  // Lấy userId từ FirebaseAuth
+        val userDocRef = firestore.collection("users").document(userId)
+        userDocRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                val savedMode = document.getString("DarkMode") ?: "Off"
+                if (savedMode != "Off") {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                }
+            }
+        }
+    }
 }

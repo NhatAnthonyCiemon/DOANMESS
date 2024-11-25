@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -186,6 +187,14 @@ class inforFragment : Fragment() {
             .addOnFailureListener { e ->
                 // Xử lý lỗi nếu cập nhật thất bại
             }
+        // Lưu giá trị chế độ Dark Mode (On hoặc Off)
+        val isDarkMode = mode == "On"
+        // Cập nhật chế độ hiển thị ngay lập tức
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
     }
 
     private fun saveImageUri(uri: String) {

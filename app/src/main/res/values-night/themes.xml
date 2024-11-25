@@ -3,6 +3,10 @@
     <style name="Base.Theme.DOANMESS" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">#C70039</item> <!-- Màu chính cho chế độ tối -->
+        <item name="colorPrimaryDark">#900C3F</item> <!-- Màu chính đậm cho chế độ tối -->
+        <item name="colorAccent">#581845</item> <!-- Màu nhấn cho chế độ tối -->
+
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
