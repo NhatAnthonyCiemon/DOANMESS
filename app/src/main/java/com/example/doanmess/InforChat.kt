@@ -86,16 +86,47 @@ class InforChat : HandleOnlineActivity() {
         }
 
         frmNotice.setOnClickListener {
+            // Thay đổi màu nền của frmNotice
             changeBackgroundColor(frmNotice, "#D9D9D9", 150)
+
+            // Tạo và hiển thị hộp thoại AlertDialog
             AlertDialog.Builder(this)
                 .setTitle("Unnoticed")
                 .setMessage("Do you want to unnoticed?")
                 .setPositiveButton("Yes") { dialog, which ->
-                    // Xử lý khi người dùng chọn "Có"
-                    // Thực hiện thao tác block ở đây
+                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+                    if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
+                        val firestore = FirebaseFirestore.getInstance()
+                        firestore.collection("users").document(currentUserId).get()
+                            .addOnSuccessListener { document ->
+                                // Lấy danh sách người dùng bị unnotice của người dùng hiện tại
+                                val unnoticedUsers = document["Unnoticed"] as? List<Map<String, Any>>
+                                val isAlreadyUnnoticed = unnoticedUsers?.any { it["uid"] == chatUserId } ?: false
+
+                                // Kiểm tra nếu người chưa đã bị unnoticed
+                                if (!isAlreadyUnnoticed) {
+                                    firestore.collection("users").document(currentUserId)
+                                        .update("Unnoticed", FieldValue.arrayUnion(mapOf("uid" to chatUserId, "timeStamp" to System.currentTimeMillis())))
+                                        .addOnSuccessListener {
+                                            Toast.makeText(this, "User unnoticed successfully.", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Toast.makeText(this, "Failed to unnoticed user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                } else {
+                                    // Nếu người dùng đã bị unnoticed
+                                    Toast.makeText(this, "User is unnoticed.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Failed to check unnoticed users: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    } else {
+                        Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 .setNegativeButton("No") { dialog, which ->
-                    // Đóng hộp thoại khi người dùng chọn "Không"
+                    // Đóng hộp thoại khi người dùng chọn "No"
                     dialog.dismiss()
                 }
                 .show()
