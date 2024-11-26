@@ -38,6 +38,7 @@ class AllChatFra : Fragment() {
     val dbfirestore = Firebase.firestore
     private lateinit var adapter: Chat_AllChatAdapter
     private lateinit var loadingBar: ProgressBar
+    private var listOff: MutableList<String> = mutableListOf()
     private lateinit var userListener: ValueEventListener
     private lateinit var groupListener: ValueEventListener
     private val btnGroup: Button by lazy { atvtContext.findViewById(R.id.btnGroup) }
@@ -93,17 +94,23 @@ class AllChatFra : Fragment() {
                                                         this.status = status!!
                                                     }
                                                 } else {
-                                                    list.add(
-                                                        DataMess(
-                                                            avatar,
-                                                            recvId.toString(),
-                                                            name,
-                                                            content.toString(),
-                                                            timestamp!!,
-                                                            status!!,
-                                                            false
+                                                    if(listOff.contains(recvId.toString())) {
+                                                        list.add(DataMess(avatar, recvId.toString(), name, content.toString(), timestamp!!, status!!, false,false))
+                                                    }
+                                                    else {
+                                                        list.add(
+                                                            DataMess(
+                                                                avatar,
+                                                                recvId.toString(),
+                                                                name,
+                                                                content.toString(),
+                                                                timestamp!!,
+                                                                status!!,
+                                                                false,
+                                                                true
+                                                            )
                                                         )
-                                                    )
+                                                    }
                                                 }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
@@ -134,17 +141,23 @@ class AllChatFra : Fragment() {
                                                         this.status = status!!
                                                     }
                                                 } else {
-                                                    list.add(
-                                                        DataMess(
-                                                            avatar,
-                                                            sendId!!,
-                                                            name,
-                                                            content.toString(),
-                                                            timestamp!!,
-                                                            status!!,
-                                                            true
+                                                    if(listOff.contains(sendId.toString())) {
+                                                        list.add(DataMess(avatar, sendId.toString(), name, content.toString(), timestamp!!, status!!, true,false))
+                                                    }
+                                                    else {
+                                                        list.add(
+                                                            DataMess(
+                                                                avatar,
+                                                                sendId!!,
+                                                                name,
+                                                                content.toString(),
+                                                                timestamp!!,
+                                                                status!!,
+                                                                true,
+                                                                true
+                                                            )
                                                         )
-                                                    )
+                                                    }
                                                 }
 
                                                 list.sortByDescending { it.timestamp }
@@ -196,7 +209,23 @@ class AllChatFra : Fragment() {
                                             this.status = status!!
                                         }
                                     } else {
-                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString()))
+                                        if(listOff.contains(childSnapshot.key.toString())) {
+                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString(),false))
+                                        }
+                                        else {
+                                            list.add(
+                                                DataMessGroup(
+                                                    avatarList[childSnapshot.key.toString()].toString(),
+                                                    childSnapshot.key!!,
+                                                    myGroup[childSnapshot.key.toString()].toString(),
+                                                    content.toString(),
+                                                    timestamp!!,
+                                                    status!!,
+                                                    "Bạn",
+                                                    myGroup[childSnapshot.key.toString()].toString(), true
+                                                )
+                                            )
+                                        }
                                     }
                                     list.sortByDescending { it.timestamp }
                                     adapter.notifyDataSetChanged()
@@ -215,18 +244,24 @@ class AllChatFra : Fragment() {
                                                         this.last_name = name
                                                     }
                                                 } else {
-                                                    list.add(
-                                                        DataMessGroup(
-                                                            avatarList[childSnapshot.key.toString()].toString(),
-                                                            childSnapshot.key.toString(),
-                                                            name,
-                                                            content.toString(),
-                                                            timestamp!!,
-                                                            status!!,
-                                                            name,
-                                                            myGroup[childSnapshot.key.toString()].toString()
+                                                    if(listOff.contains(childSnapshot.key.toString())) {
+                                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key.toString(), name, content.toString(), timestamp!!, status!!, name, myGroup[childSnapshot.key.toString()].toString(),false))
+                                                    }
+                                                    else {
+                                                        list.add(
+                                                            DataMessGroup(
+                                                                avatarList[childSnapshot.key.toString()].toString(),
+                                                                childSnapshot.key.toString(),
+                                                                name,
+                                                                content.toString(),
+                                                                timestamp!!,
+                                                                status!!,
+                                                                name,
+                                                                myGroup[childSnapshot.key.toString()].toString(),
+                                                                true
+                                                            )
                                                         )
-                                                    )
+                                                    }
                                                 }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
@@ -256,7 +291,26 @@ class AllChatFra : Fragment() {
             return
         }
         list.clear()
-     //   adapter.notifyDataSetChanged()
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val userDocRef = Firebase.firestore.collection("users").document(userId)
+        userDocRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                val unnoticed = document.get("Unnoticed") as? MutableList<String>
+                if (unnoticed != null) {
+                    listOff.addAll(unnoticed)
+
+                }
+                getGroupAndMessage()
+            }
+        }.addOnFailureListener { exception ->
+            // Xử lý lỗi (nếu cần)
+            Log.e("FirestoreError", "Error fetching document: ${exception.message}")
+        }
+
+
+    }
+
+    private fun getGroupAndMessage() {
         Firebase.firestore.collection("users").document(User!!.uid)
             .addSnapshotListener { documentSnapshot, error ->
                 loadingBar.visibility = View.GONE

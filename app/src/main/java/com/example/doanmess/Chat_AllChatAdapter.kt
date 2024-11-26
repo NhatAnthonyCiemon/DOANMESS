@@ -57,11 +57,16 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
             val txtContent = findViewById<TextView>(R.id.txtContent)
             val txtTime = findViewById<TextView>(R.id.txtTime)
             val imgAvatar = findViewById<ImageView>(R.id.imgAvatar)
-
+            val imgOffNotification = findViewById<ImageView>(R.id.imgOffNotification)
             txtName.text = item.name
             txtContent.text = item.message
             txtTime.text = item.time
-
+            if(item.isNotify) {
+                imgOffNotification.visibility = View.GONE
+            }
+            else {
+                imgOffNotification.visibility = View.VISIBLE
+            }
             // Sử dụng lifecycleScope để chạy coroutine
             //Picasso.get().load(item.avatar).into(imgAvatar)
             (cont as? LifecycleOwner)?.lifecycleScope?.launch {

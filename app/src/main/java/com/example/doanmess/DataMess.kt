@@ -16,7 +16,8 @@ open class DataMess {
     var last_name: String = ""
     var timestamp: Long = 0
     var isGroup: Boolean = false
-    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean, isGroup: Boolean = false) {
+    var isNotify: Boolean = true
+    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean,isNotify:Boolean, isGroup: Boolean = false) {
         this.uid = uid
         this.avatar = avatar
         this.name = name
@@ -26,6 +27,7 @@ open class DataMess {
         this.message = if(!othersend) "Bạn: $message" else last_name + ": $message"
         this.timestamp = timestamp
         this.time = convertTimestampToString(timestamp)
+        this.isNotify = isNotify
     }
     fun convertTimestampToString(timestamp: Long, timeZone: TimeZone = TimeZone.getDefault()): String {
         val sdf = SimpleDateFormat("E HH:mm", Locale.getDefault())
@@ -38,8 +40,8 @@ open class DataMess {
 class DataMessGroup : DataMess {
     var groupname: String = ""
 
-    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String, isGroup: Boolean = true)
-            : super(avatar, uid, name, message, timestamp, status, true) {
+    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String, isNotify:Boolean, isGroup: Boolean = true)
+            : super(avatar, uid, name, message, timestamp, status, true, isNotify) {
         this.groupname = groupname
         this.message = "$whosend: $message"
     }

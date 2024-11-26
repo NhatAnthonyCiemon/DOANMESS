@@ -2,6 +2,8 @@ package com.example.doanmess
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.webkit.JavascriptInterface
@@ -13,6 +15,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -56,6 +59,7 @@ class Call : AppCompatActivity() {
     val toggleVideoBtn by lazy { findViewById<ImageView>(R.id.toggleVideoBtn) }
     val NameOtherTxt by lazy { findViewById<TextView>(R.id.NameOtherTxt) }
     val callControlLayout by lazy { findViewById<LinearLayout>(R.id.callControlLayout) }
+    val loadingBar by lazy { findViewById<ProgressBar>(R.id.LoadingBar) }
     var call = false
     var isAudio = true
     var isVideo = true
@@ -108,41 +112,35 @@ class Call : AppCompatActivity() {
                 val name = document.getString("Name")
                 NameOtherTxt.text = name
             }
-            firebaseRef.child(friendId).child("incoming").setValue(userId)
-            firebaseRef.child(friendId).child("idIncoming").setValue(uniqueId)
-            firebaseRef.child(friendId).child("isAvailable").addValueEventListener(object:
-                ValueEventListener {
-                override fun onCancelled(error: DatabaseError) {}
-
-                override fun onDataChange(snapshot: DataSnapshot) {
-
-                    if (snapshot.value.toString() == "true") {
-                        listenForConnId()
+            firebaseRef.child(friendId).get().addOnSuccessListener {
+                if(it.exists()){
+                    finish()
+                }
+                else{
+                    if(isVideoCall) {
+                        Firebase.database.getReference("callvoices").child(friendId).get()
+                            .addOnSuccessListener {
+                                if (it.exists()) {
+                                    finish()
+                                } else {
+                                    onStartCall()
+                                }
+                            }
                     }
-                    else if(snapshot.value.toString() == "endcall") {
-                        firebaseRef.child(friendId).child("isAvailable").setValue(null)
-                        finish()
+                    else{
+                        Firebase.database.getReference("calls").child(friendId).get()
+                            .addOnSuccessListener {
+                                if (it.exists()) {
+                                    finish()
+                                } else {
+                                    onStartCall()
+                                }
+                            }
                     }
 
                 }
+            }
 
-            })
-            firebaseRef.child(friendId).child("incoming").addValueEventListener(object:
-                ValueEventListener {
-                override fun onCancelled(error: DatabaseError) {}
-
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        if(snapshot.value.toString() == "****reject****") {
-                            firebaseRef.child(friendId).child("incoming").setValue(null)
-                            finish()
-
-                            return
-                        }
-                    }
-                }
-
-            })
         }
         else{
             callControlLayout.visibility = View.GONE
@@ -205,6 +203,7 @@ class Call : AppCompatActivity() {
                 firebaseRef.child(userId).child("isAvailable").setValue("endcall")
                 firebaseRef.child(userId).child("connId").setValue(null)
                 firebaseRef.child(userId).child("incoming").setValue(null)
+
                 finish()
             }
         }
@@ -212,7 +211,44 @@ class Call : AppCompatActivity() {
     }
 
 
+    private fun onStartCall(){
+        firebaseRef.child(friendId).child("incoming").setValue(userId)
+        firebaseRef.child(friendId).child("idIncoming").setValue(uniqueId)
 
+        firebaseRef.child(friendId).child("isAvailable").addValueEventListener(object:
+            ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {}
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                if (snapshot.value.toString() == "true") {
+                    listenForConnId()
+                }
+                else if(snapshot.value.toString() == "endcall") {
+                    firebaseRef.child(friendId).child("isAvailable").setValue(null)
+                    finish()
+                }
+
+            }
+
+        })
+        firebaseRef.child(friendId).child("incoming").addValueEventListener(object:
+            ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {}
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    if(snapshot.value.toString() == "****reject****") {
+                        firebaseRef.child(friendId).child("incoming").setValue(null)
+                        finish()
+
+                        return
+                    }
+                }
+            }
+
+        })
+    }
     private fun listenForConnId() {
         firebaseRef.child(friendId).child("connId").addValueEventListener(object: ValueEventListener {
             override fun onCancelled(error: DatabaseError) {}
@@ -303,21 +339,25 @@ class Call : AppCompatActivity() {
     private fun onCallRequest(caller: String?) {
         if (caller == null) return
         acceptBtnCard.setOnClickListener {
-            webView.visibility = View.VISIBLE
-            if(isVideoCall){
-                avatarCallCard.visibility = View.GONE
-                NameOtherTxt.visibility = View.GONE
-            }
-            else{
-                timeTxt.visibility = View.VISIBLE
-                CallTimer(timeTxt).start()
-            }
-            firebaseRef.child(userId).child("connId").setValue(uniqueId)
-            firebaseRef.child(userId).child("isAvailable").setValue(true)
-            acceptBtnCard.visibility = View.GONE
-            rejectBtnCard.visibility = View.GONE
-            endCallBtnCard.visibility = View.VISIBLE
-            switchToControls()
+            loadingBar.visibility = View.VISIBLE
+            Handler(Looper.getMainLooper()).postDelayed({
+                webView.visibility = View.VISIBLE
+                if(isVideoCall){
+                    avatarCallCard.visibility = View.GONE
+                    NameOtherTxt.visibility = View.GONE
+                }
+                else{
+                    timeTxt.visibility = View.VISIBLE
+                    CallTimer(timeTxt).start()
+                }
+                firebaseRef.child(userId).child("connId").setValue(uniqueId)
+                firebaseRef.child(userId).child("isAvailable").setValue(true)
+                acceptBtnCard.visibility = View.GONE
+                rejectBtnCard.visibility = View.GONE
+                endCallBtnCard.visibility = View.VISIBLE
+                loadingBar.visibility = View.GONE
+                switchToControls()
+            }, 5000) // 5000 milliseconds = 5 seconds
         }
 
         rejectBtnCard.setOnClickListener {

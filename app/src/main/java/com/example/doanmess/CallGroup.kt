@@ -1,6 +1,8 @@
 package com.example.doanmess
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.webkit.PermissionRequest
@@ -9,6 +11,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +45,7 @@ class CallGroup : AppCompatActivity() {
     private val timeTxt by lazy { findViewById<TextView>(R.id.timeTxt) }
     private val avatarCall by lazy { findViewById<ImageView>(R.id.avatarCall) }
     private val voiceBackgroundImg by lazy { findViewById<ImageView>(R.id.voiceBackgroundImg) }
+    val loadingBar by lazy { findViewById<ProgressBar>(R.id.LoadingBar) }
     private val toggleAudioBtn by lazy { findViewById<ImageView>(R.id.toggleAudioBtn) }
     private val toggleVideoBtn by lazy { findViewById<ImageView>(R.id.toggleVideoBtn) }
     private val nameOtherTxt by lazy { findViewById<TextView>(R.id.NameOtherTxt) }
@@ -162,21 +166,26 @@ class CallGroup : AppCompatActivity() {
         }
 
         acceptBtnCard.setOnClickListener {
-            called = true
-            webView.visibility = View.VISIBLE
-            if (isVideoCall) {
-                avatarCallCard.visibility = View.GONE
-                nameOtherTxt.visibility = View.GONE
-            } else {
-                timeTxt.visibility = View.VISIBLE
-                CallTimer(timeTxt).start()
-            }
-            firebaseRef.child(groupId).child(userId).setValue(uniqueId)
-            acceptBtnCard.visibility = View.GONE
-            rejectBtnCard.visibility = View.GONE
-            endCallBtnCard.visibility = View.VISIBLE
-            switchToControls()
-            firebaseRef.child(groupId).addChildEventListener(childEventListener)
+            loadingBar.visibility = View.VISIBLE
+            Handler(Looper.getMainLooper()).postDelayed({
+                called = true
+                webView.visibility = View.VISIBLE
+                if (isVideoCall) {
+                    avatarCallCard.visibility = View.GONE
+                    nameOtherTxt.visibility = View.GONE
+                } else {
+                    timeTxt.visibility = View.VISIBLE
+                    CallTimer(timeTxt).start()
+                }
+                firebaseRef.child(groupId).child(userId).setValue(uniqueId)
+                acceptBtnCard.visibility = View.GONE
+                rejectBtnCard.visibility = View.GONE
+                endCallBtnCard.visibility = View.VISIBLE
+                switchToControls()
+                firebaseRef.child(groupId).addChildEventListener(childEventListener)
+                loadingBar.visibility = View.GONE
+
+            }, 5000) // 5000 milliseconds = 5 seconds
         }
 
         rejectBtnCard.setOnClickListener {
@@ -245,21 +254,25 @@ class CallGroup : AppCompatActivity() {
     }
     private fun onCallRequest() {
         acceptBtnCard.setOnClickListener {
-            called = true
-            webView.visibility = View.VISIBLE
-            if (isVideoCall) {
-                avatarCallCard.visibility = View.GONE
-                nameOtherTxt.visibility = View.GONE
-            } else {
-                timeTxt.visibility = View.VISIBLE
-                CallTimer(timeTxt).start()
-            }
-            firebaseRef.child(groupId).child(userId).setValue(uniqueId)
-            acceptBtnCard.visibility = View.GONE
-            rejectBtnCard.visibility = View.GONE
-            endCallBtnCard.visibility = View.VISIBLE
-            switchToControls()
-            firebaseRef.child(groupId).addChildEventListener(childEventListener)
+            loadingBar.visibility = View.VISIBLE
+            Handler(Looper.getMainLooper()).postDelayed({
+                called = true
+                webView.visibility = View.VISIBLE
+                if (isVideoCall) {
+                    avatarCallCard.visibility = View.GONE
+                    nameOtherTxt.visibility = View.GONE
+                } else {
+                    timeTxt.visibility = View.VISIBLE
+                    CallTimer(timeTxt).start()
+                }
+                firebaseRef.child(groupId).child(userId).setValue(uniqueId)
+                acceptBtnCard.visibility = View.GONE
+                rejectBtnCard.visibility = View.GONE
+                endCallBtnCard.visibility = View.VISIBLE
+                switchToControls()
+                firebaseRef.child(groupId).addChildEventListener(childEventListener)
+            }, 5000) // 5000 milliseconds = 5 seconds
+
         }
 
         rejectBtnCard.setOnClickListener {

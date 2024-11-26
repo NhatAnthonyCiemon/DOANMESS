@@ -23,6 +23,10 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.database
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
@@ -36,11 +40,12 @@ class Home : HandleOnlineActivity() {
     lateinit var btnMore: ImageButton
     lateinit var btnGroup: Button
     lateinit var txtName: TextView
+    lateinit var txtCall: TextView
     private val firestore = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
     private var User: FirebaseUser? =null
     private var dbfirestore = Firebase.firestore
-    var call = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -145,6 +150,7 @@ class Home : HandleOnlineActivity() {
         btnMore = findViewById<ImageButton>(R.id.btnMore)
         txtName = findViewById<TextView>(R.id.txtName)
         btnGroup = findViewById<Button>(R.id.btnGroup)
+        txtCall = findViewById(R.id.txtCall)
         btnGroup.visibility = View.GONE
         btnGroup.setOnClickListener{
             val intent = Intent(this, CreateGroup::class.java)
@@ -227,6 +233,8 @@ class Home : HandleOnlineActivity() {
                     txtName.text= "Loading..."
                 }
         }
+        onCallRequest(true, "calls")
+        onCallRequest(false, "callvoices")
     }
 
     fun checkPermissionNotify() {
@@ -321,4 +329,46 @@ class Home : HandleOnlineActivity() {
             }
         }
     }
+    private fun onCallRequest(isVideoCall: Boolean, firebasePath: String) {
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val firebaseRef = Firebase.database.getReference(firebasePath)
+
+        firebaseRef.child(userId).child("incoming").addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {}
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val incomingId = snapshot.value.toString()
+                    if (incomingId == "****endcall****") {
+                        txtCall.visibility = View.GONE
+                        return
+                    }
+
+                    // Fetch caller information from Firestore
+                    firestore.collection("users").document(incomingId).get()
+                        .addOnSuccessListener { document ->
+                            val callerName = document.data?.get("Name").toString()
+                            val callType = if (isVideoCall) "video call" else "voice call"
+
+                            txtCall.text = "Incoming $callType from $callerName"
+                            txtCall.visibility = View.VISIBLE
+                            txtCall.setOnClickListener {
+                                val intent = Intent(this@Home, Call::class.java).apply {
+                                    putExtra("friendId", incomingId)
+                                    putExtra("call", false)
+                                    putExtra("isVideoCall", isVideoCall)
+                                }
+                                startActivity(intent)
+                            }
+                        }
+                        .addOnFailureListener {
+                            txtCall.visibility = View.GONE
+                        }
+                } else {
+                    txtCall.visibility = View.GONE
+                }
+            }
+        })
+    }
+
 }
