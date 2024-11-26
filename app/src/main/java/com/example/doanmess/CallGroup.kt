@@ -271,6 +271,7 @@ class CallGroup : AppCompatActivity() {
                 endCallBtnCard.visibility = View.VISIBLE
                 switchToControls()
                 firebaseRef.child(groupId).addChildEventListener(childEventListener)
+                loadingBar.visibility = View.GONE
             }, 5000) // 5000 milliseconds = 5 seconds
 
         }

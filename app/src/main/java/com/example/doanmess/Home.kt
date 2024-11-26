@@ -41,6 +41,7 @@ class Home : HandleOnlineActivity() {
     lateinit var btnGroup: Button
     lateinit var txtName: TextView
     lateinit var txtCall: TextView
+    lateinit var txtCallGroup: TextView
     private val firestore = FirebaseFirestore.getInstance()
     private lateinit var auth: FirebaseAuth
     private var User: FirebaseUser? =null
@@ -151,6 +152,7 @@ class Home : HandleOnlineActivity() {
         txtName = findViewById<TextView>(R.id.txtName)
         btnGroup = findViewById<Button>(R.id.btnGroup)
         txtCall = findViewById(R.id.txtCall)
+        txtCallGroup = findViewById(R.id.txtCallGroup)
         btnGroup.visibility = View.GONE
         btnGroup.setOnClickListener{
             val intent = Intent(this, CreateGroup::class.java)
@@ -235,6 +237,7 @@ class Home : HandleOnlineActivity() {
         }
         onCallRequest(true, "calls")
         onCallRequest(false, "callvoices")
+        onCallGroupRequest()
     }
 
     fun checkPermissionNotify() {
@@ -370,5 +373,83 @@ class Home : HandleOnlineActivity() {
             }
         })
     }
+    // Tạo một map để lưu trữ các listener của từng group
+    private val activeListeners = mutableMapOf<String, ValueEventListener>()
+
+    private fun onCallGroupRequest() {
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        // Lắng nghe Firestore
+        firestore.collection("users").document(userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.w("TAG", "Listen failed.", error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    val groups = snapshot.get("Groups") as? List<String>
+                    if (groups != null) {
+                        // Hủy bỏ các listener cũ trước khi thêm listener mới
+                        removeOldListeners(groups)
+
+                        // Lắng nghe các group mới
+                        for (group in groups) {
+                            val listener = Firebase.database.getReference("callGroups")
+                                .child(group)
+                                .addValueEventListener(object : ValueEventListener {
+                                    override fun onCancelled(error: DatabaseError) {}
+
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.exists()) {
+                                            val groupId = snapshot.key.toString()
+                                            Firebase.firestore.collection("groups").document(groupId).get()
+                                                .addOnSuccessListener { document ->
+                                                    val groupName = document.data?.get("Name").toString()
+                                                    txtCallGroup.text = "Incoming call from $groupName"
+                                                    txtCallGroup.visibility = View.VISIBLE
+                                                    txtCallGroup.setOnClickListener {
+                                                        val intent = Intent(this@Home, CallGroup::class.java).apply {
+                                                            putExtra("groupId", groupId)
+                                                            putExtra("call", false)
+                                                            putExtra("isVideoCall", true)
+                                                        }
+                                                        startActivity(intent)
+                                                    }
+                                                }
+                                                .addOnFailureListener {
+                                                    txtCallGroup.visibility = View.GONE
+                                                }
+                                        } else {
+                                            txtCallGroup.visibility = View.GONE
+                                        }
+                                    }
+                                })
+
+                            // Lưu listener vào map
+                            activeListeners[group] = listener
+                        }
+
+                        Log.d("TAG", "Groups: $groups")
+                    } else {
+                        Log.d("TAG", "No groups found.")
+                    }
+                }
+            }
+    }
+
+
+
+    private fun removeOldListeners(currentGroups: List<String>) {
+        val groupsToRemove = activeListeners.keys.filter { it !in currentGroups }
+        for (group in groupsToRemove) {
+            val reference = Firebase.database.getReference("callGroups").child(group)
+            val listener = activeListeners[group]
+            if (listener != null) {
+                reference.removeEventListener(listener)
+            }
+            activeListeners.remove(group)
+        }
+    }
+
 
 }

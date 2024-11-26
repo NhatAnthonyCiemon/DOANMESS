@@ -191,6 +191,18 @@
                             android:textColor="@color/black"
                             android:textSize="16dp"
                             android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/txtCallGroup"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="35dp"
+                            android:background="#0fcd12"
+                            android:gravity="center"
+                            android:text="TextView"
+                            android:layout_marginBottom="20dp"
+                            android:textColor="@color/black"
+                            android:textSize="16dp"
+                            android:textStyle="bold" />
                         <FrameLayout
                             android:id="@+id/fragment_container"
                             android:layout_width="match_parent"
