@@ -149,6 +149,8 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         recyclerViewMessages.adapter = chatAdapter
         recyclerViewMessages.layoutManager = LinearLayoutManager(this)
 
+
+
         if (!isGroup) {
             if (currentUserUid != null && targetUserUid != null) {
                 //set status of user in list chat of last item  to true
@@ -690,9 +692,21 @@ private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
                 if (!isGroup) {
                     Firebase.database.getReference("users").child(currentUserUid)
                         .child(targetUserUid).child("Messages").child(messageId).child("Pinned").setValue(!message.pinned)
-                } else {
-                    Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
-                        .child(messageId).child("Pinned").setValue(!message.pinned)
+
+                    Firebase.database.getReference("users").child(targetUserUid)
+                        .child(currentUserUid).child("Messages").child(messageId).child("Pinned").setValue(!message.pinned)
+                    val newMessage = mapOf(
+                        "Content" to message.content,
+                        "SendId" to message.sendId,
+                        "RecvId" to message.recvId,
+                        "Time" to message.time,
+                        "Type" to message.type,
+                        "Pinned" to !message.pinned
+                    )
+                    Firebase.database.getReference("users").child(currentUserUid)
+                        .child(targetUserUid).child("PinnedMessages").push().setValue(newMessage)
+                    Firebase.database.getReference("users").child(targetUserUid)
+                        .child(currentUserUid).child("PinnedMessages").push().setValue(newMessage)
                 }
             }
         }

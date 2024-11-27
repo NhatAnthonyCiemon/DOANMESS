@@ -250,6 +250,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         // Khởi tạo ExoPlayer từ Media3
         playerView.player = tmp
     }
+
+
+
+
     // ViewHolder for received messages
     inner class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
@@ -466,6 +470,8 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             return formatter.format(date)
         }
     }
+
+
 
 }
 
