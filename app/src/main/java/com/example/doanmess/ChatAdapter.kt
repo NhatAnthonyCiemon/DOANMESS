@@ -158,7 +158,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         return chatMessages.size
     }
     private lateinit var player : ExoPlayer
-    private lateinit var audioPlayer : ExoPlayer
 
     // ViewHolder for sent messages
     inner class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -179,6 +178,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val loadingBar : ProgressBar = itemView.findViewById(R.id.LoadingBar)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
+        private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
@@ -186,7 +186,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 videoMessageView.visibility = View.VISIBLE
                 audioPlayerLayout.visibility = View.GONE
                 cardVideo.visibility = View.VISIBLE
-
                 // Khởi tạo ExoPlayer từ Media3
         /*        player = ExoPlayer.Builder(itemView.context).build()
                 videoMessageView.player = player
@@ -217,8 +216,8 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 audioPlayerLayout.visibility = View.VISIBLE
                 if (chatMessage.isSent) {
                     loadingBar.visibility = View.GONE
-                    audioPlayerView.visibility= View.VISIBLE
-                    setupAudioPlayer(chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
+                //    audioPlayerView.visibility= View.VISIBLE
+                    setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
                 } else {
                     audioPlayerView.visibility= View.GONE
                     loadingBar.visibility = View.VISIBLE
@@ -241,17 +240,25 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         }
     }
     val audioPlayerLists : MutableMap<String,ExoPlayer> = mutableMapOf()
-    private fun setupAudioPlayer(chatId:String, context: Context, audioPlayerView: PlayerView, content: String) {
-        if(!audioPlayerLists.containsKey(chatId)){
-            val tmp = ExoPlayer.Builder(context).build()
-            val mediaItem = MediaItem.fromUri(content)
-            tmp!!.setMediaItem(mediaItem)
-            audioPlayerLists[chatId] = tmp
-      //      tmp.pause()
+    private fun setupAudioPlayer(audioPlayBtn : ImageButton,chatId:String, context: Context, audioPlayerView: PlayerView, content: String) {
+        audioPlayerView.player = null
+        audioPlayerView.visibility = View.GONE
+        audioPlayBtn.setOnClickListener{
+            audioPlayerView.visibility = View.VISIBLE
+            if(!audioPlayerLists.containsKey(chatId)){
+                val tmp = ExoPlayer.Builder(context).build()
+                val mediaItem = MediaItem.fromUri(content)
+                tmp!!.setMediaItem(mediaItem)
+                audioPlayerLists[chatId] = tmp
+                //      tmp.pause()
+            }
+            val tmp = audioPlayerLists[chatId]
+            audioPlayerView.player = tmp
+            tmp!!.prepare()
+            audioPlayerView.player!!.playWhenReady = true
+
         }
-        val tmp = audioPlayerLists[chatId]
-       // audioPlayer.prepare()
-        audioPlayerView.player = tmp
+
     }
     fun setUpVideoPlayer(chatId:String, context: Context, playerView: PlayerView, content: String){
         if(!audioPlayerLists.containsKey(chatId)){
@@ -279,6 +286,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
+        private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
@@ -316,7 +324,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
                 audioPlayerView.visibility= View.VISIBLE
-                setupAudioPlayer(chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
+                setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             } else {
                 cardVideo.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -346,6 +354,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
+        private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
@@ -383,7 +392,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 imageMessageView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
                 audioPlayerView.visibility= View.VISIBLE
-                setupAudioPlayer(chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
+                setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             } else {
                 cardVideo.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -422,6 +431,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
         private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
+        private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
 //
 //        fun bind(chatMessage: MainChat.ChatMessage) {
 //            messageTextView.text = chatMessage.content
@@ -469,8 +479,9 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.VISIBLE
                 audioPlayerView.visibility= View.VISIBLE
-                setupAudioPlayer(chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
+                setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             } else {
+                cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE

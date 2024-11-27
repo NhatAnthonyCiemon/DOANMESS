@@ -69,12 +69,13 @@ class AllChatFra : Fragment() {
                             it.child("Time").getValue(Long::class.java) ?: 0L
                         }
                         if (latestsmallSnapshot != null) {
-                            val content = latestsmallSnapshot.child("Content").getValue(String::class.java)
+                            var content = latestsmallSnapshot.child("Content").getValue(String::class.java)
                             val recvId = latestsmallSnapshot.child("RecvId").getValue(String::class.java)
                             val sendId = latestsmallSnapshot.child("SendId").getValue(String::class.java)
                             val status = childSnapshot.child("Status").getValue(Boolean::class.java) ?: false
                             val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
-
+                            val type = latestsmallSnapshot.child("Type").getValue(String::class.java)
+                            content = changeContent(content,type)
                             if (User != null && recvId != null && sendId != null) {
                                 if (User!!.uid == sendId) {
                                     dbfirestore.collection("users").document(recvId.toString())
@@ -195,11 +196,12 @@ class AllChatFra : Fragment() {
                                 it.child("Time").getValue(Long::class.java) ?: 0L
                             }
                             if (latestsmallSnapshot != null) {
-                                val content = latestsmallSnapshot.child("Content").getValue(String::class.java)
+                                var content = latestsmallSnapshot.child("Content").getValue(String::class.java)
                                 val sendId = latestsmallSnapshot.child("SendId").getValue(String::class.java)
                                 val status = childSnapshot.child("Status").child(User!!.uid).getValue(Boolean::class.java) ?: false
                                 val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
-
+                                val type = latestsmallSnapshot.child("Type").getValue(String::class.java)
+                                content = changeContent(content,type)
                                 if (User!!.uid == sendId) {
                                     val existingItem = list.find { it.uid == childSnapshot.key.toString() }
                                     if (existingItem != null) {
@@ -284,6 +286,22 @@ class AllChatFra : Fragment() {
             }
         }
         Firebase.database.getReference("groups").addValueEventListener(groupListener)
+    }
+
+    private fun changeContent(content: String ?, type: String?): String? {
+        if (type == "image") {
+             return "Đã gửi một ảnh"
+        }
+        else if(type == "video") {
+            return "Đã gửi một video"
+        }
+        else if(type == "location") {
+            return "Đã gửi một vị trí"
+        }
+        else if(type == "audio") {
+            return "Đã gửi một tin nhắn thoại"
+        }
+        return content
     }
 
     private fun ListenFirebase() {

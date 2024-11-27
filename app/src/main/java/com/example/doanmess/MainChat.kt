@@ -1,8 +1,13 @@
 package com.example.doanmess
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.location.Location
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
@@ -16,16 +21,17 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.doanmess.InforChat
-import com.example.doanmess.MessageController
-import com.example.doanmess.R
-import com.example.doanmess.User
+import com.example.createuiproject.ChatAdapter
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -34,25 +40,14 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
 import java.util.UUID
-import android.Manifest
-import android.location.Location
-import android.os.Build
-import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
-import com.arthenica.mobileffmpeg.Config
-import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
-import com.arthenica.mobileffmpeg.FFmpeg
-import com.arthenica.mobileffmpeg.Level
-import com.example.createuiproject.ChatAdapter
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.Task
 
 
 class MainChat : AppCompatActivity(), OnMessageLongClickListener {
@@ -322,8 +317,8 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
             }
         }
         attachButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+        //    intent.addCategory(Intent.CATEGORY_OPENABLE)
             intent.type = "*/*"
             val mimeTypes = arrayOf("image/*", "video/*")
             intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
@@ -442,6 +437,15 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
                 if(type == "audio") {
                     noti = "Sent an audio"
                 }
+                else if(type == "image") {
+                    noti = "Sent an image"
+                }
+                else if(type == "video") {
+                    noti = "Sent a video"
+                }
+                else if(type == "location") {
+                    noti = "Sent a location"
+                }
                 messageController.newMessageFriend(targetUserUid, currentUserUid, noti )
             }
         }
@@ -499,22 +503,35 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         if (requestCode == REQUEST_CODE_PICK_MEDIA && resultCode == RESULT_OK) {
             val selectedMediaUri: Uri? = data?.data
             if (selectedMediaUri != null) {
-                uploadMediaToFirebase(selectedMediaUri)
+                val fileSize = contentResolver.openFileDescriptor(selectedMediaUri, "r")?.statSize ?: 0
+                if (fileSize > 15 * 1024 * 1024) { // 15 MB in bytes
+                    Toast.makeText(this, "File size exceeds 15MB", Toast.LENGTH_SHORT).show()
+                } else {
+                    uploadMediaToFirebase(selectedMediaUri)
+                }
             }
         }
     }
+    fun compressImage(fileUri: Uri, context: Context): ByteArray {
+        val inputStream = context.contentResolver.openInputStream(fileUri)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream) // Adjust quality as needed
+        return outputStream.toByteArray()
+    }
     private fun uploadMediaToFirebase(fileUri: Uri) {
+        // Xác định loại MIME của tệp
+        val mimeType = contentResolver.getType(fileUri)
         val storageRef = storage.reference.child("media/${UUID.randomUUID()}")
-        val uploadTask = storageRef.putFile(fileUri)
-
+        val uploadTask = if (mimeType?.startsWith("image/") == true) {
+            val compressedImage = compressImage(fileUri, this)
+            storageRef.putBytes(compressedImage)
+        } else {
+            storageRef.putFile(fileUri)
+        }
         uploadTask.addOnSuccessListener {
             storageRef.downloadUrl.addOnSuccessListener { uri ->
                 val downloadUrl = uri.toString()
-
-                // Xác định loại MIME của tệp
-                val contentResolver = contentResolver
-                val mimeType = contentResolver.getType(fileUri)
-
                 // Kiểm tra loại tệp và gửi tin nhắn tương ứng
                 when {
                     mimeType?.startsWith("image/") == true -> {
@@ -580,7 +597,7 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
             Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
         }
     }
-    private fun stopRecordingAndSave() {
+    private fun sendSkeletonMess(type : String){
         val chatMessage = ChatMessage(
             content = "",
             sendId = currentUserUid ?: "",
@@ -588,11 +605,14 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
             //   status = false,
             time = System.currentTimeMillis(),
             isSent = false,
-            type = "audio"
+            type = type
         )
         chatMessages.add(chatMessage)
         chatAdapter.notifyItemInserted(chatMessages.size - 1)
         recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
+    }
+    private fun stopRecordingAndSave() {
+        sendSkeletonMess("audio")
         mediaRecorder?.apply {
             Log.d("MainChat", "Stopping recording")
             try {
@@ -684,6 +704,7 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         showOptionsDialog(position, message)
     }
 
+
 private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
     val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
 
@@ -720,13 +741,12 @@ private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
                         .child(currentUserUid).child("PinnedMessages").push().setValue(newMessage)
                 }
             }
-        }
-        .create()
-        .apply {
-            setCanceledOnTouchOutside(true)
-        }
-        .show()
-}
+            .create()
+            .apply {
+                setCanceledOnTouchOutside(true)
+            }
+            .show()
+    }
 
     private fun deleteMessage(position: Int) {
         // xóa tin nhắn trong firebase
