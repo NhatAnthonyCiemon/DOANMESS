@@ -46,6 +46,16 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
     private var auth = Firebase.auth
     private var currentUser = auth.currentUser
 
+    // Listener interface
+    interface OnItemClickListener {
+        fun onItemClick(position: Int)
+    }
+
+    private var OnClicklistener: OnItemClickListener? = null
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.OnClicklistener = listener
+    }
 
 
     companion object {
@@ -54,6 +64,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private const val VIEW_TYPE_WITH_AVATAR = 3
         private const val VIEW_TYPE_NO_AVATAR = 4
     }
+
 
     // ViewHolder class
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -122,6 +133,11 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = chatMessages[position]
+
+        // Set click listener for the item view
+        holder.itemView.setOnClickListener {
+            OnClicklistener?.onItemClick(position)
+        }
 
         when (holder) {
             is SentMessageViewHolder -> holder.bind(message)
@@ -469,6 +485,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
             return formatter.format(date)
         }
+
     }
 
 

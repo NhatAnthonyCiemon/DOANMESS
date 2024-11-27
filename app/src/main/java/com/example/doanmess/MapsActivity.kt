@@ -1,6 +1,7 @@
 package com.example.doanmess
 
 import android.os.Bundle
+import android.webkit.WebView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -11,10 +12,17 @@ class MapsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_maps)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+
+        //get the web view
+        val webView = findViewById<WebView>(R.id.webView)
+
+        val messageContent = intent.getStringExtra("content")
+        // messageContent: "Location: https://maps.google.com/?q=37.4220936,-122.083922"
+
+        //parse to get the url
+        val url = messageContent?.split(" ")?.get(1)
+
+        //load the url
+        webView.loadUrl(url!!)
     }
 }

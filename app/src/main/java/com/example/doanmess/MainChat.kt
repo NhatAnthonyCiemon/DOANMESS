@@ -149,6 +149,17 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         recyclerViewMessages.adapter = chatAdapter
         recyclerViewMessages.layoutManager = LinearLayoutManager(this)
 
+        chatAdapter.setOnItemClickListener(object : ChatAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                val message = chatMessages[position]
+                if (message.type == "location") {
+                    val intent = Intent(this@MainChat, MapsActivity::class.java).apply {
+                        putExtra("content", message.content)
+                    }
+                    startActivity(intent)
+                }
+            }
+        })
 
 
         if (!isGroup) {
