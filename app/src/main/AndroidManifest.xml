@@ -40,6 +40,9 @@
             android:name=".Verification"
             android:exported="false" />
         <activity
+            android:name=".MapsActivity"
+            android:exported="false" />
+        <activity
             android:name=".CallGroup"
             android:exported="false" />
         <activity

@@ -144,6 +144,19 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         recyclerViewMessages.adapter = chatAdapter
         recyclerViewMessages.layoutManager = LinearLayoutManager(this)
 
+        chatAdapter.setOnItemClickListener(object : ChatAdapter.OnItemClickListener {
+            override fun onItemClick(position: Int) {
+                val message = chatMessages[position]
+                if (message.type == "location") {
+                    val intent = Intent(this@MainChat, MapsActivity::class.java).apply {
+                        putExtra("content", message.content)
+                    }
+                    startActivity(intent)
+                }
+            }
+        })
+
+
         if (!isGroup) {
             if (currentUserUid != null && targetUserUid != null) {
                 //set status of user in list chat of last item  to true
@@ -691,29 +704,41 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         showOptionsDialog(position, message)
     }
 
-    private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
-        val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
 
-        // Ví dụ hiển thị dialog với các tùy chọn
-        AlertDialog.Builder(this)
-            .setTitle("Tùy chọn")
-            .setMessage("Bạn muốn làm gì với tin nhắn này?")
-            .setPositiveButton("Xóa") { _, _ ->
-                deleteMessage(position)
-            }
-            .setNegativeButton("Hủy", null)
-            .setNeutralButton(neutralButton) { _, _ ->
-                // pin message
-                val messageId = message.chatId
+private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
+    val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
 
-                if (messageId.isNotEmpty()) {
-                    if (!isGroup) {
-                        Firebase.database.getReference("users").child(currentUserUid)
-                            .child(targetUserUid).child("Messages").child(messageId).child("Pinned").setValue(!message.pinned)
-                    } else {
-                        Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
-                            .child(messageId).child("Pinned").setValue(!message.pinned)
-                    }
+    // Ví dụ hiển thị dialog với các tùy chọn
+    AlertDialog.Builder(this)
+        .setTitle("Tùy chọn")
+        .setMessage("Bạn muốn làm gì với tin nhắn này?")
+        .setPositiveButton("Xóa") { _, _ ->
+            deleteMessage(position)
+        }
+        .setNegativeButton("Hủy", null)
+        .setNeutralButton(neutralButton) { _, _ ->
+            // pin message
+            val messageId = message.chatId
+
+            if (messageId.isNotEmpty()) {
+                if (!isGroup) {
+                    Firebase.database.getReference("users").child(currentUserUid)
+                        .child(targetUserUid).child("Messages").child(messageId).child("Pinned").setValue(!message.pinned)
+
+                    Firebase.database.getReference("users").child(targetUserUid)
+                        .child(currentUserUid).child("Messages").child(messageId).child("Pinned").setValue(!message.pinned)
+                    val newMessage = mapOf(
+                        "Content" to message.content,
+                        "SendId" to message.sendId,
+                        "RecvId" to message.recvId,
+                        "Time" to message.time,
+                        "Type" to message.type,
+                        "Pinned" to !message.pinned
+                    )
+                    Firebase.database.getReference("users").child(currentUserUid)
+                        .child(targetUserUid).child("PinnedMessages").push().setValue(newMessage)
+                    Firebase.database.getReference("users").child(targetUserUid)
+                        .child(currentUserUid).child("PinnedMessages").push().setValue(newMessage)
                 }
             }
             .create()
