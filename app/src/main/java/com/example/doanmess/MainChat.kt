@@ -705,40 +705,46 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
     }
 
 
-private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
-    val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
+    private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
+        val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
 
-    // Ví dụ hiển thị dialog với các tùy chọn
-    AlertDialog.Builder(this)
-        .setTitle("Tùy chọn")
-        .setMessage("Bạn muốn làm gì với tin nhắn này?")
-        .setPositiveButton("Xóa") { _, _ ->
-            deleteMessage(position)
-        }
-        .setNegativeButton("Hủy", null)
-        .setNeutralButton(neutralButton) { _, _ ->
-            // pin message
-            val messageId = message.chatId
+        // Ví dụ hiển thị dialog với các tùy chọn
+        AlertDialog.Builder(this)
+            .setTitle("Tùy chọn")
+            .setMessage("Bạn muốn làm gì với tin nhắn này?")
+            .setPositiveButton("Xóa") { _, _ ->
+                deleteMessage(position)
+            }
+            .setNegativeButton("Hủy", null)
+            .setNeutralButton(neutralButton) { _, _ ->
+                // pin message
+                val messageId = message.chatId
 
-            if (messageId.isNotEmpty()) {
-                if (!isGroup) {
-                    Firebase.database.getReference("users").child(currentUserUid)
-                        .child(targetUserUid).child("Messages").child(messageId).child("Pinned").setValue(!message.pinned)
+                if (messageId.isNotEmpty()) {
+                    if (!isGroup) {
+                        Firebase.database.getReference("users").child(currentUserUid)
+                            .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
+                            .setValue(!message.pinned)
 
-                    Firebase.database.getReference("users").child(targetUserUid)
-                        .child(currentUserUid).child("Messages").child(messageId).child("Pinned").setValue(!message.pinned)
-                    val newMessage = mapOf(
-                        "Content" to message.content,
-                        "SendId" to message.sendId,
-                        "RecvId" to message.recvId,
-                        "Time" to message.time,
-                        "Type" to message.type,
-                        "Pinned" to !message.pinned
-                    )
-                    Firebase.database.getReference("users").child(currentUserUid)
-                        .child(targetUserUid).child("PinnedMessages").push().setValue(newMessage)
-                    Firebase.database.getReference("users").child(targetUserUid)
-                        .child(currentUserUid).child("PinnedMessages").push().setValue(newMessage)
+                        Firebase.database.getReference("users").child(targetUserUid)
+                            .child(currentUserUid).child("Messages").child(messageId)
+                            .child("Pinned")
+                            .setValue(!message.pinned)
+                        val newMessage = mapOf(
+                            "Content" to message.content,
+                            "SendId" to message.sendId,
+                            "RecvId" to message.recvId,
+                            "Time" to message.time,
+                            "Type" to message.type,
+                            "Pinned" to !message.pinned
+                        )
+                        Firebase.database.getReference("users").child(currentUserUid)
+                            .child(targetUserUid).child("PinnedMessages").push()
+                            .setValue(newMessage)
+                        Firebase.database.getReference("users").child(targetUserUid)
+                            .child(currentUserUid).child("PinnedMessages").push()
+                            .setValue(newMessage)
+                    }
                 }
             }
             .create()
@@ -747,7 +753,6 @@ private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
             }
             .show()
     }
-
     private fun deleteMessage(position: Int) {
         // xóa tin nhắn trong firebase
         val message = chatMessages[position]
@@ -767,6 +772,5 @@ private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
         chatMessages.removeAt(position)
         recyclerViewMessages.adapter?.notifyItemRemoved(position)
     }
-
 
 }
