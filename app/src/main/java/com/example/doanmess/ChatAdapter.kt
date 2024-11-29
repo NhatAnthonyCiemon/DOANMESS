@@ -279,6 +279,15 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
     // ViewHolder for received messages
     inner class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        init {
+            itemView.setOnLongClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onMessageLongClick(position, chatMessages[position])
+                }
+                true // Trả về true để xử lý sự kiện long click
+            }
+        }
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
@@ -345,6 +354,15 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
     // ViewHolder for messages with avatar
     inner class MessageWithAvatarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        init {
+            itemView.setOnLongClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onMessageLongClick(position, chatMessages[position])
+                }
+                true // Trả về true để xử lý sự kiện long click
+            }
+        }
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val avatarImageView: ImageView = itemView.findViewById(R.id.avatarImageView)
@@ -424,6 +442,15 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
     // ViewHolder for messages without avatar
     inner class MessageNoAvatarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        init {
+            itemView.setOnLongClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onMessageLongClick(position, chatMessages[position])
+                }
+                true // Trả về true để xử lý sự kiện long click
+            }
+        }
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
