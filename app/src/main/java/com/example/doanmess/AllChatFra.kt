@@ -4,11 +4,15 @@ import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -53,6 +57,7 @@ class AllChatFra : Fragment() {
         }
         dbfirestore.firestoreSettings = settings
     }
+
 
     private fun ResumeRealTimeListen() {
         PauseRealTimeListen()
@@ -250,7 +255,7 @@ class AllChatFra : Fragment() {
         if (User == null) {
             return
         }
-        list.clear()
+
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
         val userDocRef = Firebase.firestore.collection("users").document(userId)
         userDocRef.get().addOnSuccessListener { document ->
@@ -343,12 +348,31 @@ class AllChatFra : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         ListenFirebase()
+        fadeOutAndHide(view)
         return view
+    }
+    private fun fadeOutAndHide(view: View) {
+        val fadeOut = AlphaAnimation(1.0f, 0.0f)
+        fadeOut.duration = 600
+        fadeOut.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {}
+
+            override fun onAnimationEnd(animation: Animation) {
+                view.visibility = View.GONE
+
+                // Delay for 0.25 seconds before making the view visible again
+                Handler(Looper.getMainLooper()).postDelayed({
+                    view.visibility = View.VISIBLE
+                }, 600)
+            }
+
+            override fun onAnimationRepeat(animation: Animation) {}
+        })
+        view.startAnimation(fadeOut)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        PauseRealTimeListen()
     }
 
     override fun onResume() {
@@ -365,6 +389,7 @@ class AllChatFra : Fragment() {
     }
 
     fun PauseRealTimeListen() {
+        list.clear()
         if (::userListener.isInitialized) {
             Firebase.database.getReference("users").child(User!!.uid).removeEventListener(userListener)
             userListener = object : ValueEventListener {
