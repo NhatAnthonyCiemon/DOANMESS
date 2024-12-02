@@ -39,6 +39,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
@@ -64,6 +65,8 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
     private lateinit var message_input: EditText
     private lateinit var database: DatabaseReference
     private lateinit var attachButton : ImageView
+    private lateinit var recyclerSeen: RecyclerView
+    private lateinit var seenAdapter: SeenAdapter
     private val chatMessages = mutableListOf<ChatMessage>()
     private var lastSenderId: String = ""
     private val messageController = MessageController()
@@ -77,6 +80,9 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
     private lateinit var locationBtn: ImageButton
     private lateinit var videoCallBtn: ImageButton
     private lateinit var callVoiceBtn: ImageButton
+    private val imageSeenList = mutableListOf<ImageSeen>()
+    private var userStatusListener: ValueEventListener? = null
+    private var groupStatusListener: ValueEventListener? = null
     data class ChatMessage(
         val chatId : String = "",
         val content: String = "",
@@ -147,6 +153,12 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         recyclerViewMessages.isVerticalScrollBarEnabled = false;
         recyclerViewMessages.adapter = chatAdapter
         recyclerViewMessages.layoutManager = LinearLayoutManager(this)
+        recyclerSeen = findViewById(R.id.recyclerSeen)
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, true)
+        recyclerSeen.layoutManager = layoutManager
+        seenAdapter = SeenAdapter(imageSeenList)
+        recyclerSeen.adapter = seenAdapter
+
 
         chatAdapter.setOnItemClickListener(object : ChatAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
@@ -650,8 +662,106 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
     override fun onResume() {
         super.onResume()
         checkBlockedStatus()
+        createImageSeenRecycle()
     }
 
+    private fun createImageSeenRecycle(){
+        if(!isGroup){
+            val ref = Firebase.firestore.collection("users").document(targetUserUid)
+            ref.get().addOnSuccessListener { document ->
+                val image = document["Avatar"] as String
+                imageSeenList.add(ImageSeen(targetUserUid, image, false))
+                seenAdapter.updateData(imageSeenList)
+                listenSeen()
+            }
+        }
+        else{
+            val ref = Firebase.firestore.collection("groups").document(targetUserUid)
+            ref.get().addOnSuccessListener { document ->
+                val participants = document["Participants"] as List<String>
+                var isListen = false
+                for (participant in participants) {
+                    if(participant != currentUserUid) {
+                        Firebase.firestore.collection("users").document(participant).get().addOnSuccessListener { document ->
+                            val image = document["Avatar"] as String
+                            imageSeenList.add(ImageSeen(participant, image, false))
+                            seenAdapter.updateData(imageSeenList)
+                            if(!isListen)listenSeen()
+                            isListen = true
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    private fun listenSeen() {
+        if (!isGroup) {
+            // Khởi tạo listener và lưu vào biến
+            userStatusListener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val status = snapshot.getValue(Boolean::class.java) ?: false
+                    imageSeenList.find {
+                        it.id == targetUserUid
+                    }?.setSeenId(status)
+                    seenAdapter.updateData(imageSeenList)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Xử lý khi bị lỗi
+                }
+            }
+            Firebase.database.getReference("users")
+                .child(targetUserUid)
+                .child(currentUserUid)
+                .child("Status")
+                .addValueEventListener(userStatusListener!!)
+
+        } else {
+            // Khởi tạo listener cho nhóm và lưu vào biến
+            groupStatusListener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val genericTypeIndicator = object : GenericTypeIndicator<Map<String, Boolean>>() {}
+                    val status = snapshot.getValue(genericTypeIndicator)
+
+                    if (status != null) {
+                        for (participant in status.keys) {
+                            if (participant != currentUserUid) {
+                                imageSeenList.find {
+                                    it.id == participant
+                                }?.setSeenId(status[participant] ?: false)
+                            }
+                        }
+                        seenAdapter.updateData(imageSeenList)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("FirebaseError", error.message)
+                }
+            }
+            Firebase.database.getReference("groups")
+                .child(targetUserUid)
+                .child("Status")
+                .addValueEventListener(groupStatusListener!!)
+        }
+    }
+    private fun removeStatusListeners() {
+        userStatusListener?.let {
+            Firebase.database.getReference("users")
+                .child(targetUserUid)
+                .child(currentUserUid)
+                .child("Status")
+                .removeEventListener(it)
+        }
+
+        groupStatusListener?.let {
+            Firebase.database.getReference("groups")
+                .child(targetUserUid)
+                .child("Status")
+                .removeEventListener(it)
+        }
+    }
     override fun onDestroy() {
         super.onDestroy()
         if (::chatAdapter.isInitialized) {
@@ -844,6 +954,10 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        removeStatusListeners()
+    }
     private fun deleteMessage(position: Int) {
         // xóa tin nhắn trong firebase
         val message = chatMessages[position]

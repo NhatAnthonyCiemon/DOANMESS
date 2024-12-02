@@ -413,7 +413,7 @@ class AllChatFra : Fragment() {
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-
+        ListenFirebase()
         return view
     }
 
@@ -424,12 +424,16 @@ class AllChatFra : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        list.clear()
-        ListenFirebase()
+
     }
 
     override fun onPause() {
         super.onPause()
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         PauseRealTimeListen()
     }
 

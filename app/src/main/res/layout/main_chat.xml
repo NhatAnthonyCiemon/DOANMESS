@@ -1,135 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fitsSystemWindows="true">
+
+    <ImageView
+        android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/main"
-        android:fitsSystemWindows="true"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="@color/white">
+        android:padding="2dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitXY"
-            android:padding="2dp"
-            android:src="@drawable/background"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imageView">
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_back_arrow" />
 
         <LinearLayout
-            android:id="@+id/linearLayout2"
-            android:layout_width="match_parent"
+            android:id="@+id/name_layout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/imageView">
+            android:layout_weight="1">
 
-            <ImageButton
-                android:id="@+id/back_button"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+            <ImageView
+                android:id="@+id/user_avatar"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:background="@android:color/transparent"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_back_arrow" />
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_avatar" />
 
             <LinearLayout
-                android:id="@+id/name_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-                <ImageView
-                    android:id="@+id/user_avatar"
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
-                    android:background="@android:color/transparent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_avatar" />
-
-                <LinearLayout
-                    android:layout_width="150dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/user_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingStart="8dp"
-                        android:text="user"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20dp" />
-
-                    <TextView
-                        android:id="@+id/user_status"
-                        android:layout_width="78dp"
-                        android:layout_height="20dp"
-                        android:paddingStart="8dp"
-                        android:text="Online"
-                        android:textColor="#FFFFFF" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="120dp"
+                android:layout_width="150dp"
                 android:layout_height="match_parent"
-                android:layout_gravity="right"
-                android:layout_marginTop="5dp"
-                android:background="@android:color/transparent"
-                android:gravity="center">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <ImageButton
-                    android:id="@+id/callVoiceBtn"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="3dp"
-                    android:background="@android:color/transparent"
-                    android:maxWidth="20dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/baseline_local_phone_24" />
+                <TextView
+                    android:id="@+id/user_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:text="user"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20dp" />
 
-                <ImageButton
-                    android:id="@+id/videoCallBtn"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="3dp"
-                    android:background="@android:color/transparent"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/baseline_videocam_24" />
-
-                <ImageButton
-                    android:id="@+id/info_button"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/baseline_info_24" />
+                <TextView
+                    android:id="@+id/user_status"
+                    android:layout_width="78dp"
+                    android:layout_height="20dp"
+                    android:paddingStart="8dp"
+                    android:text="Online"
+                    android:textColor="#FFFFFF" />
             </LinearLayout>
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="120dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:layout_marginTop="5dp"
+            android:background="@android:color/transparent"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/callVoiceBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:maxWidth="20dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_local_phone_24" />
+
+            <ImageButton
+                android:id="@+id/videoCallBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_videocam_24" />
+
+            <ImageButton
+                android:id="@+id/info_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_info_24" />
+        </LinearLayout>
+    </LinearLayout>
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_weight="1"
         android:id="@+id/main_chat_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1"
         android:padding="10dp"
+        android:layout_marginBottom="10dp"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@+id/input_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerSeen"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+
+        android:layout_marginBottom="70dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="20dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_chat_recycler"
+        app:layout_constraintVertical_bias="1.0" />
 
     <LinearLayout
         android:id="@+id/input_bar"
@@ -213,5 +229,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 

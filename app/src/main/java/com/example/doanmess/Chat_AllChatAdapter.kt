@@ -68,22 +68,8 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
                 imgOffNotification.visibility = View.VISIBLE
             }
             // Sử dụng lifecycleScope để chạy coroutine
-            //Picasso.get().load(item.avatar).into(imgAvatar)
-            (cont as? LifecycleOwner)?.lifecycleScope?.launch {
-                try {
-                    val ImageLoader = ImageLoader(cont)
-                    val path = ImageLoader.checkFile(item.avatar!!, item.uid)
-                    if(path != item.avatar && File(path).exists()) {
-                        Picasso.get().load(File(path)).into(imgAvatar)
-                    }
-                    else {
-                        Picasso.get().load(item.avatar).into(imgAvatar)
-                    }
-                }
-                catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
+            Picasso.get().load(item.avatar).into(imgAvatar)
+
 
             if (item is DataMessGroup) {
                 txtName.text = item.groupname
