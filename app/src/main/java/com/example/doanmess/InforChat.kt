@@ -64,9 +64,6 @@ class InforChat : HandleOnlineActivity() {
             Toast.makeText(this, "Invalid user ID.", Toast.LENGTH_SHORT).show()
         }
 
-        val frmTopic = findViewById<FrameLayout>(R.id.frmTopic)
-        val frmFastEmotion = findViewById<FrameLayout>(R.id.frmFastEmotion)
-        val frmNickName = findViewById<FrameLayout>(R.id.frmNickName)
         val frmNotice = findViewById<FrameLayout>(R.id.frmNotice)
         val frmLink = findViewById<FrameLayout>(R.id.frmLink)
         val frmLimit = findViewById<FrameLayout>(R.id.frmLimit)
@@ -74,17 +71,6 @@ class InforChat : HandleOnlineActivity() {
         val frmTrash = findViewById<FrameLayout>(R.id.frmTrash)
 
     // Thiết lập onClickListener cho các FrameLayout
-        frmTopic.setOnClickListener {
-            changeBackgroundColor(frmTopic, "#D9D9D9", 150)
-        }
-
-        frmFastEmotion.setOnClickListener {
-            changeBackgroundColor(frmFastEmotion, "#D9D9D9", 150)
-        }
-
-        frmNickName.setOnClickListener {
-            changeBackgroundColor(frmNickName, "#D9D9D9", 150)
-        }
 
 //        frmNotice.setOnClickListener {
 //            // Thay đổi màu nền của frmNotice

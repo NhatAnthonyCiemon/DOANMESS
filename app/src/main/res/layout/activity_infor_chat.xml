@@ -188,6 +188,28 @@
         android:textStyle="bold" />
 
     <FrameLayout
+        android:id="@+id/frmLimit"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="20dp">
+      <ImageView
+          android:id="@+id/imgLimit"
+          android:layout_width="50dp"
+          android:layout_height="match_parent"
+          android:layout_marginLeft="10dp"
+          android:scaleType="fitCenter"
+          app:srcCompat="@drawable/lock" />
+      <TextView
+          android:id="@+id/txtLimit"
+          android:layout_width="280dp"
+          android:layout_height="match_parent"
+          android:layout_marginLeft="80dp"
+          android:gravity="center_vertical"
+          android:text="Limit"
+          android:textSize="25dp" />
+    </FrameLayout>
+
+    <FrameLayout
         android:id="@+id/frmBlock"
         android:layout_width="match_parent"
         android:layout_height="40dp"
