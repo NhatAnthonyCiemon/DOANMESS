@@ -5,7 +5,9 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -16,7 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.database
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -70,7 +77,8 @@ class InforChat : HandleOnlineActivity() {
         val frmBlock = findViewById<FrameLayout>(R.id.frmBlock)
         val frmTrash = findViewById<FrameLayout>(R.id.frmTrash)
 
-    // Thiết lập onClickListener cho các FrameLayout
+
+        // Thiết lập onClickListener cho các FrameLayout
 
 //        frmNotice.setOnClickListener {
 //            // Thay đổi màu nền của frmNotice
@@ -166,12 +174,10 @@ class InforChat : HandleOnlineActivity() {
                 .show()
         }
 
-
         frmLink.setOnClickListener {
             changeBackgroundColor(frmLink, "#D9D9D9", 150)
             // Chuyển sang ListViewPinnedActivity
-            val intent = Intent(this, ListViewPinnedActivity::class.java)
-            startActivity(intent)
+            fetchPinnedMessages()
         }
 
         frmLimit.setOnClickListener {
@@ -242,6 +248,8 @@ class InforChat : HandleOnlineActivity() {
                 }
                 .show()
         }
+
+
     }
 
     private fun changeBackgroundColor(view: View, color: String, duration: Long) {
@@ -251,4 +259,50 @@ class InforChat : HandleOnlineActivity() {
         view.setBackgroundColor(Color.parseColor(color))
         view.postDelayed({ view.setBackgroundColor(currentColor) }, duration)
     }
+
+    private fun fetchPinnedMessages() {
+        // Lấy UID của người dùng hiện tại và người dùng mục tiêu
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val targetUserUid = intent.getStringExtra("uid") ?: return
+
+        // Truy cập vào nhánh PinnedMessages
+        val isGroup = intent.getBooleanExtra("isGroup", false)
+        val databaseRef = if (isGroup) {
+            Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages")
+        } else {
+            Firebase.database.getReference("users").child(currentUserUid).child(targetUserUid).child("PinnedMessages")
+        }
+
+        // Lắng nghe dữ liệu
+        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val pinnedMessages = mutableListOf<Map<String, String>>()
+
+                // Lặp qua tất cả các tin nhắn ghim
+                for (child in snapshot.children) {
+                    val message = child.value as? Map<String, String>
+                    if (message != null) {
+                        pinnedMessages.add(message)
+                    }
+                }
+
+                // Chuyển dữ liệu tin nhắn ghim sang Intent và chuyển sang ListViewPinnedActivity
+                val intent = Intent(this@InforChat, ListViewPinnedActivity::class.java)
+                val bundle = Bundle()
+                bundle.putSerializable("pinnedMessages", ArrayList(pinnedMessages)) // Chuyển đổi sang ArrayList vì Serializable yêu cầu
+                intent.putExtras(bundle)
+
+//                Toast.makeText(this@InforChat, ArrayList(pinnedMessages).toString(), Toast.LENGTH_LONG).show()
+                startActivity(intent)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Xử lý lỗi nếu có
+                Toast.makeText(this@InforChat, "Không thể lấy dữ liệu.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+
+
 }

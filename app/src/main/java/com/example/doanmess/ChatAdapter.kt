@@ -1,5 +1,6 @@
 package com.example.createuiproject
 import android.content.Context
+import android.graphics.Bitmap
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -39,6 +40,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
+import android.media.MediaMetadataRetriever
 
 class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, val isGroup: Boolean, private val listener: OnMessageLongClickListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -103,6 +105,9 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         }
     }
 
+
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             VIEW_TYPE_SENT -> {
@@ -159,6 +164,57 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
     }
     private lateinit var player : ExoPlayer
 
+    fun setUpVideoPlayer(chatId:String, context: Context, playerView: PlayerView, content: String){
+        if(!audioPlayerLists.containsKey(chatId)){
+            val tmp = ExoPlayer.Builder(context).build()
+            audioPlayerLists[chatId] = tmp
+            // Thiết lập video URL
+            val mediaItem = MediaItem.fromUri(content)
+            tmp!!.setMediaItem(mediaItem)
+        }
+        val tmp = audioPlayerLists[chatId]
+        tmp!!.prepare()
+        // Khởi tạo ExoPlayer từ Media3
+        playerView.player = tmp
+    }
+
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        super.onViewRecycled(holder)
+
+        // Giải phóng tài nguyên của videoMessageView nếu cần
+        if (holder is ReceivedMessageViewHolder) {
+            releaseVideoPlayer(holder.videoMessageView)
+        } else if (holder is MessageWithAvatarViewHolder) {
+            releaseVideoPlayer(holder.videoMessageView)
+        } else if (holder is MessageNoAvatarViewHolder) {
+            releaseVideoPlayer(holder.videoMessageView)
+        }
+    }
+
+    // Hàm tiện ích để giải phóng PlayerView
+    private fun releaseVideoPlayer(playerView: PlayerView?) {
+        val player = playerView?.player
+        if (player != null) {
+            player.stop() // Dừng phát
+            player.release() // Giải phóng tài nguyên
+        }
+        playerView?.player = null // Xóa liên kết
+
+    }
+
+
+    fun releaseAllPlayers() {
+        for ((_, player) in audioPlayerLists) {
+            player.release() // Giải phóng tài nguyên
+        }
+        audioPlayerLists.clear() // Xóa tất cả khỏi danh sách
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        releaseAllPlayers() // Giải phóng toàn bộ player
+    }
+
     // ViewHolder for sent messages
     inner class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         init {
@@ -173,7 +229,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
-        private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
+        val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val loadingBar : ProgressBar = itemView.findViewById(R.id.LoadingBar)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
@@ -182,27 +238,62 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
-                imageMessageView.visibility = View.GONE
-                videoMessageView.visibility = View.VISIBLE
+                imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
+                videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
-                cardVideo.visibility = View.VISIBLE
-                // Khởi tạo ExoPlayer từ Media3
-        /*        player = ExoPlayer.Builder(itemView.context).build()
-                videoMessageView.player = player
-                // Thiết lập video URL
-                val mediaItem = MediaItem.fromUri(chatMessage.content)
-                player.setMediaItem(mediaItem)
-                player.prepare()*/
-                setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
-                //set on long click on card video
+                cardVideo.visibility = View.GONE
+
+                // Show a placeholder while loading the thumbnail
+                Glide.with(itemView.context)
+                    .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                    .placeholder(R.drawable.video_placeholder) // Placeholder image
+                    .error(R.drawable.video_placeholder) // Fallback image in case of error
+                    .into(imageMessageView)
+
+                // Retrieve video thumbnail in background thread
+                CoroutineScope(Dispatchers.IO).launch {
+                    val retriever = MediaMetadataRetriever()
+                    var bitmap: Bitmap? = null
+                    try {
+                        retriever.setDataSource(chatMessage.content, HashMap()) // Use video URL
+                        bitmap = retriever.frameAtTime // Capture the first frame as a thumbnail
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        retriever.release() // Release resources
+                    }
+
+                    // Update UI on the main thread
+                    withContext(Dispatchers.Main) {
+                        if (bitmap != null) {
+                            Glide.with(itemView.context)
+                                .load(bitmap) // Use extracted bitmap
+                                .placeholder(R.drawable.video_placeholder) // Placeholder image
+                                .error(R.drawable.video_placeholder) // Fallback image in case of error
+                                .into(imageMessageView)
+                        }
+                    }
+                }
+
+                // Set click listener to start video playback
+                imageMessageView.setOnClickListener {
+                    imageMessageView.visibility = View.GONE // Hide thumbnail when video starts playing
+                    videoMessageView.visibility = View.VISIBLE // Show the video player
+                    cardVideo.visibility = View.VISIBLE
+                    setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                }
+
+                // Long click listener on the video card
                 videoMessageView.setOnLongClickListener {
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
                         listener.onMessageLongClick(position, chatMessages[position])
                     }
-                    true // Trả về true để xử lý sự kiện long click
+                    true // Return true to handle long click event
                 }
-            } else if (chatMessage.type == "image") {
+            }
+
+            else if (chatMessage.type == "image") {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 messageTextView.visibility = View.GONE
@@ -246,6 +337,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             return formatter.format(date)
         }
     }
+
     val audioPlayerLists : MutableMap<String,ExoPlayer> = mutableMapOf()
     private fun setupAudioPlayer(audioPlayBtn : ImageButton,chatId:String, context: Context, audioPlayerView: PlayerView, content: String) {
         audioPlayerView.player = null
@@ -265,20 +357,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             audioPlayerView.player!!.playWhenReady = true
 
         }
-
-    }
-    fun setUpVideoPlayer(chatId:String, context: Context, playerView: PlayerView, content: String){
-        if(!audioPlayerLists.containsKey(chatId)){
-            val tmp = ExoPlayer.Builder(context).build()
-            audioPlayerLists[chatId] = tmp
-            // Thiết lập video URL
-            val mediaItem = MediaItem.fromUri(content)
-            tmp!!.setMediaItem(mediaItem)
-        }
-        val tmp = audioPlayerLists[chatId]
-        tmp!!.prepare()
-        // Khởi tạo ExoPlayer từ Media3
-        playerView.player = tmp
     }
 
 
@@ -298,7 +376,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val messageTextView: TextView = itemView.findViewById(R.id.messageTextView)
         private val timestampTextView: TextView = itemView.findViewById(R.id.timestampTextView)
         private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
-        private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
+        val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
@@ -306,26 +384,61 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
-                imageMessageView.visibility = View.GONE
-                videoMessageView.visibility = View.VISIBLE
+                imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
+                videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
-                cardVideo.visibility = View.VISIBLE
-                // Khởi tạo ExoPlayer từ Media3
-     /*           player = ExoPlayer.Builder(itemView.context).build()
-                videoMessageView.player = player
-                // Thiết lập video URL
-                val mediaItem = MediaItem.fromUri(chatMessage.content)
-                player.setMediaItem(mediaItem)
-                player.prepare()*/
-                setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                cardVideo.visibility = View.GONE
+
+                // Show a placeholder while loading the thumbnail
+                Glide.with(itemView.context)
+                    .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                    .placeholder(R.drawable.video_placeholder) // Placeholder image
+                    .error(R.drawable.video_placeholder) // Fallback image in case of error
+                    .into(imageMessageView)
+
+                // Retrieve video thumbnail in background thread
+                CoroutineScope(Dispatchers.IO).launch {
+                    val retriever = MediaMetadataRetriever()
+                    var bitmap: Bitmap? = null
+                    try {
+                        retriever.setDataSource(chatMessage.content, HashMap()) // Use video URL
+                        bitmap = retriever.frameAtTime // Capture the first frame as a thumbnail
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        retriever.release() // Release resources
+                    }
+
+                    // Update UI on the main thread
+                    withContext(Dispatchers.Main) {
+                        if (bitmap != null) {
+                            Glide.with(itemView.context)
+                                .load(bitmap) // Use extracted bitmap
+                                .placeholder(R.drawable.video_placeholder) // Placeholder image
+                                .error(R.drawable.video_placeholder) // Fallback image in case of error
+                                .into(imageMessageView)
+                        }
+                    }
+                }
+
+                // Set click listener to start video playback
+                imageMessageView.setOnClickListener {
+                    imageMessageView.visibility = View.GONE // Hide thumbnail when video starts playing
+                    videoMessageView.visibility = View.VISIBLE // Show the video player
+                    cardVideo.visibility = View.VISIBLE
+                    setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                }
+
+                // Long click listener on the video card
                 videoMessageView.setOnLongClickListener {
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
                         listener.onMessageLongClick(position, chatMessages[position])
                     }
-                    true // Trả về true để xử lý sự kiện long click
+                    true // Return true to handle long click event
                 }
-            }else if (chatMessage.type == "image") {
+            }
+            else if (chatMessage.type == "image") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.GONE
                 imageMessageView.visibility = View.VISIBLE
@@ -381,7 +494,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val avatarImageView: ImageView = itemView.findViewById(R.id.avatarImageView)
         private val senderNameTextView: TextView = itemView.findViewById(R.id.senderNameTextView)
         private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
-        private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
+        val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
@@ -389,28 +502,61 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
-                imageMessageView.visibility = View.GONE
-                videoMessageView.visibility = View.VISIBLE
+                imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
+                videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
-                cardVideo.visibility = View.VISIBLE
-                // Khởi tạo ExoPlayer từ Media3
-            /*    player = ExoPlayer.Builder(itemView.context).build()
-                videoMessageView.player = player
+                cardVideo.visibility = View.GONE
 
+                // Show a placeholder while loading the thumbnail
+                Glide.with(itemView.context)
+                    .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                    .placeholder(R.drawable.video_placeholder) // Placeholder image
+                    .error(R.drawable.video_placeholder) // Fallback image in case of error
+                    .into(imageMessageView)
 
-                // Thiết lập video URL
-                val mediaItem = MediaItem.fromUri(chatMessage.content)
-                player.setMediaItem(mediaItem)
-                player.prepare()*/
-                setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                // Retrieve video thumbnail in background thread
+                CoroutineScope(Dispatchers.IO).launch {
+                    val retriever = MediaMetadataRetriever()
+                    var bitmap: Bitmap? = null
+                    try {
+                        retriever.setDataSource(chatMessage.content, HashMap()) // Use video URL
+                        bitmap = retriever.frameAtTime // Capture the first frame as a thumbnail
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        retriever.release() // Release resources
+                    }
+
+                    // Update UI on the main thread
+                    withContext(Dispatchers.Main) {
+                        if (bitmap != null) {
+                            Glide.with(itemView.context)
+                                .load(bitmap) // Use extracted bitmap
+                                .placeholder(R.drawable.video_placeholder) // Placeholder image
+                                .error(R.drawable.video_placeholder) // Fallback image in case of error
+                                .into(imageMessageView)
+                        }
+                    }
+                }
+
+                // Set click listener to start video playback
+                imageMessageView.setOnClickListener {
+                    imageMessageView.visibility = View.GONE // Hide thumbnail when video starts playing
+                    videoMessageView.visibility = View.VISIBLE // Show the video player
+                    cardVideo.visibility = View.VISIBLE
+                    setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                }
+
+                // Long click listener on the video card
                 videoMessageView.setOnLongClickListener {
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
                         listener.onMessageLongClick(position, chatMessages[position])
                     }
-                    true // Trả về true để xử lý sự kiện long click
+                    true // Return true to handle long click event
                 }
-            }else if (chatMessage.type == "image") {
+            }
+            else if (chatMessage.type == "image") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.GONE
                 imageMessageView.visibility = View.VISIBLE
@@ -476,7 +622,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val imageMessageView: ImageView = itemView.findViewById(R.id.imageMessageView)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
-        private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
+        val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
 //
@@ -491,29 +637,62 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         fun bind(chatMessage: MainChat.ChatMessage) {
             // Trong phương thức bind hoặc xử lý
             if (chatMessage.type == "video") {
-                cardVideo.visibility = View.VISIBLE
                 messageTextView.visibility = View.GONE
-                imageMessageView.visibility = View.GONE
-                videoMessageView.visibility = View.VISIBLE
+                imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
+                videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
+                cardVideo.visibility = View.GONE
 
-                // Khởi tạo ExoPlayer từ Media3
-            /*    player = ExoPlayer.Builder(itemView.context).build()
-                videoMessageView.player = player as Player
+                // Show a placeholder while loading the thumbnail
+                Glide.with(itemView.context)
+                    .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                    .placeholder(R.drawable.video_placeholder) // Placeholder image
+                    .error(R.drawable.video_placeholder) // Fallback image in case of error
+                    .into(imageMessageView)
 
-                // Thiết lập video URL
-                val mediaItem = MediaItem.fromUri(chatMessage.content)
-                player.setMediaItem(mediaItem)
-                player.prepare()*/
-                setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                // Retrieve video thumbnail in background thread
+                CoroutineScope(Dispatchers.IO).launch {
+                    val retriever = MediaMetadataRetriever()
+                    var bitmap: Bitmap? = null
+                    try {
+                        retriever.setDataSource(chatMessage.content, HashMap()) // Use video URL
+                        bitmap = retriever.frameAtTime // Capture the first frame as a thumbnail
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        retriever.release() // Release resources
+                    }
+
+                    // Update UI on the main thread
+                    withContext(Dispatchers.Main) {
+                        if (bitmap != null) {
+                            Glide.with(itemView.context)
+                                .load(bitmap) // Use extracted bitmap
+                                .placeholder(R.drawable.video_placeholder) // Placeholder image
+                                .error(R.drawable.video_placeholder) // Fallback image in case of error
+                                .into(imageMessageView)
+                        }
+                    }
+                }
+
+                // Set click listener to start video playback
+                imageMessageView.setOnClickListener {
+                    imageMessageView.visibility = View.GONE // Hide thumbnail when video starts playing
+                    videoMessageView.visibility = View.VISIBLE // Show the video player
+                    cardVideo.visibility = View.VISIBLE
+                    setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                }
+
+                // Long click listener on the video card
                 videoMessageView.setOnLongClickListener {
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
                         listener.onMessageLongClick(position, chatMessages[position])
                     }
-                    true // Trả về true để xử lý sự kiện long click
+                    true // Return true to handle long click event
                 }
-            } else if (chatMessage.type == "image") {
+            }
+ else if (chatMessage.type == "image") {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 messageTextView.visibility = View.GONE

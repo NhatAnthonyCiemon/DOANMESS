@@ -99,6 +99,7 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         var avatarUrl: String = ""
     }
 
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
