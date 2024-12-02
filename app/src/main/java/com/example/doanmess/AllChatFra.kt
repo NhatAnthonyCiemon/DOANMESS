@@ -63,7 +63,6 @@ class AllChatFra : Fragment() {
                 if (snapshot.exists()) {
                     loadingBar.visibility = View.GONE
                     btnGroup.visibility = View.VISIBLE
-              //      list.removeIf { it !is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
                         val latestsmallSnapshot = childSnapshot.child("Messages").children.maxByOrNull {
                             it.child("Time").getValue(Long::class.java) ?: 0L
@@ -75,7 +74,7 @@ class AllChatFra : Fragment() {
                             val status = childSnapshot.child("Status").getValue(Boolean::class.java) ?: false
                             val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
                             val type = latestsmallSnapshot.child("Type").getValue(String::class.java)
-                            content = changeContent(content,type)
+                            content = changeContent(content, type)
                             if (User != null && recvId != null && sendId != null) {
                                 if (User!!.uid == sendId) {
                                     dbfirestore.collection("users").document(recvId.toString())
@@ -87,35 +86,22 @@ class AllChatFra : Fragment() {
                                                 val existingItem = list.find { it.uid == recvId.toString() }
                                                 if (existingItem != null) {
                                                     existingItem.apply {
-                                                        this.othersend= false
+                                                        this.othersend = false
                                                         this.avatar = avatar
                                                         this.name = name
-                                                        this.message = if(!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
+                                                        this.message = if (!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
                                                         this.timestamp = timestamp!!
                                                         this.status = status!!
                                                     }
                                                 } else {
-                                                    if(listOff.contains(recvId.toString())) {
-                                                        list.add(DataMess(avatar, recvId.toString(), name, content.toString(), timestamp!!, status!!, false,false))
-                                                    }
-                                                    else {
-                                                        list.add(
-                                                            DataMess(
-                                                                avatar,
-                                                                recvId.toString(),
-                                                                name,
-                                                                content.toString(),
-                                                                timestamp!!,
-                                                                status!!,
-                                                                false,
-                                                                true
-                                                            )
-                                                        )
+                                                    if (listOff.contains(recvId.toString())) {
+                                                        list.add(DataMess(avatar, recvId.toString(), name, content.toString(), timestamp!!, status!!, false, false))
+                                                    } else {
+                                                        list.add(DataMess(avatar, recvId.toString(), name, content.toString(), timestamp!!, status!!, false, true))
                                                     }
                                                 }
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
-
                                             } else {
                                                 Log.d("exist", "No such document")
                                             }
@@ -134,33 +120,20 @@ class AllChatFra : Fragment() {
                                                 val existingItem = list.find { it.uid == sendId.toString() }
                                                 if (existingItem != null) {
                                                     existingItem.apply {
-                                                        this.othersend= true
+                                                        this.othersend = true
                                                         this.avatar = avatar
                                                         this.name = name
-                                                        this.message =if(!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
+                                                        this.message = if (!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
                                                         this.timestamp = timestamp!!
                                                         this.status = status!!
                                                     }
                                                 } else {
-                                                    if(listOff.contains(sendId.toString())) {
-                                                        list.add(DataMess(avatar, sendId.toString(), name, content.toString(), timestamp!!, status!!, true,false))
-                                                    }
-                                                    else {
-                                                        list.add(
-                                                            DataMess(
-                                                                avatar,
-                                                                sendId!!,
-                                                                name,
-                                                                content.toString(),
-                                                                timestamp!!,
-                                                                status!!,
-                                                                true,
-                                                                true
-                                                            )
-                                                        )
+                                                    if (listOff.contains(sendId.toString())) {
+                                                        list.add(DataMess(avatar, sendId.toString(), name, content.toString(), timestamp!!, status!!, true, false))
+                                                    } else {
+                                                        list.add(DataMess(avatar, sendId!!, name, content.toString(), timestamp!!, status!!, true, true))
                                                     }
                                                 }
-
                                                 list.sortByDescending { it.timestamp }
                                                 adapter.notifyDataSetChanged()
                                             } else {
@@ -176,6 +149,7 @@ class AllChatFra : Fragment() {
                     }
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {
                 Toast.makeText(atvtContext, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
             }
@@ -189,7 +163,6 @@ class AllChatFra : Fragment() {
                 if (snapshot.exists()) {
                     loadingBar.visibility = View.GONE
                     btnGroup.visibility = View.VISIBLE
-                //    list.removeIf { it is DataMessGroup }
                     for (childSnapshot in snapshot.children) {
                         if (myGroup.contains(childSnapshot.key.toString())) {
                             val latestsmallSnapshot = childSnapshot.child("Messages").children.maxByOrNull {
@@ -201,7 +174,7 @@ class AllChatFra : Fragment() {
                                 val status = childSnapshot.child("Status").child(User!!.uid).getValue(Boolean::class.java) ?: false
                                 val timestamp = latestsmallSnapshot.child("Time").getValue(Long::class.java)
                                 val type = latestsmallSnapshot.child("Type").getValue(String::class.java)
-                                content = changeContent(content,type)
+                                content = changeContent(content, type)
                                 if (User!!.uid == sendId) {
                                     val existingItem = list.find { it.uid == childSnapshot.key.toString() }
                                     if (existingItem != null) {
@@ -211,22 +184,10 @@ class AllChatFra : Fragment() {
                                             this.status = status!!
                                         }
                                     } else {
-                                        if(listOff.contains(childSnapshot.key.toString())) {
-                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString(),false))
-                                        }
-                                        else {
-                                            list.add(
-                                                DataMessGroup(
-                                                    avatarList[childSnapshot.key.toString()].toString(),
-                                                    childSnapshot.key!!,
-                                                    myGroup[childSnapshot.key.toString()].toString(),
-                                                    content.toString(),
-                                                    timestamp!!,
-                                                    status!!,
-                                                    "Bạn",
-                                                    myGroup[childSnapshot.key.toString()].toString(), true
-                                                )
-                                            )
+                                        if (listOff.contains(childSnapshot.key.toString())) {
+                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString(), false))
+                                        } else {
+                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString(), true))
                                         }
                                     }
                                     list.sortByDescending { it.timestamp }
@@ -246,23 +207,10 @@ class AllChatFra : Fragment() {
                                                         this.last_name = name
                                                     }
                                                 } else {
-                                                    if(listOff.contains(childSnapshot.key.toString())) {
-                                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key.toString(), name, content.toString(), timestamp!!, status!!, name, myGroup[childSnapshot.key.toString()].toString(),false))
-                                                    }
-                                                    else {
-                                                        list.add(
-                                                            DataMessGroup(
-                                                                avatarList[childSnapshot.key.toString()].toString(),
-                                                                childSnapshot.key.toString(),
-                                                                name,
-                                                                content.toString(),
-                                                                timestamp!!,
-                                                                status!!,
-                                                                name,
-                                                                myGroup[childSnapshot.key.toString()].toString(),
-                                                                true
-                                                            )
-                                                        )
+                                                    if (listOff.contains(childSnapshot.key.toString())) {
+                                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key.toString(), name, content.toString(), timestamp!!, status!!, name, myGroup[childSnapshot.key.toString()].toString(), false))
+                                                    } else {
+                                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key.toString(), name, content.toString(), timestamp!!, status!!, name, myGroup[childSnapshot.key.toString()].toString(), true))
                                                     }
                                                 }
                                                 list.sortByDescending { it.timestamp }
@@ -288,20 +236,14 @@ class AllChatFra : Fragment() {
         Firebase.database.getReference("groups").addValueEventListener(groupListener)
     }
 
-    private fun changeContent(content: String ?, type: String?): String? {
-        if (type == "image") {
-             return "Đã gửi một ảnh"
+    private fun changeContent(content: String?, type: String?): String? {
+        return when (type) {
+            "image" -> "Đã gửi một ảnh"
+            "video" -> "Đã gửi một video"
+            "location" -> "Đã gửi một vị trí"
+            "audio" -> "Đã gửi một tin nhắn thoại"
+            else -> content
         }
-        else if(type == "video") {
-            return "Đã gửi một video"
-        }
-        else if(type == "location") {
-            return "Đã gửi một vị trí"
-        }
-        else if(type == "audio") {
-            return "Đã gửi một tin nhắn thoại"
-        }
-        return content
     }
 
     private fun ListenFirebase() {
@@ -316,16 +258,12 @@ class AllChatFra : Fragment() {
                 val unnoticed = document.get("Unnoticed") as? MutableList<String>
                 if (unnoticed != null) {
                     listOff.addAll(unnoticed)
-
                 }
                 getGroupAndMessage()
             }
         }.addOnFailureListener { exception ->
-            // Xử lý lỗi (nếu cần)
             Log.e("FirestoreError", "Error fetching document: ${exception.message}")
         }
-
-
     }
 
     private fun getGroupAndMessage() {
@@ -379,36 +317,27 @@ class AllChatFra : Fragment() {
 
         adapter = Chat_AllChatAdapter(atvtContext, list)
         adapter.setOnItemClickListener(object : Chat_AllChatAdapter.OnItemClickListener {
-//            override fun onItemClick(position: Int) {
-//                val intent = Intent(atvtContext, MainChat::class.java)
-//                intent.putExtra("uid", list[position].uid)
-//                intent.putExtra("name", list[position].name)
-//                intent.putExtra("avatar", list[position].avatar)
-//                intent.putExtra("isGroup", list[position].isGroup)
-//                startActivity(intent)
-//            }
-                override fun onItemClick(position: Int) {
-                    if (list.isEmpty()) {
-                        return
-                    }
-                    val intent = Intent(atvtContext, MainChat::class.java)
-                    val item = list[position]
-
-                    intent.putExtra("uid", item.uid)
-                    intent.putExtra("avatar", item.avatar)
-                    intent.putExtra("isGroup", item.isGroup)
-
-                    // Check if item is of type DataMessGroup to send groupname instead of name
-                    if (item is DataMessGroup) {
-                        intent.putExtra("isGroup", true)
-                        intent.putExtra("name", item.groupname) // Send groupname for DataMessGroup
-                    } else {
-                        intent.putExtra("isGroup", false)
-                        intent.putExtra("name", item.name) // Send name for other types
-                    }
-
-                    startActivity(intent)
+            override fun onItemClick(position: Int) {
+                if (list.isEmpty()) {
+                    return
                 }
+                val intent = Intent(atvtContext, MainChat::class.java)
+                val item = list[position]
+
+                intent.putExtra("uid", item.uid)
+                intent.putExtra("avatar", item.avatar)
+                intent.putExtra("isGroup", item.isGroup)
+
+                if (item is DataMessGroup) {
+                    intent.putExtra("isGroup", true)
+                    intent.putExtra("name", item.groupname)
+                } else {
+                    intent.putExtra("isGroup", false)
+                    intent.putExtra("name", item.name)
+                }
+
+                startActivity(intent)
+            }
         })
 
         recyclerView.adapter = adapter
@@ -424,12 +353,10 @@ class AllChatFra : Fragment() {
 
     override fun onResume() {
         super.onResume()
-
     }
 
     override fun onPause() {
         super.onPause()
-
     }
 
     override fun onDestroy() {
@@ -438,7 +365,6 @@ class AllChatFra : Fragment() {
     }
 
     fun PauseRealTimeListen() {
-      //  list.clear()
         if (::userListener.isInitialized) {
             Firebase.database.getReference("users").child(User!!.uid).removeEventListener(userListener)
             userListener = object : ValueEventListener {

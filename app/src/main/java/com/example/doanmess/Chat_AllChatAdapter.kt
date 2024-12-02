@@ -8,6 +8,8 @@ import android.widget.TextView
 import android.view.LayoutInflater
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.squareup.picasso.Callback
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
 import java.io.File
@@ -15,11 +17,11 @@ import java.io.IOException
 
 class Chat_AllChatAdapter(private val cont: Activity, private val list: List<DataMess>) : RecyclerView.Adapter<Chat_AllChatAdapter.MessHolder>() {
 
-    inner class MessHolder(itemview: View, clickListener: OnItemClickListener) : RecyclerView.ViewHolder(itemview) {
+    inner class MessHolder(itemView: View, clickListener: OnItemClickListener) : RecyclerView.ViewHolder(itemView) {
         init {
             itemView.setOnClickListener {
                 clickListener.onItemClick(adapterPosition)
-                notifyDataSetChanged()
+                notifyItemChanged(adapterPosition) // Update only the clicked item
             }
         }
     }
@@ -61,14 +63,41 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
             txtName.text = item.name
             txtContent.text = item.message
             txtTime.text = item.time
-            if(item.isNotify) {
-                imgOffNotification.visibility = View.GONE
-            }
-            else {
-                imgOffNotification.visibility = View.VISIBLE
-            }
-            // Sử dụng lifecycleScope để chạy coroutine
-            Picasso.get().load(item.avatar).into(imgAvatar)
+            imgOffNotification.visibility = if (item.isNotify) View.GONE else View.VISIBLE
+            //Picasso.get().load(item.avatar).into(imgAvatar)
+            Picasso.get()
+                .load(item.avatar)
+                .resize(100, 100)  // Điều chỉnh kích thước ảnh phù hợp với ImageView
+                .centerCrop()
+                .networkPolicy(NetworkPolicy.OFFLINE)  // Kiểm tra bộ nhớ cache trước, nếu có
+                .into(imgAvatar, object : Callback {
+                    override fun onSuccess() {
+                        // Nếu ảnh đã được tải từ cache, sẽ không tải lại từ mạng
+                    }
+
+                    override fun onError(e: Exception?) {
+                        // Nếu ảnh chưa có trong cache, tải từ mạng
+                        Picasso.get()
+                            .load(item.avatar)
+                            .resize(100, 100)
+                            .centerCrop()
+                            .into(imgAvatar)
+                    }
+                })
+            // Use lifecycleScope to run coroutine
+//            (cont as? LifecycleOwner)?.lifecycleScope?.launch {
+//                try {
+//                    val imageLoader = ImageLoader(cont)
+//                    val path = imageLoader.checkFile(item.avatar!!, item.uid)
+//                    if (path != item.avatar && File(path).exists()) {
+//                        Picasso.get().load(File(path)).into(imgAvatar)
+//                    } else {
+//                        Picasso.get().load(item.avatar).into(imgAvatar)
+//                    }
+//                } catch (e: IOException) {
+//                    e.printStackTrace()
+//                }
+//            }
 
 
             if (item is DataMessGroup) {
