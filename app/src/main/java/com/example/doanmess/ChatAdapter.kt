@@ -194,7 +194,14 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 player.setMediaItem(mediaItem)
                 player.prepare()*/
                 setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
-
+                //set on long click on card video
+                videoMessageView.setOnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                }
             } else if (chatMessage.type == "image") {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
@@ -311,7 +318,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 player.setMediaItem(mediaItem)
                 player.prepare()*/
                 setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
-
+                videoMessageView.setOnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                }
             }else if (chatMessage.type == "image") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.GONE
@@ -390,6 +403,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 player.setMediaItem(mediaItem)
                 player.prepare()*/
                 setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                videoMessageView.setOnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                }
             }else if (chatMessage.type == "image") {
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.GONE
@@ -486,6 +506,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 player.setMediaItem(mediaItem)
                 player.prepare()*/
                 setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
+                videoMessageView.setOnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                }
             } else if (chatMessage.type == "image") {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
