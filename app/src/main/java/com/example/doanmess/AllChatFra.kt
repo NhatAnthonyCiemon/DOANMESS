@@ -347,7 +347,7 @@ class AllChatFra : Fragment() {
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        ListenFirebase()
+
         fadeOutAndHide(view)
         return view
     }
@@ -377,10 +377,12 @@ class AllChatFra : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        ListenFirebase()
     }
 
     override fun onPause() {
         super.onPause()
+
     }
 
     override fun onDestroy() {
@@ -389,7 +391,7 @@ class AllChatFra : Fragment() {
     }
 
     fun PauseRealTimeListen() {
-        list.clear()
+
         if (::userListener.isInitialized) {
             Firebase.database.getReference("users").child(User!!.uid).removeEventListener(userListener)
             userListener = object : ValueEventListener {
