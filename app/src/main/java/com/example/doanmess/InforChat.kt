@@ -313,49 +313,101 @@ class InforChat : HandleOnlineActivity() {
         view.postDelayed({ view.setBackgroundColor(currentColor) }, duration)
     }
 
+//    private fun fetchPinnedMessages() {
+//        // Lấy UID của người dùng hiện tại và người dùng mục tiêu
+//        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+//        val targetUserUid = intent.getStringExtra("uid") ?: return
+//
+//        // Truy cập vào nhánh PinnedMessages
+//        val isGroup = intent.getBooleanExtra("isGroup", false)
+//        val databaseRef = if (isGroup) {
+//            Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages")
+//        } else {
+//            Firebase.database.getReference("users").child(currentUserUid).child(targetUserUid).child("PinnedMessages")
+//        }
+//
+//        // Lắng nghe dữ liệu
+//        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                val pinnedMessages = mutableListOf<Map<String, String>>()
+//
+//                // Lặp qua tất cả các tin nhắn ghim
+//                for (child in snapshot.children) {
+//                    val message = child.value as? Map<String, String>
+//                    if (message != null) {
+//                        pinnedMessages.add(message)
+//                    }
+//                }
+//
+//                // Chuyển dữ liệu tin nhắn ghim sang Intent và chuyển sang ListViewPinnedActivity
+//                val intent = Intent(this@InforChat, ListViewPinnedActivity::class.java)
+//                val bundle = Bundle()
+//                bundle.putSerializable("pinnedMessages", ArrayList(pinnedMessages)) // Chuyển đổi sang ArrayList vì Serializable yêu cầu
+//                intent.putExtras(bundle)
+//
+////                Toast.makeText(this@InforChat, ArrayList(pinnedMessages).toString(), Toast.LENGTH_LONG).show()
+//                startActivity(intent)
+//            }
+//
+//            override fun onCancelled(error: DatabaseError) {
+//                // Xử lý lỗi nếu có
+//                Toast.makeText(this@InforChat, "Không thể lấy dữ liệu.", Toast.LENGTH_SHORT).show()
+//            }
+//        })
+//    }
+
     private fun fetchPinnedMessages() {
         // Lấy UID của người dùng hiện tại và người dùng mục tiêu
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val targetUserUid = intent.getStringExtra("uid") ?: return
 
-        // Truy cập vào nhánh PinnedMessages
-        val isGroup = intent.getBooleanExtra("isGroup", false)
-        val databaseRef = if (isGroup) {
-            Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages")
-        } else {
-            Firebase.database.getReference("users").child(currentUserUid).child(targetUserUid).child("PinnedMessages")
-        }
+        // Tham chiếu đến database
+        val database = Firebase.database
+        val groupRef = database.getReference("groups")
+            .child(targetUserUid)
+            .child("PinnedMessages")
 
-        // Lắng nghe dữ liệu
-        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val pinnedMessages = mutableListOf<Map<String, String>>()
+        groupRef.get().addOnCompleteListener { groupTask ->
+            val databaseRef = if (groupTask.isSuccessful && groupTask.result.exists()) {
+                // Nếu tồn tại trong "groups"
+                groupRef
+            } else {
+                // Nếu không tồn tại trong "groups", sử dụng "users"
+                database.getReference("users")
+                    .child(currentUserUid)
+                    .child(targetUserUid)
+                    .child("PinnedMessages")
+            }
 
-                // Lặp qua tất cả các tin nhắn ghim
-                for (child in snapshot.children) {
-                    val message = child.value as? Map<String, String>
-                    if (message != null) {
-                        pinnedMessages.add(message)
+            // Lắng nghe dữ liệu từ databaseRef
+            databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val pinnedMessages = mutableListOf<Map<String, String>>()
+
+                    // Lặp qua tất cả các tin nhắn ghim
+                    for (child in snapshot.children) {
+                        val message = child.value as? Map<String, String>
+                        if (message != null) {
+                            pinnedMessages.add(message)
+                        }
                     }
+
+                    // Chuyển dữ liệu tin nhắn ghim sang Intent và chuyển sang ListViewPinnedActivity
+                    val intent = Intent(this@InforChat, ListViewPinnedActivity::class.java)
+                    val bundle = Bundle()
+                    bundle.putSerializable("pinnedMessages", ArrayList(pinnedMessages)) // Chuyển đổi sang ArrayList vì Serializable yêu cầu
+                    intent.putExtras(bundle)
+
+                    startActivity(intent)
                 }
 
-                // Chuyển dữ liệu tin nhắn ghim sang Intent và chuyển sang ListViewPinnedActivity
-                val intent = Intent(this@InforChat, ListViewPinnedActivity::class.java)
-                val bundle = Bundle()
-                bundle.putSerializable("pinnedMessages", ArrayList(pinnedMessages)) // Chuyển đổi sang ArrayList vì Serializable yêu cầu
-                intent.putExtras(bundle)
-
-//                Toast.makeText(this@InforChat, ArrayList(pinnedMessages).toString(), Toast.LENGTH_LONG).show()
-                startActivity(intent)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Xử lý lỗi nếu có
-                Toast.makeText(this@InforChat, "Không thể lấy dữ liệu.", Toast.LENGTH_SHORT).show()
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    // Xử lý lỗi nếu có
+                    Toast.makeText(this@InforChat, "Không thể lấy dữ liệu.", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
-
 
 
 }
