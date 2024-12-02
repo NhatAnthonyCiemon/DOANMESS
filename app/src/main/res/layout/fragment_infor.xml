@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginHorizontal="26dp"
     android:scrollbars="none">
+
     <RelativeLayout
 
         android:id="@+id/main"
@@ -46,8 +48,8 @@
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_below="@+id/txtName"
-            android:layout_marginTop="40dp"
             android:layout_centerInParent="true"
+            android:layout_marginTop="40dp"
             android:src="@drawable/ic_launcher_background"
             app:layout_constraintTop_toBottomOf="@+id/txtName"
             app:shapeAppearanceOverlay="@style/circular" />
@@ -93,7 +95,9 @@
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
                 android:text="Dark Mode"
-                android:textSize="25dp" />
+                android:textColor="#000009"
+                android:textSize="25dp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtCheckDarkMode"
@@ -130,7 +134,9 @@
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
                 android:text="Change avatar"
-                android:textSize="25dp" />
+                android:textColor="#000000"
+                android:textSize="25dp"
+                android:textStyle="bold" />
 
         </FrameLayout>
 
@@ -159,7 +165,9 @@
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
                 android:text="Change name"
-                android:textSize="25dp" />
+                android:textColor="#000000"
+                android:textSize="25dp"
+                android:textStyle="bold" />
 
         </FrameLayout>
 
@@ -188,7 +196,9 @@
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
                 android:text="Friend request"
-                android:textSize="25dp" />
+                android:textColor="#000000"
+                android:textSize="25dp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtNumberRequest"
@@ -225,7 +235,9 @@
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
                 android:text="Block list"
-                android:textSize="25dp" />
+                android:textColor="#000000"
+                android:textSize="25dp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtNumberBlock"
@@ -237,6 +249,36 @@
                 android:textSize="20dp" />
 
         </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/logout"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@+id/blockList"
+            android:layout_alignParentStart="true"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="25dp">
+
+            <ImageView
+                android:id="@+id/imageView13"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                app:srcCompat="@drawable/logout_icon" />
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="80dp"
+                android:gravity="center"
+                android:text="Logout"
+                android:textColor="#000000"
+                android:textSize="25dp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
 
     </RelativeLayout>
 </ScrollView>
