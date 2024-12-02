@@ -39,29 +39,81 @@ class InforChat : HandleOnlineActivity() {
         }
 
         val chatUserId = intent.getStringExtra("uid") // Retrieve the uid from the intent
+
         val imgView = findViewById<ImageView>(R.id.imgView) // Avatar ImageView
         val txtName = findViewById<TextView>(R.id.txtName) // Name TextView
+//        if (!chatUserId.isNullOrEmpty()) {
+//            // Fetch user data from Firebase Firestore
+//            val firestore = FirebaseFirestore.getInstance()
+//            firestore.collection("users").document(chatUserId).get()
+//                .addOnSuccessListener { document ->
+//                    if (document != null) {
+//                        // Retrieve the avatar URL and name from the document
+//                        val avatarUrl = document.getString("Avatar")
+//                        val name = document.getString("Name")
+//
+//                        // Set the name in the TextView
+//                        txtName.text = name ?: "User"
+//
+//                        // Load the avatar into the ImageView using Glide
+//                        if (!avatarUrl.isNullOrEmpty()) {
+//                            Glide.with(this).load(avatarUrl).into(imgView)
+//                        } else {
+//                            imgView.setImageResource(R.drawable.ic_launcher_background) // Placeholder
+//                        }
+//                    } else {
+//                        Toast.makeText(this, "User not found.", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//                .addOnFailureListener { e ->
+//                    Toast.makeText(this, "Failed to load user data: ${e.message}", Toast.LENGTH_SHORT).show()
+//                }
+//        } else {
+//            Toast.makeText(this, "Invalid user ID.", Toast.LENGTH_SHORT).show()
+//        }
+
         if (!chatUserId.isNullOrEmpty()) {
-            // Fetch user data from Firebase Firestore
             val firestore = FirebaseFirestore.getInstance()
+
+            // Tìm trong collection "users"
             firestore.collection("users").document(chatUserId).get()
                 .addOnSuccessListener { document ->
-                    if (document != null) {
-                        // Retrieve the avatar URL and name from the document
+                    if (document != null && document.exists()) {
+                        // Lấy thông tin từ "users"
                         val avatarUrl = document.getString("Avatar")
                         val name = document.getString("Name")
 
-                        // Set the name in the TextView
+                        // Hiển thị thông tin
                         txtName.text = name ?: "User"
-
-                        // Load the avatar into the ImageView using Glide
                         if (!avatarUrl.isNullOrEmpty()) {
                             Glide.with(this).load(avatarUrl).into(imgView)
                         } else {
                             imgView.setImageResource(R.drawable.ic_launcher_background) // Placeholder
                         }
                     } else {
-                        Toast.makeText(this, "User not found.", Toast.LENGTH_SHORT).show()
+                        // Nếu không tìm thấy trong "users", tiếp tục tìm trong "groups"
+                        firestore.collection("groups").document(chatUserId).get()
+                            .addOnSuccessListener { groupDoc ->
+                                if (groupDoc != null && groupDoc.exists()) {
+                                    // Lấy thông tin từ "groups"
+                                    val groupAvatarUrl = groupDoc.getString("Avatar")
+                                    val groupName = groupDoc.getString("Name")
+
+                                    // Hiển thị thông tin nhóm
+                                    txtName.text = groupName ?: "Group"
+                                    if (!groupAvatarUrl.isNullOrEmpty()) {
+                                        Glide.with(this).load(groupAvatarUrl).into(imgView)
+                                    } else {
+                                        imgView.setImageResource(R.drawable.ic_launcher_background) // Placeholder
+                                    }
+                                } else {
+                                    // Không tìm thấy trong cả "users" lẫn "groups"
+                                    Toast.makeText(this, "No user or group found.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Failed to load group data: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
                     }
                 }
                 .addOnFailureListener { e ->
@@ -70,6 +122,7 @@ class InforChat : HandleOnlineActivity() {
         } else {
             Toast.makeText(this, "Invalid user ID.", Toast.LENGTH_SHORT).show()
         }
+
 
         val frmNotice = findViewById<FrameLayout>(R.id.frmNotice)
         val frmLink = findViewById<FrameLayout>(R.id.frmLink)
