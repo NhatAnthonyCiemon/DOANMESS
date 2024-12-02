@@ -22,15 +22,20 @@ class Verification : AppCompatActivity() {
 
         btnCheckVerification.setOnClickListener {
             auth.currentUser?.reload()?.addOnCompleteListener { task ->
-                if (auth.currentUser?.isEmailVerified == true) {
-                    Toast.makeText(this, "Email verified! You can log in now.", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, Login::class.java)
-                    startActivity(intent)
-                    finish()
+                if (task.isSuccessful) {
+                    if (auth.currentUser?.isEmailVerified == true) {
+                        Toast.makeText(this, "Email verified! Please log in now.", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, Login::class.java)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Your email is not verified yet.", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    Toast.makeText(this, "Your email is not verified.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Failed to reload user. Please try again.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
     }
 }
