@@ -1,6 +1,7 @@
 package com.example.doanmess
 
 import HandleOnlineActivity
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -182,6 +183,9 @@ class InforChat : HandleOnlineActivity() {
 
         frmLink.setOnClickListener {
             changeBackgroundColor(frmLink, "#D9D9D9", 150)
+            // Chuyển sang ListViewPinnedActivity
+            val intent = Intent(this, ListViewPinnedActivity::class.java)
+            startActivity(intent)
         }
 
         frmLimit.setOnClickListener {
