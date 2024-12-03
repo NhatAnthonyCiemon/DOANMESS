@@ -21,11 +21,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 
 
 class Login : AppCompatActivity() {
-//    private lateinit var etEmail: EditText
-//    private lateinit var etPassword: EditText
-//    private lateinit var btnForgotPassword: Button
-//    private lateinit var btnLogin: Button
-//    private lateinit var btnSignUp: Button
+
     private lateinit var auth: FirebaseAuth
 
 

@@ -10,6 +10,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.provider.Settings
+import android.util.Log
 import android.view.KeyEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -24,9 +26,14 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
+
+
 
 class inforFragment : Fragment() {
     private val storageReference = FirebaseStorage.getInstance().reference
@@ -37,6 +44,8 @@ class inforFragment : Fragment() {
     private lateinit var userId: String
     private lateinit var friendReqFrame : FrameLayout
     private lateinit var blockListFrame : FrameLayout
+    private var dbfirestore = Firebase.firestore
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -54,10 +63,78 @@ class inforFragment : Fragment() {
         val changeName = view.findViewById<FrameLayout>(R.id.changeName)
         val txtName = view.findViewById<TextView>(R.id.txtName)
         val txtMode = view.findViewById<TextView>(R.id.txtCheckDarkMode)
+        val logOutBtn = view.findViewById<FrameLayout>(R.id.logout)
         friendReqFrame = view.findViewById(R.id.friendRequest)
         blockListFrame = view.findViewById(R.id.blockList)
         imageView = view.findViewById(R.id.imgView)
         button = view.findViewById(R.id.floatingActionButton)
+
+
+        val auth1 = FirebaseAuth.getInstance()
+        val currentUser = auth1.currentUser
+
+
+        logOutBtn.setOnClickListener {
+            val dir = requireContext().filesDir
+            val files = dir.listFiles()
+            if (files != null) {
+                for (file in files) {
+                    if (file.isFile) {
+                        try {
+                            file.delete()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
+            val docRef = dbfirestore.collection("users").document(currentUser!!.uid)
+            //xóa 1 phần tử trong mảng field của firestore
+            val androidId = Settings.Secure.getString(requireContext().contentResolver, Settings.Secure.ANDROID_ID)
+
+            docRef.update("Devices", FieldValue.arrayRemove(androidId))
+                .addOnSuccessListener {
+                    Log.d("thanhhhhhhcoooong", "Phần tử đã được xóa thành công khỏi mảng")
+                }
+                .addOnFailureListener { e ->
+                    Log.d("xxxxxxxxxxxxxxxx", "Loi xoa phan tu", e)
+                }
+
+            val docRef2 = dbfirestore.collection("devices").document(androidId.toString())
+            docRef2.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+
+                        docRef2.update("User_id", "")
+                            .addOnSuccessListener {
+                                Log.d("TAG", "Trường User_id đã được ghi đè thành công")
+                                auth1.signOut()
+                                val intent = Intent(requireContext(), Login::class.java)
+                                startActivity(intent)
+                                requireActivity().finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w("TAG", "Lỗi khi ghi đè trường User_id", e)
+                            }
+                    } else {
+                        docRef2.set(hashMapOf("Token" to "", "User_id" to ""))
+                            .addOnSuccessListener {
+                                Log.d("TAG", "DocumentSnapshot successfully updated!")
+                                auth1.signOut()
+                                val intent = Intent(requireContext(), Login::class.java)
+                                startActivity(intent)
+                                requireActivity().finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w("TAG", "Error updating document", e)
+                            }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d("TAG", "get failed with ", exception)
+                }
+
+        }
 
         blockListFrame.setOnClickListener {
             val intent = Intent(context, Block::class.java)

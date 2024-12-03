@@ -60,9 +60,6 @@ class Home : HandleOnlineActivity() {
         applyDarkMode()
 
 
-        // CODE DƯỚI ĐÂY LÀ DUY LÂM VIẾT THÊM ĐỂ LÀM PHẦN ĐĂNG NHẬP, NẾU CÓ MÂU THUẪN VỚI CODE CŨ THÌ BÁO ĐỂ CHỈNH LẠI NHA
-        // ======================================================================================================
-        // code nay de kiem tra xem user da dang nhap chua neu roi thi cho vo Home luon
 
         val auth1 = FirebaseAuth.getInstance()
         val currentUser = auth1.currentUser
@@ -74,69 +71,72 @@ class Home : HandleOnlineActivity() {
         }
 
        // Toast.makeText(this, "Welcome ${currentUser?.email}", Toast.LENGTH_SHORT).show()
-        val logOutBtn = findViewById<Button>(R.id.logOutBtn)
-        logOutBtn.setOnClickListener {
 
-            val dir = filesDir
-            val files = dir.listFiles()
-            if (files != null) {
-                for (file in files) {
-                    if (file.isFile) {
-                        try {
-                            file.delete()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                }
-            }
-            val docRef = dbfirestore.collection("users").document(currentUser!!.uid)
-            //xóa 1 phần tử trong mảng field của firestore
-            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        // Tạm thời comment vì có thể cần để sau này
 
-            docRef.update("Devices", FieldValue.arrayRemove(androidId))
-                .addOnSuccessListener {
-                    Log.d("thanhhhhhhcoooong", "Phần tử đã được xóa thành công khỏi mảng")
-                }
-                .addOnFailureListener { e ->
-                    Log.d("xxxxxxxxxxxxxxxx", "Loi xoa phan tu", e)
-                }
-
-            val docRef2 = dbfirestore.collection("devices").document(androidId.toString())
-            docRef2.get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-
-                        docRef2.update("User_id", "")
-                            .addOnSuccessListener {
-                                Log.d("TAG", "Trường User_id đã được ghi đè thành công")
-                                auth1.signOut()
-                                val intent = Intent(this, Login::class.java)
-                                startActivity(intent)
-                                finish()
-                            }
-                            .addOnFailureListener { e ->
-                                Log.w("TAG", "Lỗi khi ghi đè trường User_id", e)
-                            }
-                    } else {
-                        docRef2.set(hashMapOf("Token" to "", "User_id" to ""))
-                            .addOnSuccessListener {
-                                Log.d("TAG", "DocumentSnapshot successfully updated!")
-                                auth1.signOut()
-                                val intent = Intent(this, Login::class.java)
-                                startActivity(intent)
-                                finish()
-                            }
-                            .addOnFailureListener { e ->
-                                Log.w("TAG", "Error updating document", e)
-                            }
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.d("TAG", "get failed with ", exception)
-                }
-
-        }
+//        val logOutBtn = findViewById<Button>(R.id.logOutBtn)
+//        logOutBtn.setOnClickListener {
+//
+//            val dir = filesDir
+//            val files = dir.listFiles()
+//            if (files != null) {
+//                for (file in files) {
+//                    if (file.isFile) {
+//                        try {
+//                            file.delete()
+//                        } catch (e: Exception) {
+//                            e.printStackTrace()
+//                        }
+//                    }
+//                }
+//            }
+//            val docRef = dbfirestore.collection("users").document(currentUser!!.uid)
+//            //xóa 1 phần tử trong mảng field của firestore
+//            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+//
+//            docRef.update("Devices", FieldValue.arrayRemove(androidId))
+//                .addOnSuccessListener {
+//                    Log.d("thanhhhhhhcoooong", "Phần tử đã được xóa thành công khỏi mảng")
+//                }
+//                .addOnFailureListener { e ->
+//                    Log.d("xxxxxxxxxxxxxxxx", "Loi xoa phan tu", e)
+//                }
+//
+//            val docRef2 = dbfirestore.collection("devices").document(androidId.toString())
+//            docRef2.get()
+//                .addOnSuccessListener { document ->
+//                    if (document.exists()) {
+//
+//                        docRef2.update("User_id", "")
+//                            .addOnSuccessListener {
+//                                Log.d("TAG", "Trường User_id đã được ghi đè thành công")
+//                                auth1.signOut()
+//                                val intent = Intent(this, Login::class.java)
+//                                startActivity(intent)
+//                                finish()
+//                            }
+//                            .addOnFailureListener { e ->
+//                                Log.w("TAG", "Lỗi khi ghi đè trường User_id", e)
+//                            }
+//                    } else {
+//                        docRef2.set(hashMapOf("Token" to "", "User_id" to ""))
+//                            .addOnSuccessListener {
+//                                Log.d("TAG", "DocumentSnapshot successfully updated!")
+//                                auth1.signOut()
+//                                val intent = Intent(this, Login::class.java)
+//                                startActivity(intent)
+//                                finish()
+//                            }
+//                            .addOnFailureListener { e ->
+//                                Log.w("TAG", "Error updating document", e)
+//                            }
+//                    }
+//                }
+//                .addOnFailureListener { exception ->
+//                    Log.d("TAG", "get failed with ", exception)
+//                }
+//
+//        }
         // ======================================================================================================
 
         Firebase.firestore.clearPersistence().addOnCompleteListener {
