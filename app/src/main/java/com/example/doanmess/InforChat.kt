@@ -328,7 +328,6 @@ class InforChat : HandleOnlineActivity() {
                 .setMessage("Do you want to limit?")
                 .setPositiveButton("Yes") { dialog, which ->
                     // Xử lý khi người dùng chọn "Có"
-                    // Thực hiện thao tác block ở đây
                 }
                 .setNegativeButton("No") { dialog, which ->
                     // Đóng hộp thoại khi người dùng chọn "Không"
@@ -338,42 +337,84 @@ class InforChat : HandleOnlineActivity() {
         }
         frmBlock.setOnClickListener {
             changeBackgroundColor(frmBlock, "#D9D9D9", 150)
-            AlertDialog.Builder(this)
-                .setTitle("Block")
-                .setMessage("Do you want to block?")
-                .setPositiveButton("Yes") { dialog, which ->
-                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
-                    if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
-                        val firestore = FirebaseFirestore.getInstance()
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+            if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
+                val firestore = FirebaseFirestore.getInstance()
+
+                // Kiểm tra nếu currentUserId nằm trong Blocks của chatUserId
+                firestore.collection("users").document(chatUserId).get()
+                    .addOnSuccessListener { document ->
+                        val blockedUsers = document["Blocks"] as? List<Map<String, Any>>
+                        val isBlockedByChatUser = blockedUsers?.any { it["uid"] == currentUserId } ?: false
+
+                        if (isBlockedByChatUser) {
+                            AlertDialog.Builder(this)
+                                .setTitle("Blocked")
+                                .setMessage("You have been blocked by this user.")
+                                .setPositiveButton("OK") { dialog, which ->
+                                    dialog.dismiss()
+                                }
+                                .show()
+                            return@addOnSuccessListener
+                        }
+
+                        // Nếu không bị block bởi chatUserId, tiếp tục xử lý kiểm tra block/unblock
                         firestore.collection("users").document(currentUserId).get()
-                            .addOnSuccessListener { document ->
-                                val blockedUsers = document["Blocks"] as? List<Map<String, Any>>
-                                val isAlreadyBlocked = blockedUsers?.any { it["uid"] == chatUserId } ?: false
+                            .addOnSuccessListener { userDocument ->
+                                val currentUserBlockedUsers = userDocument["Blocks"] as? List<Map<String, Any>>
+                                val isAlreadyBlocked = currentUserBlockedUsers?.any { it["uid"] == chatUserId } ?: false
 
-                                if (!isAlreadyBlocked) {
-                                    firestore.collection("users").document(currentUserId)
-                                        .update("Blocks", FieldValue.arrayUnion(mapOf("uid" to chatUserId, "timeStamp" to System.currentTimeMillis())))
-                                        .addOnSuccessListener {
-                                            Toast.makeText(this, "User blocked successfully.", Toast.LENGTH_SHORT).show()
+                                if (isAlreadyBlocked) {
+                                    AlertDialog.Builder(this)
+                                        .setTitle("Unblock")
+                                        .setMessage("Do you want to unblock?")
+                                        .setPositiveButton("Yes") { dialog, which ->
+                                            firestore.collection("users").document(currentUserId)
+                                                .update("Blocks", FieldValue.arrayRemove(mapOf("uid" to chatUserId)))
+                                                .addOnSuccessListener {
+                                                    Toast.makeText(this, "User unblocked successfully.", Toast.LENGTH_SHORT).show()
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Toast.makeText(this, "Failed to unblock user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                }
                                         }
-                                        .addOnFailureListener { e ->
-                                            Toast.makeText(this, "Failed to block user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        .setNegativeButton("No") { dialog, which ->
+                                            dialog.dismiss()
                                         }
+                                        .show()
                                 } else {
-                                    Toast.makeText(this, "User is already blocked.", Toast.LENGTH_SHORT).show()
+                                    AlertDialog.Builder(this)
+                                        .setTitle("Block")
+                                        .setMessage("Do you want to block?")
+                                        .setPositiveButton("Yes") { dialog, which ->
+                                            firestore.collection("users").document(currentUserId)
+                                                .update("Blocks", FieldValue.arrayUnion(mapOf("uid" to chatUserId)))
+                                                .addOnSuccessListener {
+                                                    Toast.makeText(this, "User blocked successfully.", Toast.LENGTH_SHORT).show()
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Toast.makeText(this, "Failed to block user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                }
+                                        }
+                                        .setNegativeButton("No") { dialog, which ->
+                                            dialog.dismiss()
+                                        }
+                                        .show()
                                 }
                             }
                             .addOnFailureListener { e ->
                                 Toast.makeText(this, "Failed to check blocked users: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                     }
-                }
-                .setNegativeButton("No") { dialog, which ->
-                    dialog.dismiss()
-                }
-                .show()
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Failed to check if you are blocked: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }
         }
+
+
         frmTrash.setOnClickListener {
             changeBackgroundColor(frmTrash, "#D9D9D9", 150)
             AlertDialog.Builder(this)

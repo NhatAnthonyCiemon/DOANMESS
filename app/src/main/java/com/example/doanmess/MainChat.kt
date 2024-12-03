@@ -14,11 +14,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -44,14 +45,11 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.storage
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.InputStream
 import java.util.UUID
 
 
@@ -98,7 +96,7 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
         var senderName: String = ""
         var avatarUrl: String = ""
     }
-
+//
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -793,11 +791,17 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
     }
     private fun checkBlockedStatus() {
         val inputBar = findViewById<LinearLayout>(R.id.input_bar)
-        val blockedMessage = findViewById<TextView>(R.id.blocked_message)
+        val blockedMessage1 = findViewById<FrameLayout>(R.id.blockMsg1)
+        val blockedMessage2 = findViewById<FrameLayout>(R.id.blockMsg2)
+
+
         val userId = auth.currentUser?.uid ?: return
         val targetUserUid = intent.getStringExtra("uid") ?: return
 
-        Firebase.firestore.collection("users").document(userId)
+        val db = Firebase.firestore
+
+        // Kiểm tra nếu A (người hiện tại) block B
+        db.collection("users").document(userId)
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
@@ -806,24 +810,58 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
                         for (blockedUser in blockedUsers) {
                             val uid = blockedUser["uid"] as? String
                             if (uid == targetUserUid) {
-                                // Hide input bar and show blocked message
+                                // A đã block B
                                 inputBar.visibility = View.GONE
-                                blockedMessage.visibility = View.VISIBLE
+                                blockedMessage2.visibility = View.VISIBLE
+                                videoCallBtn.visibility = View.GONE
+                                callVoiceBtn.visibility = View.GONE
                                 return@addOnSuccessListener
                             }
                         }
                     }
                 }
-                // If not blocked, show input bar and hide blocked message
-                inputBar.visibility = View.VISIBLE
-                blockedMessage.visibility = View.GONE
+                // Nếu A không block B, kiểm tra ngược lại
+                db.collection("users").document(targetUserUid)
+                    .get()
+                    .addOnSuccessListener { targetDocument ->
+                        if (targetDocument.exists()) {
+                            val blockedByTarget = targetDocument["Blocks"] as? List<Map<String, Any>>
+                            if (blockedByTarget != null) {
+                                for (blockedUser in blockedByTarget) {
+                                    val uid = blockedUser["uid"] as? String
+                                    if (uid == userId) {
+                                        // B đã block A
+                                        inputBar.visibility = View.GONE
+                                        blockedMessage1.visibility = View.VISIBLE
+                                        videoCallBtn.visibility = View.GONE
+                                        callVoiceBtn.visibility = View.GONE
+                                        return@addOnSuccessListener
+                                    }
+                                }
+                            }
+                        }
+                        // Nếu không có ai block ai, hiển thị giao diện bình thường
+                        inputBar.visibility = View.VISIBLE
+                        blockedMessage1.visibility = View.GONE
+                        blockedMessage2.visibility = View.GONE
+                        videoCallBtn.visibility = View.VISIBLE
+                        callVoiceBtn.visibility = View.VISIBLE
+                    }
+                    .addOnFailureListener {
+                        // Lỗi khi kiểm tra B block A
+                        inputBar.visibility = View.VISIBLE
+                        blockedMessage1.visibility = View.GONE
+                        blockedMessage2.visibility = View.GONE
+                    }
             }
-            .addOnFailureListener { e ->
-                // Handle error
+            .addOnFailureListener {
+                // Lỗi khi kiểm tra A block B
                 inputBar.visibility = View.VISIBLE
-                blockedMessage.visibility = View.GONE
+                blockedMessage1.visibility = View.GONE
+                blockedMessage2.visibility = View.GONE
             }
     }
+
 
     override fun onMessageLongClick(position: Int, message: MainChat.ChatMessage) {
         // Xử lý khi người dùng long click vào tin nhắn
