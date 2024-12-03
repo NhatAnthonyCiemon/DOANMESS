@@ -180,6 +180,53 @@ class InforChat : HandleOnlineActivity() {
 //                .show()
 //        }
 
+//        frmNotice.setOnClickListener {
+//            // Thay đổi màu nền của frmNotice
+//            changeBackgroundColor(frmNotice, "#D9D9D9", 150)
+//
+//            // Tạo và hiển thị hộp thoại AlertDialog
+//            AlertDialog.Builder(this)
+//                .setTitle("Unnoticed")
+//                .setMessage("Do you want to unnoticed?")
+//                .setPositiveButton("Yes") { dialog, which ->
+//                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+//                    if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
+//                        val firestore = FirebaseFirestore.getInstance()
+//                        firestore.collection("users").document(currentUserId).get()
+//                            .addOnSuccessListener { document ->
+//                                // Lấy danh sách người dùng bị unnoticed của người dùng hiện tại
+//                                val unnoticedUsers = document["Unnoticed"] as? List<String>
+//                                val isAlreadyUnnoticed = unnoticedUsers?.contains(chatUserId) ?: false
+//
+//                                // Kiểm tra nếu người dùng chưa bị unnoticed
+//                                if (!isAlreadyUnnoticed) {
+//                                    firestore.collection("users").document(currentUserId)
+//                                        .update("Unnoticed", FieldValue.arrayUnion(chatUserId))
+//                                        .addOnSuccessListener {
+//                                            Toast.makeText(this, "User unnoticed successfully.", Toast.LENGTH_SHORT).show()
+//                                        }
+//                                        .addOnFailureListener { e ->
+//                                            Toast.makeText(this, "Failed to unnoticed user: ${e.message}", Toast.LENGTH_SHORT).show()
+//                                        }
+//                                } else {
+//                                    // Nếu người dùng đã bị unnoticed
+//                                    Toast.makeText(this, "User is already unnoticed.", Toast.LENGTH_SHORT).show()
+//                                }
+//                            }
+//                            .addOnFailureListener { e ->
+//                                Toast.makeText(this, "Failed to check unnoticed users: ${e.message}", Toast.LENGTH_SHORT).show()
+//                            }
+//                    } else {
+//                        Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//                .setNegativeButton("No") { dialog, which ->
+//                    // Đóng hộp thoại khi người dùng chọn "No"
+//                    dialog.dismiss()
+//                }
+//                .show()
+//        }
+
         frmNotice.setOnClickListener {
             // Thay đổi màu nền của frmNotice
             changeBackgroundColor(frmNotice, "#D9D9D9", 150)
@@ -187,30 +234,37 @@ class InforChat : HandleOnlineActivity() {
             // Tạo và hiển thị hộp thoại AlertDialog
             AlertDialog.Builder(this)
                 .setTitle("Unnoticed")
-                .setMessage("Do you want to unnoticed?")
+                .setMessage("Do you want to toggle unnoticed status?")
                 .setPositiveButton("Yes") { dialog, which ->
                     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
                     if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
                         val firestore = FirebaseFirestore.getInstance()
                         firestore.collection("users").document(currentUserId).get()
                             .addOnSuccessListener { document ->
-                                // Lấy danh sách người dùng bị unnoticed của người dùng hiện tại
+                                // Lấy danh sách người dùng bị "Unnoticed" của người dùng hiện tại
                                 val unnoticedUsers = document["Unnoticed"] as? List<String>
                                 val isAlreadyUnnoticed = unnoticedUsers?.contains(chatUserId) ?: false
 
-                                // Kiểm tra nếu người dùng chưa bị unnoticed
-                                if (!isAlreadyUnnoticed) {
+                                if (isAlreadyUnnoticed) {
+                                    // Nếu người dùng đã có trong danh sách "Unnoticed", xóa họ ra
+                                    firestore.collection("users").document(currentUserId)
+                                        .update("Unnoticed", FieldValue.arrayRemove(chatUserId))
+                                        .addOnSuccessListener {
+                                            Toast.makeText(this, "User removed from unnoticed list.", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Toast.makeText(this, "Failed to remove user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                } else {
+                                    // Nếu người dùng chưa có trong danh sách "Unnoticed", thêm họ vào
                                     firestore.collection("users").document(currentUserId)
                                         .update("Unnoticed", FieldValue.arrayUnion(chatUserId))
                                         .addOnSuccessListener {
-                                            Toast.makeText(this, "User unnoticed successfully.", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(this, "User added to unnoticed list.", Toast.LENGTH_SHORT).show()
                                         }
                                         .addOnFailureListener { e ->
-                                            Toast.makeText(this, "Failed to unnoticed user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(this, "Failed to add user: ${e.message}", Toast.LENGTH_SHORT).show()
                                         }
-                                } else {
-                                    // Nếu người dùng đã bị unnoticed
-                                    Toast.makeText(this, "User is already unnoticed.", Toast.LENGTH_SHORT).show()
                                 }
                             }
                             .addOnFailureListener { e ->
@@ -226,6 +280,7 @@ class InforChat : HandleOnlineActivity() {
                 }
                 .show()
         }
+
 
         frmLink.setOnClickListener {
             changeBackgroundColor(frmLink, "#D9D9D9", 150)
