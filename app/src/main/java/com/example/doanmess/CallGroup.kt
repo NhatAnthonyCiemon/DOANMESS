@@ -107,6 +107,7 @@ class CallGroup : AppCompatActivity() {
         rejectBtnCard.visibility = View.GONE
         endCallBtnCard.visibility = View.VISIBLE
         avatarCallCard.visibility = View.VISIBLE
+        if(!isVideoCall) toggleVideoBtn.visibility = View.GONE
         loadGroupInfo()
         firebaseRef.child(groupId).child(userId).setValue(uniqueId)
         firebaseRef.child(groupId).addChildEventListener(childEventListener)

@@ -27,9 +27,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+
 
 
 class Home : HandleOnlineActivity() {
@@ -510,6 +510,9 @@ class Home : HandleOnlineActivity() {
             activeListeners.remove(group)
         }
     }
+
+
+    // Hàm để lấy và xóa giá trị từ SharedPreferences
 
 
 }

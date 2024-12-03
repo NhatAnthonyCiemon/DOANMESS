@@ -1,4 +1,5 @@
 package com.example.createuiproject
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.media.AudioManager
@@ -665,12 +666,24 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
                     // Update UI on the main thread
                     withContext(Dispatchers.Main) {
-                        if (bitmap != null) {
-                            Glide.with(itemView.context)
-                                .load(bitmap) // Use extracted bitmap
-                                .placeholder(R.drawable.video_placeholder) // Placeholder image
-                                .error(R.drawable.video_placeholder) // Fallback image in case of error
-                                .into(imageMessageView)
+                        val context = itemView.context
+                        val activity = context as? Activity
+
+                        // Kiểm tra nếu context không phải là Activity hoặc Activity đã bị hủy
+                        if (activity == null || activity.isDestroyed || activity.isFinishing) {
+                            return@withContext
+                        }
+                        try {
+                            if (bitmap != null) {
+                                Glide.with(itemView.context)
+                                    .load(bitmap) // Use extracted bitmap
+                                    .placeholder(R.drawable.video_placeholder) // Placeholder image
+                                    .error(R.drawable.video_placeholder) // Fallback image in case of error
+                                    .into(imageMessageView)
+                            }
+                        }
+                        catch (e: Exception) {
+                            e.printStackTrace()
                         }
                     }
                 }
