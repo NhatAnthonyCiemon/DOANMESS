@@ -14,17 +14,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.bumptech.glide.request.RequestOptions
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
 
 class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerView.Adapter<BlockAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val profileImage: ImageView = itemView.findViewById(R.id.profileImage)
         val userName: TextView = itemView.findViewById(R.id.userName)
-        val blockTime: TextView = itemView.findViewById(R.id.blockTime)
         val btnAccept: Button = itemView.findViewById(R.id.btnAccept)
         val btnDelete: Button = itemView.findViewById(R.id.btnDelete)
     }
@@ -37,9 +32,6 @@ class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerVi
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = blockLists[position]
         holder.userName.text = item.name
-        holder.blockTime.text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
-            Date(item.timestamp)
-        )
 
         val requestOptions = RequestOptions().circleCrop()
         val avatarUrl = if (item.avatar.isNotEmpty()) item.avatar else "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9"
@@ -58,7 +50,7 @@ class BlockAdapter(private val blockLists: MutableList<BlockModel>) : RecyclerVi
                 Log.d("Unblock", "Attempting to unblock user with ID: $blockedUserId for user: $userId")
 
                 firestore.collection("users").document(userId)
-                    .update("Blocks", FieldValue.arrayRemove(mapOf("uid" to blockedUserId, "timeStamp" to item.timestamp)))
+                    .update("Blocks", FieldValue.arrayRemove(mapOf("uid" to blockedUserId)))
                     .addOnSuccessListener {
                         Log.d("Unblock", "Successfully removed $blockedUserId from block list")
                         blockLists.removeAt(pos)

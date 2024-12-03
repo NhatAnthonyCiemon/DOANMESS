@@ -6,15 +6,10 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.*
 
 class Block : HandleOnlineActivity() {
 
@@ -46,8 +41,6 @@ class Block : HandleOnlineActivity() {
         fetchBlockedUsers()
     }
 
-
-    //    working on
     private fun fetchBlockedUsers() {
         val userId = auth.currentUser?.uid ?: return
         firestore.collection("users").document(userId)
@@ -61,8 +54,7 @@ class Block : HandleOnlineActivity() {
                     } else {
                         for (blockedUser in blockedUsers) {
                             val uid = blockedUser["uid"] as? String ?: continue
-                            val timestamp = blockedUser["timeStamp"] as? Long ?: continue
-                            fetchUserDetails(uid, timestamp)
+                            fetchUserDetails(uid)
                         }
                     }
                 } else {
@@ -75,7 +67,7 @@ class Block : HandleOnlineActivity() {
             }
     }
 
-    private fun fetchUserDetails(blockedUserId: String, timestamp: Long) {
+    private fun fetchUserDetails(blockedUserId: String) {
         firestore.collection("users").document(blockedUserId)
             .get()
             .addOnSuccessListener { document ->
@@ -83,7 +75,7 @@ class Block : HandleOnlineActivity() {
                     val name = document.getString("Name") ?: ""
                     val avatar = document.getString("Avatar") ?: ""
                     Log.d("Block", "Fetched User Details - Name: $name, Avatar: $avatar")
-                    val block = BlockModel(uid = blockedUserId, name = name, avatar = avatar, timestamp = timestamp)
+                    val block = BlockModel(uid = blockedUserId, name = name, avatar = avatar)
                     blockLists.add(block)
                     adapter.notifyDataSetChanged()
                 } else {
@@ -95,19 +87,4 @@ class Block : HandleOnlineActivity() {
                 Log.e("Block", "Error fetching user details", e)
             }
     }
-
-//    private fun blockUser(blockedUserId: String, blockedUserName: String, blockedUserAvatar: String) {
-//        val userId = auth.currentUser?.uid ?: return
-//        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-//        val block = BlockModel(name = blockedUserName, avatar = blockedUserAvatar, timestamp = timestamp)
-//        firestore.collection("users").document(userId).collection("Blocks").document(blockedUserId)
-//            .set(block)
-//            .addOnSuccessListener {
-//                Toast.makeText(this, "User blocked successfully", Toast.LENGTH_SHORT).show()
-//                fetchBlockedUsers()
-//            }
-//            .addOnFailureListener { e ->
-//                Toast.makeText(this, "Error blocking user", Toast.LENGTH_SHORT).show()
-//            }
-//    }
 }
