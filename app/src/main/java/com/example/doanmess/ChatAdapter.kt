@@ -267,6 +267,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     // Update UI on the main thread
                     withContext(Dispatchers.Main) {
                         if (bitmap != null) {
+                            val context = itemView.context
+                            val activity = context as? Activity
+
+                            // Kiểm tra nếu context không phải là Activity hoặc Activity đã bị hủy
+                            if (activity == null || activity.isDestroyed || activity.isFinishing) {
+                                return@withContext
+                            }
                             Glide.with(itemView.context)
                                 .load(bitmap) // Use extracted bitmap
                                 .placeholder(R.drawable.video_placeholder) // Placeholder image
@@ -413,6 +420,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     // Update UI on the main thread
                     withContext(Dispatchers.Main) {
                         if (bitmap != null) {
+                            val context = itemView.context
+                            val activity = context as? Activity
+
+                            // Kiểm tra nếu context không phải là Activity hoặc Activity đã bị hủy
+                            if (activity == null || activity.isDestroyed || activity.isFinishing) {
+                                return@withContext
+                            }
                             Glide.with(itemView.context)
                                 .load(bitmap) // Use extracted bitmap
                                 .placeholder(R.drawable.video_placeholder) // Placeholder image
@@ -531,6 +545,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     // Update UI on the main thread
                     withContext(Dispatchers.Main) {
                         if (bitmap != null) {
+                            val context = itemView.context
+                            val activity = context as? Activity
+
+                            // Kiểm tra nếu context không phải là Activity hoặc Activity đã bị hủy
+                            if (activity == null || activity.isDestroyed || activity.isFinishing) {
+                                return@withContext
+                            }
                             Glide.with(itemView.context)
                                 .load(bitmap) // Use extracted bitmap
                                 .placeholder(R.drawable.video_placeholder) // Placeholder image
