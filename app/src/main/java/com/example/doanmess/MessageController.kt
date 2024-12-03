@@ -124,6 +124,19 @@ class MessageController {
                 Log.e("Error", e.toString())
             }
     }
+    fun callVoiceGroup(idGroup: String, uid: String){
+        Firebase.firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val name = document.get("Name") as? String ?: ""
+                    val content = name +" đã gọi voice"
+                    sendAPIRequest("https://android-backend-3day.vercel.app/callvoicegroup/$idGroup/$uid/$content")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Error", e.toString())
+            }
+    }
     fun sendAPIRequest(url: String) {
         CoroutineScope(Dispatchers.IO).launch {
             var connection: HttpURLConnection? = null

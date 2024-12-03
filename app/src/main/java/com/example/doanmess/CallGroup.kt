@@ -98,7 +98,7 @@ class CallGroup : AppCompatActivity() {
                     initializePeer()
                 }
             }
-            loadUrl(if (isVideoCall) "https://call-bkxs.vercel.app" else "file:android_asset/callgroupvoice.html")
+            loadUrl(if (isVideoCall) "https://call-bkxs.vercel.app" else "https://call-voice-group.vercel.app")
         }
     }
 
@@ -173,9 +173,11 @@ class CallGroup : AppCompatActivity() {
                 if (isVideoCall) {
                     avatarCallCard.visibility = View.GONE
                     nameOtherTxt.visibility = View.GONE
+                    toggleVideoBtn.visibility = View.VISIBLE
                 } else {
-                    timeTxt.visibility = View.VISIBLE
-                    CallTimer(timeTxt).start()
+                    avatarCallCard.visibility = View.GONE
+                    nameOtherTxt.visibility = View.GONE
+                    toggleVideoBtn.visibility = View.GONE
                 }
                 firebaseRef.child(groupId).child(userId).setValue(uniqueId)
                 acceptBtnCard.visibility = View.GONE
@@ -199,7 +201,7 @@ class CallGroup : AppCompatActivity() {
             val value = snapshot.value.toString()
             if (key != userId && mapPeer[key] == null) {
                 mapPeer[key] = value
-                listenForConnId(value)
+                listenForConnId(value, key)
             }
         }
 
@@ -221,7 +223,7 @@ class CallGroup : AppCompatActivity() {
         }
     }
 
-    private fun listenForConnId(idOther: String) {
+    private fun listenForConnId(idOther: String,idFibase: String) {
         if (idOther == uniqueId) return
         webView.visibility = View.VISIBLE
         if (isVideoCall) {
@@ -229,17 +231,38 @@ class CallGroup : AppCompatActivity() {
             nameOtherTxt.visibility = View.GONE
             timeTxt.visibility = View.GONE
         } else {
-            timeTxt.visibility = View.VISIBLE
-            CallTimer(timeTxt).start()
+            avatarCallCard.visibility = View.GONE
+            nameOtherTxt.visibility = View.GONE
+            timeTxt.visibility = View.GONE
         }
         switchToControls()
-        callJavascriptFunction("javascript:startGroupCall(\"$idOther\")")
+        if(!isVideoCall){
+            Firebase.firestore.collection("users").document(idFibase).get().addOnSuccessListener { document ->
+                val avatar = document.getString("Avatar")
+                val name = document.getString("Name")
+                callJavascriptFunction("javascript:startGroupCall(\"$idOther\",\"$avatar\",\"$name\")")
+            }
+        }
+        else callJavascriptFunction("javascript:startGroupCall(\"$idOther\")")
     }
 
     private fun initializePeer() {
-        webView.evaluateJavascript("javascript:init(\"$uniqueId\")") { result ->
-            if (result.isNotEmpty()) {
-                Log.d("JavaScript Result", result)
+        if(isVideoCall) {
+            webView.evaluateJavascript("javascript:init(\"$uniqueId\")") { result ->
+                if (result.isNotEmpty()) {
+                    Log.d("JavaScript Result", result)
+                }
+            }
+        }
+        else {
+            Firebase.firestore.collection("users").document(userId).get().addOnSuccessListener { document ->
+                val avatar = document.getString("Avatar")
+                val name = document.getString("Name")
+                webView.evaluateJavascript("javascript:init(\"$uniqueId\",\"$avatar\",\"$name\")") { result ->
+                    if (result.isNotEmpty()) {
+                        Log.d("JavaScript Result", result)
+                    }
+                }
             }
         }
         if (!call) onCallRequest()
@@ -262,8 +285,9 @@ class CallGroup : AppCompatActivity() {
                     avatarCallCard.visibility = View.GONE
                     nameOtherTxt.visibility = View.GONE
                 } else {
-                    timeTxt.visibility = View.VISIBLE
-                    CallTimer(timeTxt).start()
+                    avatarCallCard.visibility = View.GONE
+                    nameOtherTxt.visibility = View.GONE
+                    toggleVideoBtn.visibility = View.GONE
                 }
                 firebaseRef.child(groupId).child(userId).setValue(uniqueId)
                 acceptBtnCard.visibility = View.GONE

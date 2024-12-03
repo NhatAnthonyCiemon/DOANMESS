@@ -386,12 +386,23 @@ class MainChat : AppCompatActivity(), OnMessageLongClickListener {
             }
         }
         callVoiceBtn.setOnClickListener {
-            val intent = Intent(this, Call::class.java)
-            intent.putExtra("friendId", targetUserUid)
+            var intent = Intent(this, Call::class.java)
+            if(isGroup){
+                intent = Intent(this, CallGroup::class.java)
+                intent.putExtra("groupId", targetUserUid)
+            }
+            else{
+                intent.putExtra("friendId", targetUserUid)
+            }
             intent.putExtra("call", true)
             intent.putExtra("isVideoCall", false)
             startActivity(intent)
-            MessageController().callVoiceFriend(targetUserUid, currentUserUid)
+            if(isGroup){
+                MessageController().callVoiceGroup(targetUserUid, currentUserUid)
+            }
+            else {
+                MessageController().callVoiceFriend(targetUserUid, currentUserUid)
+            }
         }
     }
 

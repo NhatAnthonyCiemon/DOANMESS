@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PeerJS Group Voice Call</title>
+    <title>PeerJS Group Video Call</title>
     <link rel="stylesheet" href="./reset.css">
 
     <style>
@@ -14,66 +14,110 @@
             box-sizing: border-box;
         }
 
-        .voice__contain {
+        body {
+            background: url(./callbackground.png);
+            background-size: cover;
+            background-repeat: no-repeat;
+
+        }
+
+        .video__contain {
             display: grid;
             grid-template-columns: repeat(1, 1fr);
             grid-template-rows: repeat(1, 1fr);
             width: 100%;
+
             background-color: #f0f0f0;
             justify-content: center;
         }
 
-        .voice__item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .voice__avatar {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
+        .video__item {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-        }
-
-        .voice__name {
-            margin-top: 10px;
-            font-size: 16px;
-            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
-<div class="voice__contain" id="voice-contain"></div>
+<div class="video__contain">
+    <div style="position: relative;" class="video__container" id="local-video-container">
+        <video class="video__item" id="local-video" class="primary-video" autoplay muted></video>
+    </div>
+</div>
 <script src="./peerjs.js"></script>
 <script>
+    let localVideo = document.getElementById("local-video");
+    let remoteVideos = document.querySelector(".video__contain");
     let peer;
     let localStream;
+    let video__container_local = document.getElementById("local-video-container");
     let peerConnections = {};
-    const voiceContain = document.getElementById("voice-contain");
+    const video__contain = document.querySelector(".video__contain");
+    //lấy chiêu rộng và chiều cao của video__contain
+    window.addEventListener("resize", widthAndHeight);
+    function widthAndHeight() {
+        const video__contain = document.querySelector(".video__contain");
+        const video__item = Array.from(video__contain.children);
+        const video__itemLength = video__item.length;
+        if (video__itemLength === 1) {
+            video__contain.style.gridTemplateColumns = "repeat(1, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(1, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight + "px";
+            });
 
-    // Thiết lập PeerJS
-    function init(userId) {
-        async function getIceServers() {
-            const response = await fetch(
-                "https://global.xirsys.net/_turn/MyFirstApp",
-                {
-                    method: "PUT",
-                    headers: {
-                        Authorization:
-                            "Basic " +
-                            btoa("nhat:67e43036-a35e-11ef-8fc0-0242ac150002"),
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-            const iceServers = await response.json();
-            return iceServers.v.iceServers;
+        } else if (video__itemLength === 2) {
+            video__contain.style.gridTemplateColumns = "repeat(1, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(2, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 2 + "px";
+            });
+
+        } else if (video__itemLength === 3) {
+            video__contain.style.gridTemplateColumns = "repeat(2, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(2, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 2 + "px";
+            });
+        } else if (video__itemLength === 4) {
+            video__contain.style.gridTemplateColumns = "repeat(2, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(2, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 2 + "px";
+            });
+        } else if (video__itemLength === 5) {
+            video__contain.style.gridTemplateColumns = "repeat(2, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(3, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 3 + "px";
+            });
+        } else if (video__itemLength === 6) {
+            video__contain.style.gridTemplateColumns = "repeat(2, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(3, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 3 + "px";
+            });
+        } else if (video__itemLength > 6) {
+            video__contain.style.gridTemplateColumns = "repeat(3, 1fr)";
+            video__contain.style.gridTemplateRows = "repeat(3, 1fr)";
+            video__item.forEach((item) => {
+                item.style.height = window.innerHeight / 3 + "px";;
+            });
         }
 
+    }
+    // Thiết lập PeerJS
+
+
+    function init(userId, avatar, name) {
+        async function getIceServers() {
+            const res = await fetch("https://call-server-part2.vercel.app/?vercelToolbarCode=cRLtHhVcEpRh5NQ")
+            const iceServers = await res.json();
+            return iceServers.iceServers;
+        }
+
+        // Khởi tạo PeerJS sau khi lấy ICE servers
         getIceServers().then((iceServers) => {
             peer = new Peer(userId, {
                 host: "0.peerjs.com",
@@ -84,68 +128,127 @@
                 },
             });
 
+            // Sự kiện khi PeerJS mở thành công
             peer.on("open", () => {
                 console.log(`Peer opened with ID: ${peer.id}`);
             });
 
-            listenForCalls();
+            // Debug trạng thái kết nối ICE
+            peer.on("iceConnectionStateChange", (state) => {
+                console.log("ICE Connection State:", state);
+            });
+
+            // Gọi hàm để lắng nghe cuộc gọi đến
+            listenForCalls(peer);
+            const name_avatar_container = document.createElement("div");
+            const pname = document.createElement("p");
+            pname.textContent = name;
+            const img = document.createElement("img");
+            img.src = avatar;
+            img.style.width = "50px";
+            img.style.height = "50px";
+            img.style.borderRadius = "50%";
+            name_avatar_container.appendChild(img);
+            name_avatar_container.appendChild(pname);
+            name_avatar_container.style.display = "flex";
+            name_avatar_container.style.flexDirection = "column";
+
+            name_avatar_container.style.alignItems = "center";
+            name_avatar_container.style.gap = "10px";
+            name_avatar_container.style.position = "absolute";
+            video__container_local.style.display = "none";
+            video__container_local.style.justifyContent = "center";
+            video__container_local.style.alignItems = "center";
+            video__container_local.appendChild(name_avatar_container);
         });
     }
-
-    // Lắng nghe cuộc gọi đến
     function listenForCalls() {
         peer.on("call", (call) => {
             navigator.getUserMedia(
                 { audio: true, video: false },
                 (stream) => {
+                    localVideo.srcObject = stream;
                     localStream = stream;
+                    localVideo.muted = true;
+
                     call.answer(stream);
 
                     // Lưu kết nối và xử lý stream của người gọi
                     peerConnections[call.peer] = call;
 
                     call.on("stream", (remoteStream) => {
-                        addRemoteAudio(call.peer, remoteStream);
+                        addRemoteVideo(call.peer, remoteStream);
                     });
                 }
             );
         });
     }
+    function createNameAndAvatar(nameUser, avatarUser) {
+        const name_avatar_container = document.createElement("div");
+        const name = document.createElement("p");
+        const avatar = document.createElement("img");
+        name.textContent = nameUser;
+        const img = document.createElement("img");
+        img.src = avatarUser;
+        img.style.width = "50px";
+        img.style.height = "50px";
+        img.style.borderRadius = "50%";
+        name_avatar_container.appendChild(img);
+        name_avatar_container.appendChild(name);
+        name_avatar_container.style.display = "flex";
+        name_avatar_container.style.flexDirection = "column";
 
-    // Thêm avatar và tên người gọi vào giao diện
-    function addRemoteAudio(peerId, stream, avatarUrl = "", name = "Unknown") {
-        let userContainer = document.getElementById(peerId);
-        if (!userContainer) {
-            userContainer = document.createElement("div");
-            userContainer.id = peerId;
-            userContainer.className = "voice__item";
-
-            const avatar = document.createElement("img");
-            avatar.src = avatarUrl;
-            avatar.alt = name;
-            avatar.className = "voice__avatar";
-
-            const userName = document.createElement("div");
-            userName.className = "voice__name";
-            userName.textContent = name;
-
-            userContainer.appendChild(avatar);
-            userContainer.appendChild(userName);
-            voiceContain.appendChild(userContainer);
-        }
-
-        const audio = document.createElement("audio");
-        audio.autoplay = true;
-        audio.srcObject = stream;
-        userContainer.appendChild(audio);
+        name_avatar_container.style.alignItems = "center";
+        name_avatar_container.style.gap = "10px";
+        name_avatar_container.style.position = "absolute";
+        return name_avatar_container;
     }
 
+    // Thêm video của thành viên vào giao diện
+    function addRemoteVideo(peerId, stream, avatar = "", name = "") {
+
+        let video = document.getElementById(peerId);
+        if (!video) {
+            let video__container_remote = document.createElement("div");
+            video__container_remote.style.position = "relative";
+            video__container_remote.style.display = "flex";
+            video__container_remote.style.justifyContent = "center";
+            video__container_remote.style.alignItems = "center";
+            video = document.createElement("video");
+            const img_container = createNameAndAvatar(name, avatar);
+            video.id = peerId;
+            video.autoplay = true;
+            video.className = "video__item";
+            video__container_remote.appendChild(video);
+            video__container_remote.appendChild(img_container);
+            remoteVideos.appendChild(video__container_remote);
+            widthAndHeight();
+        }
+        else {
+            const img__container = video.nextElementSibling;
+
+            const img = img__container.querySelector("img");
+            const p = img__container.querySelector("p");
+            if (!img.getAttribute("src") || img.getAttribute("src") === "") {
+                img.src = avatar;
+                console.log("Image source updated to:", img.src);
+            }
+            if (!p.textContent || p.textContent === "") {
+                p.textContent = name;
+                console.log("Name updated to:", p.textContent);
+            }
+        }
+        video.srcObject = stream;
+    }
     // Gọi nhóm (tất cả thành viên trong danh sách)
-    async function startGroupCall(memberId, avatarUrl = "", name = "Unknown") {
+    async function startGroupCall(memberId, avatar, name) {
         navigator.getUserMedia(
             { audio: true, video: false },
             (stream) => {
+                localVideo.srcObject = stream;
                 localStream = stream;
+                video__container_local.style.display = "flex";
+                localVideo.muted = true;
                 if (memberId === peer.id) return; // Không gọi chính mình
                 const call = peer.call(memberId, stream);
 
@@ -153,22 +256,35 @@
                 peerConnections[memberId] = call;
 
                 call.on("stream", (remoteStream) => {
-                    addRemoteAudio(memberId, remoteStream, avatarUrl, name);
+                    addRemoteVideo(memberId, remoteStream, avatar, name);
                 });
+
             }
         );
+
     }
 
-    // Xử lý bật/tắt audio
+    // Khởi tạo peer với userId
+
+
+    // Xử lý khi người dùng bật/tắt video
+
+
+    // Xử lý khi người dùng bật/tắt audio
     function toggleAudio(b) {
-        if (b === "true") {
+        if (b == "true") {
             localStream.getAudioTracks()[0].enabled = true;
         } else {
             localStream.getAudioTracks()[0].enabled = false;
         }
     }
-
-    // Khởi tạo peer với userId (gọi hàm init với ID của bạn)
+    function deleteRemoteVideo(peerId) {
+        let voice = document.getElementById(peerId);
+        if (voice) {
+            voice.remove();
+            widthAndHeight();
+        }
+    }
 </script>
 </body>
 

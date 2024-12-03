@@ -238,6 +238,7 @@ class Home : HandleOnlineActivity() {
         onCallRequest(true, "calls")
         onCallRequest(false, "callvoices")
         onCallGroupRequest()
+        onCallVoiceGroupRequest()
     }
 
     fun checkPermissionNotify() {
@@ -437,7 +438,66 @@ class Home : HandleOnlineActivity() {
             }
     }
 
+    private fun onCallVoiceGroupRequest() {
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        // Lắng nghe Firestore
+        firestore.collection("users").document(userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.w("TAG", "Listen failed.", error)
+                    return@addSnapshotListener
+                }
 
+                if (snapshot != null && snapshot.exists()) {
+                    val groups = snapshot.get("Groups") as? List<String>
+                    if (groups != null) {
+                        // Hủy bỏ các listener cũ trước khi thêm listener mới
+                        removeOldListeners(groups)
+
+                        // Lắng nghe các group mới
+                        for (group in groups) {
+                            val listener = Firebase.database.getReference("callGroupsvoices")
+                                .child(group)
+                                .addValueEventListener(object : ValueEventListener {
+                                    override fun onCancelled(error: DatabaseError) {}
+
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.exists()) {
+                                            val groupId = snapshot.key.toString()
+                                            Firebase.firestore.collection("groups").document(groupId).get()
+                                                .addOnSuccessListener { document ->
+                                                    val groupName = document.data?.get("Name").toString()
+                                                    txtCallGroup.text = "Incoming voice call from $groupName"
+                                                    txtCallGroup.visibility = View.VISIBLE
+                                                    txtCallGroup.setOnClickListener {
+                                                        val intent = Intent(this@Home, CallGroup::class.java).apply {
+                                                            putExtra("groupId", groupId)
+                                                            putExtra("call", false)
+                                                            putExtra("isVideoCall", false)
+                                                        }
+                                                        startActivity(intent)
+                                                    }
+                                                }
+                                                .addOnFailureListener {
+                                                    txtCallGroup.visibility = View.GONE
+                                                }
+                                        } else {
+                                            txtCallGroup.visibility = View.GONE
+                                        }
+                                    }
+                                })
+
+                            // Lưu listener vào map
+                            activeListeners[group] = listener
+                        }
+
+                        Log.d("TAG", "Groups: $groups")
+                    } else {
+                        Log.d("TAG", "No groups found.")
+                    }
+                }
+            }
+    }
 
     private fun removeOldListeners(currentGroups: List<String>) {
         val groupsToRemove = activeListeners.keys.filter { it !in currentGroups }

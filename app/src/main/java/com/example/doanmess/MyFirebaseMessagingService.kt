@@ -111,6 +111,21 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         showHighPriorityNotificationCallGroup(this, title, message,"",id_group,true)
                     }
             }
+            else if(type =="callvoicegroup"){
+                title = remoteMessage.data["title"] ?: "Default Title"
+                message = remoteMessage.data["body"] ?: "Default Message"
+                val id_group = remoteMessage.data["idGroup"] ?: "Default ID Group"
+                Firebase.firestore.collection("groups").document(id_group).get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val url = document.get("Avatar") as? String ?: ""
+                            showHighPriorityNotificationCallGroup(this, title, message,url,id_group,false)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        showHighPriorityNotificationCallGroup(this, title, message,"",id_group,false)
+                    }
+            }
         }
     }
     override fun onNewToken(token: String) {
