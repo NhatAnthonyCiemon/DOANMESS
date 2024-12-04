@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import HandleOnlineActivity
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.widget.Button
@@ -13,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Date
 
-class FriendRequest : AppCompatActivity() {
+class FriendRequest  : HandleOnlineActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: FriendRequestAdapter

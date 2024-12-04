@@ -1,7 +1,10 @@
 package com.example.doanmess
 
+import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Typeface
+import android.media.MediaMetadataRetriever
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.RelativeSizeSpan
@@ -17,11 +20,19 @@ import android.widget.ImageView
 import android.widget.MediaController
 import android.widget.TextView
 import android.widget.VideoView
+import androidx.cardview.widget.CardView
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.createuiproject.ChatAdapter.MessageNoAvatarViewHolder
+import com.example.createuiproject.ChatAdapter.MessageWithAvatarViewHolder
+import com.example.createuiproject.ChatAdapter.ReceivedMessageViewHolder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PostAdapter(
     private val postList: List<Post>,
@@ -32,7 +43,10 @@ class PostAdapter(
     inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val postTitle: TextView = itemView.findViewById(R.id.postTitle)
         val imagePreview: ImageView = itemView.findViewById(R.id.imagePreview)
+        val imageMessageView : ImageView = itemView.findViewById(R.id.imageMessageView)
+        val videoPlayBtn : ImageButton= itemView.findViewById(R.id.videoPlayBtn)
         val videoPreview : PlayerView = itemView.findViewById(R.id.videoPreview)
+        val cardVideo : CardView = itemView.findViewById(R.id.cardVideo)
         val postLikes: TextView = itemView.findViewById(R.id.postLikes)
         val likeButton: ImageButton = itemView.findViewById(R.id.likeButton)
         val userImage: ImageView = itemView.findViewById(R.id.userImage)
@@ -95,35 +109,60 @@ class PostAdapter(
         if(post.mediaFile==""){
             holder.imagePreview.visibility = View.GONE
             holder.videoPreview.visibility = View.GONE
+            holder.cardVideo.visibility = View.GONE
+            holder.imageMessageView.visibility = View.GONE
+            holder.videoPlayBtn.visibility = View.GONE
             return
         }
         //load image or video based on the media type
         if(post.type.contains("mp4")){
             Log.d("PostAdapter", "onBindViewHolder: video")
+            holder.videoPlayBtn.visibility = View.VISIBLE
+            holder.cardVideo.visibility = View.VISIBLE
+            holder.imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
             holder.imagePreview.visibility = View.GONE
-            holder.videoPreview.visibility = View.VISIBLE
-            setUpVideoPlayer(post.id, holder.videoPreview.context, holder.videoPreview, post.mediaFile)
+            holder.videoPreview.visibility = View.GONE
+            // Show a placeholder while loading the thumbnail
+            Glide.with(holder.imageMessageView.context)
+                .load(post.mediaFile) // Use video URL as a placeholder for the thumbnail
+                .placeholder(R.drawable.black_image) // Placeholder image
+                .error(R.drawable.black_image) // Fallback image in case of error
+                .into(holder.imageMessageView)
+            // Set click listener to start video playback
+            holder.videoPreview.player = null
+            holder.cardVideo.setOnClickListener{
+                setUpVideoPlayer(post.id, post.mediaFile, holder)
+            }
+            holder.videoPlayBtn.setOnClickListener {
+                setUpVideoPlayer(post.id, post.mediaFile, holder)
+            }
 
         }else if(post.type.contains("image")){
-            holder.imagePreview.visibility = View.VISIBLE
+            holder.videoPlayBtn.visibility = View.GONE
+            holder.imageMessageView.visibility = View.GONE
             holder.videoPreview.visibility = View.GONE
+            holder.cardVideo.visibility = View.GONE
+            holder.imagePreview.visibility = View.VISIBLE
             Glide.with(holder.imagePreview.context).load(post.mediaFile).into(holder.imagePreview)
         }
 
     }
     val audioPlayerLists : MutableMap<String, ExoPlayer> = mutableMapOf()
-    fun setUpVideoPlayer(postId:String, context: Context, playerView: PlayerView, content: String){
+    fun setUpVideoPlayer(postId:String, content: String, holder : PostViewHolder){
+        holder.imageMessageView.visibility = View.GONE
+        holder.videoPlayBtn.visibility = View.GONE
+        holder.videoPreview.visibility = View.VISIBLE
         if(!audioPlayerLists.containsKey(postId)){
-            val tmp = ExoPlayer.Builder(context).build()
+            val tmp = ExoPlayer.Builder(holder.cardVideo.context).build()
             audioPlayerLists[postId] = tmp
             // Thiết lập video URL
             val mediaItem = MediaItem.fromUri(content)
             tmp!!.setMediaItem(mediaItem)
         }
         val tmp = audioPlayerLists[postId]
+        holder.videoPreview.player = tmp
         tmp!!.prepare()
-        // Khởi tạo ExoPlayer từ Media3
-        playerView.player = tmp
+        holder.videoPreview.player!!.playWhenReady = true
     }
     public fun releaseAllPlayers(){
         for((_, player) in audioPlayerLists){
@@ -131,6 +170,7 @@ class PostAdapter(
         }
         audioPlayerLists.clear()
     }
+
     override fun getItemCount() = postList.size
 
 }

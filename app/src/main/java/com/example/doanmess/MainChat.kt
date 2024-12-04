@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import HandleOnlineActivity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -53,7 +54,7 @@ import java.io.IOException
 import java.util.UUID
 
 
-class MainChat : AppCompatActivity(), OnMessageLongClickListener {
+class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val REQUEST_CODE_PICK_MEDIA = 100
