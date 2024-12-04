@@ -2,6 +2,7 @@ package com.example.doanmess
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.common.reflect.TypeToken
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -31,6 +33,7 @@ import com.google.firebase.database.database
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.firestoreSettings
+import com.google.gson.Gson
 
 class AllChatFra : Fragment() {
     private var list: MutableList<DataMess> = mutableListOf()
@@ -43,6 +46,7 @@ class AllChatFra : Fragment() {
     private lateinit var adapter: Chat_AllChatAdapter
     private lateinit var loadingBar: ProgressBar
     private var listOff: MutableList<String> = mutableListOf()
+    private var copiedList: MutableList<String> = mutableListOf()
     private lateinit var userListener: ValueEventListener
     private lateinit var groupListener: ValueEventListener
     private val btnGroup: Button by lazy { atvtContext.findViewById(R.id.btnGroup) }
@@ -378,11 +382,48 @@ class AllChatFra : Fragment() {
     override fun onResume() {
         super.onResume()
         ListenFirebase()
+        //xem thử Các phần twf của list có trong listOff không
+        checkNotify()
+
     }
 
+    private fun checkNotify() {
+
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val userDocRef = Firebase.firestore.collection("users").document(userId)
+        userDocRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                val unnoticed = document.get("Unnoticed") as? MutableList<String>
+
+                listOff.clear()
+                if (unnoticed != null) {
+                    listOff.addAll(unnoticed)
+                }
+                //hợp của 2 list
+                val onlyListOff = listOff.filter { !copiedList.contains(it) }.toMutableList() // Chuyển sang MutableList
+                val onlyListCopy = copiedList.filter { !listOff.contains(it) }
+                onlyListOff.addAll(onlyListCopy) // Bây giờ addAll sẽ hoạt động
+
+
+
+                onlyListOff.forEach { uidFromListOff ->
+                    val index = list.indexOfFirst { it.uid == uidFromListOff }
+                    if (index != -1) {
+                        list[index].isNotify = !list[index].isNotify
+                        adapter.notifyItemChanged(index)
+                    }
+                }
+
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("FirestoreError", "Error fetching document: ${exception.message}")
+        }
+
+    }
     override fun onPause() {
         super.onPause()
-
+        //val deepCopiedList: MutableList<String> = originalList.map { it }.toMutableList()
+        copiedList = listOff.map{it}.toMutableList()
     }
 
     override fun onDestroy() {
