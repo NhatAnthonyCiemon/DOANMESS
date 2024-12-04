@@ -44,7 +44,13 @@ class AllChatFra : Fragment() {
     private var User: FirebaseUser? = null
     val dbfirestore = Firebase.firestore
     private lateinit var adapter: Chat_AllChatAdapter
-    private lateinit var loadingBar: ProgressBar
+    //private lateinit var loadingBar: ProgressBar
+    private lateinit var messageSQLDatabase: MessageSQLDatabase
+    private lateinit var messageSQLDao: MessageSQLDao
+    private lateinit var messageGroupSQLDao: MessageGroupSQLDao
+    private var firstLoad: Boolean = true
+    private lateinit var listOfMessageSQL: MutableList<MessageSQL>
+    private lateinit var listOfMessageGroupSQL: MutableList<MessageGroupSQL>
     private var listOff: MutableList<String> = mutableListOf()
     private var copiedList: MutableList<String> = mutableListOf()
     private lateinit var userListener: ValueEventListener
@@ -60,6 +66,47 @@ class AllChatFra : Fragment() {
             isPersistenceEnabled = true
         }
         dbfirestore.firestoreSettings = settings
+        messageSQLDatabase = MessageSQLDatabase.getInstance(atvtContext)
+        messageSQLDao = messageSQLDatabase.messageDao()
+        messageGroupSQLDao = messageSQLDatabase.messageGroupDao()
+        listOfMessageSQL = messageSQLDao.getAllMessages()
+        listOfMessageGroupSQL = messageGroupSQLDao.getAllGroupMessages()
+        //avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean,isNotify:Boolean
+        list.addAll(
+            listOfMessageSQL.map {
+                DataMess(
+                    it.avatar,
+                    it.uid,
+                    it.name,
+                    it.message,
+                    it.timestamp,
+                    it.status,
+                    it.othersend,
+                    it.isNotify,
+                    false,
+                    true
+                )
+            }
+        )
+        //avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String, isNotify:Boolean,
+        list.addAll(
+            listOfMessageGroupSQL.map {
+                DataMessGroup(
+                    it.avatar,
+                    it.uid,
+                    it.name,
+                    it.message,
+                    it.timestamp,
+                    it.status,
+                    "it.whosend",
+                    it.groupName,
+                    it.isNotify,
+                    true,
+                    true
+                )
+            }
+        )
+        list.sortByDescending { it.timestamp }
     }
 
 
@@ -70,7 +117,7 @@ class AllChatFra : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 Log.d("AllFra", snapshot.key.toString())
                 if (snapshot.exists()) {
-                    loadingBar.visibility = View.GONE
+                    //loadingBar.visibility = View.GONE
                     btnGroup.visibility = View.VISIBLE
                     for (childSnapshot in snapshot.children) {
                         val latestsmallSnapshot = childSnapshot.child("Messages").children.maxByOrNull {
@@ -170,7 +217,7 @@ class AllChatFra : Fragment() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 Log.d("AllFra", snapshot.key.toString())
                 if (snapshot.exists()) {
-                    loadingBar.visibility = View.GONE
+                   // loadingBar.visibility = View.GONE
                     btnGroup.visibility = View.VISIBLE
                     for (childSnapshot in snapshot.children) {
                         if (myGroup.contains(childSnapshot.key.toString())) {
@@ -278,7 +325,7 @@ class AllChatFra : Fragment() {
     private fun getGroupAndMessage() {
         Firebase.firestore.collection("users").document(User!!.uid)
             .addSnapshotListener { documentSnapshot, error ->
-                loadingBar.visibility = View.GONE
+                //loadingBar.visibility = View.GONE
                 btnGroup.visibility = View.VISIBLE
                 if (error != null) {
                     Log.w(TAG, "Listen failed.", error)
@@ -322,7 +369,7 @@ class AllChatFra : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_all_chat, container, false)
         val recyclerView = view.findViewById<RecyclerView>(R.id.RVChat_AllChat)
-        loadingBar = view.findViewById(R.id.LoadingBar)
+        //loadingBar = view.findViewById(R.id.LoadingBar)
 
         adapter = Chat_AllChatAdapter(atvtContext, list)
         adapter.setOnItemClickListener(object : Chat_AllChatAdapter.OnItemClickListener {
@@ -352,7 +399,7 @@ class AllChatFra : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
-        fadeOutAndHide(view)
+        //fadeOutAndHide(view)
         return view
     }
     private fun fadeOutAndHide(view: View) {
@@ -383,7 +430,8 @@ class AllChatFra : Fragment() {
         super.onResume()
         ListenFirebase()
         //xem thử Các phần twf của list có trong listOff không
-        checkNotify()
+        if(!firstLoad) checkNotify()
+        else firstLoad = false
 
     }
 
@@ -424,8 +472,55 @@ class AllChatFra : Fragment() {
         super.onPause()
         //val deepCopiedList: MutableList<String> = originalList.map { it }.toMutableList()
         copiedList = listOff.map{it}.toMutableList()
+        writeToSQL()
     }
 
+    fun writeToSQL() {
+        messageSQLDao.deleteAllMessages()
+        messageGroupSQLDao.deleteAllGroupMessages()
+        listOfMessageSQL.clear()
+        listOfMessageGroupSQL.clear()
+
+        for (item in list) {
+            when (item) {
+                is DataMessGroup -> { // Kiểm tra nếu item là DataMessGroup
+                    listOfMessageGroupSQL.add(
+                        MessageGroupSQL(
+                            item.avatar,
+                            item.uid,
+                            item.name,
+                            item.message,
+                            item.timestamp,
+                            item.status,
+                            item.last_name,
+                            item.groupname, // groupname tồn tại trong DataMessGroup
+                            item.isNotify,
+                            item.isGroup
+                        )
+                    )
+                }
+                is DataMess -> { // Kiểm tra nếu item là DataMess, nhưng không phải DataMessGroup
+                    if (item !is DataMessGroup) {
+                        listOfMessageSQL.add(
+                            MessageSQL(
+                                item.avatar,
+                                item.uid,
+                                item.name,
+                                item.message,
+                                item.timestamp,
+                                item.status,
+                                item.othersend,
+                                item.isNotify
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        // Chèn dữ liệu đã xử lý vào cơ sở dữ liệu
+        messageSQLDao.insertListMessage(listOfMessageSQL)
+        messageGroupSQLDao.insertListGroupMessage(listOfMessageGroupSQL)
+    }
     override fun onDestroy() {
         super.onDestroy()
         PauseRealTimeListen()

@@ -17,14 +17,15 @@ open class DataMess {
     var timestamp: Long = 0
     var isGroup: Boolean = false
     var isNotify: Boolean = true
-    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean,isNotify:Boolean, isGroup: Boolean = false) {
+    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, othersend: Boolean,isNotify:Boolean, isGroup: Boolean = false,isSQL:Boolean = false) {
         this.uid = uid
         this.avatar = avatar
         this.name = name
         this.status = status
         this.last_name = name.split(" ").last()
         this.othersend = othersend
-        this.message = if(!othersend) "Bạn: $message" else last_name + ": $message"
+        if(!isSQL) this.message = if(!othersend) "Bạn: $message" else last_name + ": $message"
+        else this.message = message
         this.timestamp = timestamp
         this.time = convertTimestampToString(timestamp)
         this.isNotify = isNotify
@@ -40,9 +41,10 @@ open class DataMess {
 class DataMessGroup : DataMess {
     var groupname: String = ""
 
-    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String, isNotify:Boolean, isGroup: Boolean = true)
-            : super(avatar, uid, name, message, timestamp, status, true, isNotify) {
+    constructor(avatar: String?, uid: String, name: String, message: String, timestamp: Long, status: Boolean, whosend: String, groupname: String, isNotify:Boolean, isGroup: Boolean = true, isSQL: Boolean =false)
+            : super(avatar, uid, name, message, timestamp, status, true, isNotify,isGroup, isSQL) {
         this.groupname = groupname
-        this.message = "$whosend: $message"
+        if(!isSQL) this.message = "$whosend: $message"
+        else this.message = message
     }
 }

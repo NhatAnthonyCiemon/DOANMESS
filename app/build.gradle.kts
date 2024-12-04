@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
+    id("kotlin-kapt")
 }
 
 android {
@@ -54,7 +55,8 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.google.firebase:firebase-messaging-directboot:20.2.0")
-
+    implementation("androidx.room:room-runtime:2.5.2")
+    kapt("androidx.room:room-compiler:2.5.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("com.arthenica:mobile-ffmpeg-full:4.4")
