@@ -181,20 +181,14 @@ class Home : HandleOnlineActivity() {
             ChangeFragment(inforFragment())
         }
         btnSearch.setOnClickListener {
-  /*          CustomButtonToActive(btnContact)
+             CustomButtonToActive(btnContact)
             CustomButtonToInactive(btnAllchat)
             CustomButtonToInactive(btnInfo)
             val fragment_Contact = ContactsFragment.newInstance()
             ChangeFragment(fragment_Contact)
-            fragment_Contact.focusSearch()*/
-            val intent = Intent(this, Call::class.java)
-            startActivity(intent)
+            fragment_Contact.focusSearch()
         }
         btnMore.setOnClickListener{
-           /* CustomButtonToActive(btnInfo)
-            CustomButtonToInactive(btnAllchat)
-            CustomButtonToInactive(btnContact)
-            ChangeFragment(inforFragment())*/
             val intent = Intent(this, PostActivity::class.java)
             startActivity(intent)
         }

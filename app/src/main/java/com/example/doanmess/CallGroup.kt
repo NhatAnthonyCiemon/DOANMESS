@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import HandleOnlineActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -30,7 +31,7 @@ import java.io.File
 import java.io.IOException
 import java.util.UUID
 
-class CallGroup : AppCompatActivity() {
+class CallGroup : HandleOnlineActivity() {
     private val userId = Firebase.auth.currentUser?.uid ?: ""
     private var groupId = ""
     private var uniqueId = ""

@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import HandleOnlineActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.ImageView
@@ -9,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-class ListViewPinnedActivity : AppCompatActivity() {
+class ListViewPinnedActivity  : HandleOnlineActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_view_pinned)

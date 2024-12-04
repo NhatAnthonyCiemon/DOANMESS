@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import HandleOnlineActivity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -40,7 +41,7 @@ import java.io.File
 import java.io.IOException
 import java.util.UUID
 
-class Call : AppCompatActivity() {
+class Call  : HandleOnlineActivity() {
     var userId = Firebase.auth.currentUser?.uid ?: ""
     var friendId = ""
     var uniqueId = ""

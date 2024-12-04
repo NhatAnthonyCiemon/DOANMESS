@@ -1,6 +1,7 @@
 package com.example.doanmess
 
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageButton
@@ -50,6 +51,31 @@ class PostActivity : AppCompatActivity() {
         backBtn.setOnClickListener {
             finish()
         }
+        //stop video when scroll
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+
+                for (i in firstVisibleItemPosition..lastVisibleItemPosition) {
+                    val viewHolder = recyclerView.findViewHolderForAdapterPosition(i) as? PostAdapter.PostViewHolder
+                    viewHolder?.let {
+                        if (it.videoPreview.player?.isPlaying == true) {
+                            val rect = Rect()
+                            it.itemView.getGlobalVisibleRect(rect)
+                            val height = it.itemView.height
+                            val visibleHeight = rect.height()
+
+                            if (visibleHeight < height / 2) {
+                                it.videoPreview.player?.playWhenReady = false
+                            }
+                        }
+                    }
+                }
+            }
+        })
     }
     override fun onResume() {
         super.onResume()
