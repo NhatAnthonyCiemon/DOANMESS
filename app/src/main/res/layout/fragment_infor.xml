@@ -202,7 +202,6 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
                 android:gravity="center"
-                android:text="3"
                 android:textSize="20dp" />
         </FrameLayout>
 
@@ -240,7 +239,6 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
                 android:gravity="center"
-                android:text="3"
                 android:textSize="20dp" />
 
         </FrameLayout>

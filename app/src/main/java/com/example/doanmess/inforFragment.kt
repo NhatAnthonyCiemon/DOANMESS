@@ -64,10 +64,15 @@ class inforFragment : Fragment() {
         val txtName = view.findViewById<TextView>(R.id.txtName)
         val txtMode = view.findViewById<TextView>(R.id.txtCheckDarkMode)
         val logOutBtn = view.findViewById<FrameLayout>(R.id.logout)
+        val requestNumbers = view.findViewById<TextView>(R.id.txtNumberRequest)
+        val blockNumbers = view.findViewById<TextView>(R.id.txtNumberBlock)
+
         friendReqFrame = view.findViewById(R.id.friendRequest)
         blockListFrame = view.findViewById(R.id.blockList)
         imageView = view.findViewById(R.id.imgView)
         button = view.findViewById(R.id.floatingActionButton)
+
+        loadUserData(requestNumbers, blockNumbers)
 
 
         val auth1 = FirebaseAuth.getInstance()
@@ -177,6 +182,32 @@ class inforFragment : Fragment() {
 
         // Tải thông tin từ Firestore khi khởi động
         loadUserData()
+    }
+
+    private fun loadUserData(requestNumbers: TextView, blockNumbers: TextView) {
+        val userDocRef = firestore.collection("users").document(userId)
+
+        userDocRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                // Get the "Requests" and "Blocks" fields
+                val requests = document["Requests"] as? List<*>
+                val blocks = document["Blocks"] as? List<*>
+
+                // Set the counts to the TextViews
+                requestNumbers.text = requests?.size.toString()
+                blockNumbers.text = blocks?.size.toString()
+
+                // Other data loading...
+            } else {
+                // Handle the case where the document does not exist
+                requestNumbers.text = "0"
+                blockNumbers.text = "0"
+            }
+        }.addOnFailureListener {
+            // Handle the error
+            requestNumbers.text = "0"
+            blockNumbers.text = "0"
+        }
     }
 
     private fun changeNameFunc(view: View) {
