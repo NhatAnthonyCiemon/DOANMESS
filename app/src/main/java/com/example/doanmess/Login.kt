@@ -29,11 +29,6 @@ class Login : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
         auth = FirebaseAuth.getInstance()
 
@@ -76,8 +71,9 @@ class Login : AppCompatActivity() {
         }
 
         btnForgotPassword.setOnClickListener {
-            // Xử lý logic quên mật khẩu ở đây
-            Toast.makeText(this, "Please remember your password", Toast.LENGTH_SHORT).show()
+            // Chuyển sang Activity quên mật khẩu
+            val intent = Intent(this, ForgotPassword::class.java)
+            startActivity(intent)
         }
 
         btnSignUp.setOnClickListener {
