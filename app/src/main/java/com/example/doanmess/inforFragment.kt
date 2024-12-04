@@ -32,7 +32,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
-
+import java.io.File
 
 
 class inforFragment : Fragment() {
@@ -80,19 +80,24 @@ class inforFragment : Fragment() {
 
 
         logOutBtn.setOnClickListener {
-            val dir = requireContext().filesDir
-            val files = dir.listFiles()
-            if (files != null) {
-                for (file in files) {
+            //delete database
+            val dbFolder = requireContext().getDatabasePath("messages_db").parentFile // Get the database folder
+            if (dbFolder.exists() && dbFolder.isDirectory) {
+                val files = dbFolder.listFiles()
+                files?.forEach { file ->
                     if (file.isFile) {
-                        try {
-                            file.delete()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                        val deleted = file.delete()
+                        if (deleted) {
+                            Log.d("DatabaseCleanup", "Deleted file: ${file.name}")
+                        } else {
+                            Log.d("DatabaseCleanup", "Failed to delete file: ${file.name}")
                         }
                     }
                 }
+            } else {
+                Log.d("DatabaseCleanup", "Database folder does not exist or is not a directory")
             }
+
             val docRef = dbfirestore.collection("users").document(currentUser!!.uid)
             //xóa 1 phần tử trong mảng field của firestore
             val androidId = Settings.Secure.getString(requireContext().contentResolver, Settings.Secure.ANDROID_ID)
