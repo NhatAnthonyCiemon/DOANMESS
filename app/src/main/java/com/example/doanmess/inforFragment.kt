@@ -80,23 +80,9 @@ class inforFragment : Fragment() {
 
 
         logOutBtn.setOnClickListener {
-            //delete database
-            val dbFolder = requireContext().getDatabasePath("messages_db").parentFile // Get the database folder
-            if (dbFolder.exists() && dbFolder.isDirectory) {
-                val files = dbFolder.listFiles()
-                files?.forEach { file ->
-                    if (file.isFile) {
-                        val deleted = file.delete()
-                        if (deleted) {
-                            Log.d("DatabaseCleanup", "Deleted file: ${file.name}")
-                        } else {
-                            Log.d("DatabaseCleanup", "Failed to delete file: ${file.name}")
-                        }
-                    }
-                }
-            } else {
-                Log.d("DatabaseCleanup", "Database folder does not exist or is not a directory")
-            }
+            val messageSQLDatabase = MessageSQLDatabase.getInstance(requireContext())
+            messageSQLDatabase.messageDao().deleteAllMessages()
+            messageSQLDatabase.messageGroupDao().deleteAllGroupMessages()
 
             val docRef = dbfirestore.collection("users").document(currentUser!!.uid)
             //xóa 1 phần tử trong mảng field của firestore
