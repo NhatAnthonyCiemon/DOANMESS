@@ -220,8 +220,8 @@
         </LinearLayout>
     <Button
         android:id="@+id/btnGroup"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="32dp"
         android:background="@drawable/btn_addgroup"
