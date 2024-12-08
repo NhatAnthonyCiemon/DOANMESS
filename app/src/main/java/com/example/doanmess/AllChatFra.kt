@@ -28,9 +28,12 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.firestoreSettings
 import com.google.gson.Gson
@@ -542,6 +545,51 @@ class AllChatFra : Fragment() {
                 override fun onCancelled(error: DatabaseError) {}
             }
         }
+    }
+    fun deleteChat(uid: String) {
+//        CODE NÀY HIỆN TẠI CHƯA HOẠT ĐỘNG
+
+//        val position = list.indexOfFirst { it.uid == uid }
+//        if (position != -1) {
+//            // Remove from the list
+//            list.removeAt(position)
+//            adapter.notifyItemRemoved(position)
+//            adapter.notifyItemRangeChanged(position, list.size)
+//
+//            // Remove from the database
+//            val uid1 = FirebaseAuth.getInstance().currentUser?.uid
+//            if (uid1 != null) {
+//                val database = FirebaseDatabase.getInstance().reference
+//                val firestore = FirebaseFirestore.getInstance()
+//
+//                // Delete messages from Firebase Realtime Database
+//                database.child("users").child(uid1).child(uid).removeValue()
+//                    .addOnSuccessListener {
+//                        database.child("users").child(uid).child(uid1).removeValue()
+//                            .addOnSuccessListener {
+//                                // Remove user from block list in Firestore
+//                                firestore.collection("users").document(uid1)
+//                                    .update("Blocks", FieldValue.arrayRemove(mapOf("uid" to uid)))
+//                                    .addOnSuccessListener {
+//                                        Log.d("DeleteChat", "Successfully deleted chat and unblocked user: $uid")
+//                                    }
+//                                    .addOnFailureListener { e ->
+//                                        Log.e("DeleteChat", "Error deleting chat and unblocking user", e)
+//                                    }
+//                            }
+//                            .addOnFailureListener { e ->
+//                                Log.e("DeleteChat", "Failed to delete chat for $uid: ${e.message}", e)
+//                            }
+//                    }
+//                    .addOnFailureListener { e ->
+//                        Log.e("DeleteChat", "Failed to delete chat for $uid1: ${e.message}", e)
+//                    }
+//            }
+//        }
+    }
+
+    fun deleteChatFromActivity(uid: String) {
+        deleteChat(uid)
     }
 
     companion object {

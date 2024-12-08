@@ -30,7 +30,7 @@ class Block : HandleOnlineActivity() {
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = BlockAdapter(blockLists)
+        adapter = BlockAdapter(blockLists, supportFragmentManager)
         recyclerView.adapter = adapter
 
         val btnBack = findViewById<Button>(R.id.btnBack)
