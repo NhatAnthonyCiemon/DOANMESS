@@ -186,7 +186,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
                     val builder = NotificationCompat.Builder(context, channelId)
-                        .setSmallIcon(R.drawable.checkmark2)
+                        .setSmallIcon(R.mipmap.icon_messeger)
                         .setContentTitle(title)
                         .setContentText(message)
                         .setAutoCancel(true)
@@ -209,7 +209,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
                 val builder = NotificationCompat.Builder(context, channelId)
-                    .setSmallIcon(R.drawable.checkmark2)
+                    .setSmallIcon(R.mipmap.icon_messeger)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -258,7 +258,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     )
 
                     val builder = NotificationCompat.Builder(context, channelId)
-                        .setSmallIcon(R.drawable.checkmark2)
+                        .setSmallIcon(R.mipmap.icon_messeger)
                         .setContentTitle(title)
                         .setContentText(message)
                         .setAutoCancel(true)
@@ -298,7 +298,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 )
 
                 val builder = NotificationCompat.Builder(context, channelId)
-                    .setSmallIcon(R.drawable.checkmark2)
+                    .setSmallIcon(R.mipmap.icon_messeger)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -347,7 +347,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     )
 
                     val builder = NotificationCompat.Builder(context, channelId)
-                        .setSmallIcon(R.drawable.checkmark2)
+                        .setSmallIcon(R.mipmap.icon_messeger)
                         .setContentTitle(title)
                         .setContentText(message)
                         .setAutoCancel(true)
@@ -387,7 +387,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 )
 
                 val builder = NotificationCompat.Builder(context, channelId)
-                    .setSmallIcon(R.drawable.checkmark2)
+                    .setSmallIcon(R.mipmap.icon_messeger)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setStyle(NotificationCompat.BigTextStyle().bigText(message))
