@@ -285,7 +285,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         }
 
 
-//        checkBlockedStatus()
+        checkBlockedStatus()
 
         // set on click listener for the back button to navigate back to the home activity
         findViewById<ImageButton>(R.id.back_button).setOnClickListener {
@@ -671,7 +671,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 
     override fun onResume() {
         super.onResume()
-//        checkBlockedStatus()
+        checkBlockedStatus()
         createImageSeenRecycle()
     }
 
@@ -789,78 +789,78 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             database.removeEventListener(valueEventListener)
         }
     }
-//    private fun checkBlockedStatus() {
-//        val inputBar = findViewById<LinearLayout>(R.id.input_bar)
-//        val blockedMessage1 = findViewById<FrameLayout>(R.id.blockMsg1)
-//        val blockedMessage2 = findViewById<FrameLayout>(R.id.blockMsg2)
-//
-//
-//        val userId = auth.currentUser?.uid ?: return
-//        val targetUserUid = intent.getStringExtra("uid") ?: return
-//
-//        val db = Firebase.firestore
-//
-//        // Kiểm tra nếu A (người hiện tại) block B
-//        db.collection("users").document(userId)
-//            .get()
-//            .addOnSuccessListener { document ->
-//                if (document.exists()) {
-//                    val blockedUsers = document["Blocks"] as? List<Map<String, Any>>
-//                    if (blockedUsers != null) {
-//                        for (blockedUser in blockedUsers) {
-//                            val uid = blockedUser["uid"] as? String
-//                            if (uid == targetUserUid) {
-//                                // A đã block B
-//                                inputBar.visibility = View.GONE
-//                                blockedMessage2.visibility = View.VISIBLE
-//                                videoCallBtn.visibility = View.GONE
-//                                callVoiceBtn.visibility = View.GONE
-//                                return@addOnSuccessListener
-//                            }
-//                        }
-//                    }
-//                }
-//                // Nếu A không block B, kiểm tra ngược lại
-//                db.collection("users").document(targetUserUid)
-//                    .get()
-//                    .addOnSuccessListener { targetDocument ->
-//                        if (targetDocument.exists()) {
-//                            val blockedByTarget = targetDocument["Blocks"] as? List<Map<String, Any>>
-//                            if (blockedByTarget != null) {
-//                                for (blockedUser in blockedByTarget) {
-//                                    val uid = blockedUser["uid"] as? String
-//                                    if (uid == userId) {
-//                                        // B đã block A
-//                                        inputBar.visibility = View.GONE
-//                                        blockedMessage1.visibility = View.VISIBLE
-//                                        videoCallBtn.visibility = View.GONE
-//                                        callVoiceBtn.visibility = View.GONE
-//                                        return@addOnSuccessListener
-//                                    }
-//                                }
-//                            }
-//                        }
-//                        // Nếu không có ai block ai, hiển thị giao diện bình thường
-//                        inputBar.visibility = View.VISIBLE
-//                        blockedMessage1.visibility = View.GONE
-//                        blockedMessage2.visibility = View.GONE
-//                        videoCallBtn.visibility = View.VISIBLE
-//                        callVoiceBtn.visibility = View.VISIBLE
-//                    }
-//                    .addOnFailureListener {
-//                        // Lỗi khi kiểm tra B block A
-//                        inputBar.visibility = View.VISIBLE
-//                        blockedMessage1.visibility = View.GONE
-//                        blockedMessage2.visibility = View.GONE
-//                    }
-//            }
-//            .addOnFailureListener {
-//                // Lỗi khi kiểm tra A block B
-//                inputBar.visibility = View.VISIBLE
-//                blockedMessage1.visibility = View.GONE
-//                blockedMessage2.visibility = View.GONE
-//            }
-//    }
+    private fun checkBlockedStatus() {
+        val inputBar = findViewById<LinearLayout>(R.id.input_bar)
+        val blockedMessage1 = findViewById<FrameLayout>(R.id.blockMsg1)
+        val blockedMessage2 = findViewById<FrameLayout>(R.id.blockMsg2)
+
+
+        val userId = auth.currentUser?.uid ?: return
+        val targetUserUid = intent.getStringExtra("uid") ?: return
+
+        val db = Firebase.firestore
+
+        // Kiểm tra nếu A (người hiện tại) block B
+        db.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val blockedUsers = document["Blocks"] as? List<String>
+                    if (blockedUsers != null) {
+                        for (blockedUser in blockedUsers) {
+                            val uid = blockedUser as? String
+                            if (uid == targetUserUid) {
+                                // A đã block B
+                                inputBar.visibility = View.GONE
+                                blockedMessage2.visibility = View.VISIBLE
+                                videoCallBtn.visibility = View.GONE
+                                callVoiceBtn.visibility = View.GONE
+                                return@addOnSuccessListener
+                            }
+                        }
+                    }
+                }
+                // Nếu A không block B, kiểm tra ngược lại
+                db.collection("users").document(targetUserUid)
+                    .get()
+                    .addOnSuccessListener { targetDocument ->
+                        if (targetDocument.exists()) {
+                            val blockedByTarget = targetDocument["Blocks"] as? List<String>
+                            if (blockedByTarget != null) {
+                                for (blockedUser in blockedByTarget) {
+                                    val uid = blockedUser as? String
+                                    if (uid == userId) {
+                                        // B đã block A
+                                        inputBar.visibility = View.GONE
+                                        blockedMessage1.visibility = View.VISIBLE
+                                        videoCallBtn.visibility = View.GONE
+                                        callVoiceBtn.visibility = View.GONE
+                                        return@addOnSuccessListener
+                                    }
+                                }
+                            }
+                        }
+                        // Nếu không có ai block ai, hiển thị giao diện bình thường
+                        inputBar.visibility = View.VISIBLE
+                        blockedMessage1.visibility = View.GONE
+                        blockedMessage2.visibility = View.GONE
+                        videoCallBtn.visibility = View.VISIBLE
+                        callVoiceBtn.visibility = View.VISIBLE
+                    }
+                    .addOnFailureListener {
+                        // Lỗi khi kiểm tra B block A
+                        inputBar.visibility = View.VISIBLE
+                        blockedMessage1.visibility = View.GONE
+                        blockedMessage2.visibility = View.GONE
+                    }
+            }
+            .addOnFailureListener {
+                // Lỗi khi kiểm tra A block B
+                inputBar.visibility = View.VISIBLE
+                blockedMessage1.visibility = View.GONE
+                blockedMessage2.visibility = View.GONE
+            }
+    }
 
 
     override fun onMessageLongClick(position: Int, message: MainChat.ChatMessage) {
