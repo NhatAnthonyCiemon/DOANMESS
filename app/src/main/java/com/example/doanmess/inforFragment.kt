@@ -43,6 +43,7 @@ class inforFragment : Fragment() {
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
     private lateinit var userId: String
     private lateinit var friendReqFrame : FrameLayout
+    private lateinit var friendListFrame : FrameLayout
     private lateinit var blockListFrame : FrameLayout
     private var dbfirestore = Firebase.firestore
 
@@ -64,15 +65,16 @@ class inforFragment : Fragment() {
         val txtName = view.findViewById<TextView>(R.id.txtName)
         val txtMode = view.findViewById<TextView>(R.id.txtCheckDarkMode)
         val logOutBtn = view.findViewById<FrameLayout>(R.id.logout)
-        val requestNumbers = view.findViewById<TextView>(R.id.txtNumberRequest)
-        val blockNumbers = view.findViewById<TextView>(R.id.txtNumberBlock)
-        val friendsNumber = view.findViewById<TextView>(R.id.txtFriendList)
+
 
         friendReqFrame = view.findViewById(R.id.friendRequest)
+        friendListFrame = view.findViewById(R.id.friendList)
         blockListFrame = view.findViewById(R.id.blockList)
         imageView = view.findViewById(R.id.imgView)
         button = view.findViewById(R.id.floatingActionButton)
-
+        val requestNumbers = view.findViewById<TextView>(R.id.txtNumberRequest)
+        val blockNumbers = view.findViewById<TextView>(R.id.txtNumberBlock)
+        val friendsNumber = view.findViewById<TextView>(R.id.txtFriendList)
         loadUserData(requestNumbers, blockNumbers, friendsNumber)
 
 
@@ -140,6 +142,11 @@ class inforFragment : Fragment() {
 
         friendReqFrame.setOnClickListener {
             val intent = Intent(context, FriendRequest::class.java)
+            startActivity(intent)
+        }
+
+        friendListFrame.setOnClickListener {
+            val intent = Intent(context, friendList::class.java)
             startActivity(intent)
         }
 

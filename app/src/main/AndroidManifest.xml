@@ -37,11 +37,13 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".ForgotPassword"
+            android:name=".friendList"
             android:exported="false" />
         <activity
-            android:name=".FortgotPassword"
-            android:exported="false" />
+            android:name=".ForgotPassword"
+            android:exported="false" /> <!-- <activity -->
+        <!-- android:name=".FortgotPassword" -->
+        <!-- android:exported="false" /> -->
         <activity
             android:name=".ListViewPinnedActivity"
             android:exported="false" />
