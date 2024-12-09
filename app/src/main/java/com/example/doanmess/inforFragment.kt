@@ -66,13 +66,14 @@ class inforFragment : Fragment() {
         val logOutBtn = view.findViewById<FrameLayout>(R.id.logout)
         val requestNumbers = view.findViewById<TextView>(R.id.txtNumberRequest)
         val blockNumbers = view.findViewById<TextView>(R.id.txtNumberBlock)
+        val friendsNumber = view.findViewById<TextView>(R.id.txtFriendList)
 
         friendReqFrame = view.findViewById(R.id.friendRequest)
         blockListFrame = view.findViewById(R.id.blockList)
         imageView = view.findViewById(R.id.imgView)
         button = view.findViewById(R.id.floatingActionButton)
 
-        loadUserData(requestNumbers, blockNumbers)
+        loadUserData(requestNumbers, blockNumbers, friendsNumber)
 
 
         val auth1 = FirebaseAuth.getInstance()
@@ -141,6 +142,7 @@ class inforFragment : Fragment() {
             val intent = Intent(context, FriendRequest::class.java)
             startActivity(intent)
         }
+
         imagePickerLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -175,7 +177,7 @@ class inforFragment : Fragment() {
         loadUserData()
     }
 
-    private fun loadUserData(requestNumbers: TextView, blockNumbers: TextView) {
+    private fun loadUserData(requestNumbers: TextView, blockNumbers: TextView, friendsNumber: TextView) {
         val userDocRef = firestore.collection("users").document(userId)
 
         userDocRef.get().addOnSuccessListener { document ->
@@ -183,21 +185,25 @@ class inforFragment : Fragment() {
                 // Get the "Requests" and "Blocks" fields
                 val requests = document["Requests"] as? List<*>
                 val blocks = document["Blocks"] as? List<*>
+                val friends = document["Friends"] as? List<*>
 
                 // Set the counts to the TextViews
                 requestNumbers.text = requests?.size.toString()
                 blockNumbers.text = blocks?.size.toString()
+                friendsNumber.text = friends?.size.toString()
 
                 // Other data loading...
             } else {
                 // Handle the case where the document does not exist
                 requestNumbers.text = "0"
                 blockNumbers.text = "0"
+                friendsNumber.text = "0"
             }
         }.addOnFailureListener {
             // Handle the error
             requestNumbers.text = "0"
             blockNumbers.text = "0"
+            friendsNumber.text = "0"
         }
     }
 
