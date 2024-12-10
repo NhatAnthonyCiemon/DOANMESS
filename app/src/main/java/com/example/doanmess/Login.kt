@@ -57,12 +57,18 @@ class Login : AppCompatActivity() {
                 auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this, Home::class.java)
-                            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-                            LoginNewDevice().RegisterNewDevice(androidId, auth.currentUser!!.uid)
-                            startActivity(intent)
-                            finish()
+                            val user = auth.currentUser
+                            if (user != null && user.isEmailVerified) {
+                                Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                                val intent = Intent(this, Home::class.java)
+                                val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                                LoginNewDevice().RegisterNewDevice(androidId, user.uid)
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                auth.signOut()
+                                Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
                             Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
                         }

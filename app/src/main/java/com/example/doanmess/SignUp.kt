@@ -81,6 +81,7 @@ class SignUp : AppCompatActivity() {
                                             ?.addOnCompleteListener { emailTask ->
                                                 if (emailTask.isSuccessful) {
                                                     Toast.makeText(this, "Verification email sent!", Toast.LENGTH_SHORT).show()
+                                                    auth.signOut() // Sign out the user immediately after sending the verification email
                                                     val intent = Intent(this, Verification::class.java)
                                                     startActivity(intent)
                                                     finish()

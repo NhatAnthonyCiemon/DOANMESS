@@ -3,11 +3,7 @@ package com.example.doanmess
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.auth.FirebaseAuth
 
 class Verification : AppCompatActivity() {
@@ -18,23 +14,12 @@ class Verification : AppCompatActivity() {
         setContentView(R.layout.activity_verification)
 
         auth = FirebaseAuth.getInstance()
-        val btnCheckVerification = findViewById<Button>(R.id.btnCheckVerification)
+        val btnToLogin = findViewById<Button>(R.id.btnToLogin)
 
-        btnCheckVerification.setOnClickListener {
-            auth.currentUser?.reload()?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    if (auth.currentUser?.isEmailVerified == true) {
-                        Toast.makeText(this, "Email verified! Please log in now.", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this, Login::class.java)
-                        startActivity(intent)
-                        finish()
-                    } else {
-                        Toast.makeText(this, "Your email is not verified yet.", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(this, "Failed to reload user. Please try again.", Toast.LENGTH_SHORT).show()
-                }
-            }
+        btnToLogin.setOnClickListener {
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+            finish()
         }
 
     }
