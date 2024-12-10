@@ -81,6 +81,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     private val imageSeenList = mutableListOf<ImageSeen>()
     private var userStatusListener: ValueEventListener? = null
     private var groupStatusListener: ValueEventListener? = null
+    private var avatarUrlMapping: MutableMap<String, String> = mutableMapOf()
     data class ChatMessage(
         val chatId : String = "",
         val content: String = "",
@@ -143,11 +144,31 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 //            }
 //        })
 
+//        val avatarUrlMapping = mutableMapOf<String, String>()
+//        if (isGroup) {
+//            val groupData = Firebase.firestore.collection("groups").document(targetUserUid)
+//            groupData.get().addOnSuccessListener { document ->
+//                val participants = document["Participants"] as List<String>
+//                for (participant in participants) {
+//                    if (participant != currentUserUid) {
+//                        Firebase.firestore.collection("users").document(participant).get().addOnSuccessListener { userDocument ->
+//                            val userAvatar = userDocument["Avatar"] as String
+//                            avatarUrlMapping[participant] = userAvatar
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         videoCallBtn = findViewById(R.id.videoCallBtn)
         callVoiceBtn = findViewById(R.id.callVoiceBtn)
         // Set up the RecyclerView
-        chatAdapter = ChatAdapter(chatMessages, isGroup, listener = this)
+        chatAdapter = ChatAdapter(chatMessages, isGroup, listener = this, avatarUrlMapping)
+        fetchAvatarUrls(targetUserUid, currentUserUid) {
+            // Dữ liệu avatarUrlMapping đã sẵn sàng
+            chatAdapter.notifyDataSetChanged() // Làm mới RecyclerView để hiển thị avatar
+        }
+
         recyclerViewMessages = findViewById<RecyclerView>(R.id.main_chat_recycler)
         recyclerViewMessages.isVerticalScrollBarEnabled = false;
         recyclerViewMessages.adapter = chatAdapter
@@ -403,6 +424,39 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
         }
     }
+
+    fun fetchAvatarUrls(targetUserUid: String, currentUserUid: String, onComplete: () -> Unit) {
+        val avatarUrlMapping = mutableMapOf<String, String>()
+        if (isGroup) {
+            val groupData = Firebase.firestore.collection("groups").document(targetUserUid)
+            groupData.get().addOnSuccessListener { document ->
+                val participants = document["Participants"] as List<String>
+                var pendingTasks = participants.size
+
+                for (participant in participants) {
+                    if (participant != currentUserUid) {
+                        Firebase.firestore.collection("users").document(participant).get()
+                            .addOnSuccessListener { userDocument ->
+                                val userAvatar = userDocument["Avatar"] as? String ?: ""
+                                avatarUrlMapping[participant] = userAvatar
+                            }
+                            .addOnCompleteListener {
+                                pendingTasks--
+                                if (pendingTasks == 0) {
+                                    // All tasks completed
+                                    this.avatarUrlMapping.clear()
+                                    this.avatarUrlMapping.putAll(avatarUrlMapping)
+                                    onComplete() // Notify that data fetching is done
+                                }
+                            }
+                    } else {
+                        pendingTasks--
+                    }
+                }
+            }
+        }
+    }
+
 
     private fun sendCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
