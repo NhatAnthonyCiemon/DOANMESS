@@ -12,6 +12,7 @@ import android.location.Location
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -463,6 +464,14 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         .compress(1024)
                         .maxResultSize(1080, 1080)
                         .createIntent { intent -> imagePickerLauncher.launch(intent) }
+                    true
+                }
+                R.id.action_video_recording -> {
+                    // Handle video recording button click
+                    val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+                    if (intent.resolveActivity(packageManager) != null) {
+                        startActivityForResult(intent, REQUEST_CODE_PICK_MEDIA)
+                    }
                     true
                 }
                 else -> false
