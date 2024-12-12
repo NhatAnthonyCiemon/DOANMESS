@@ -255,8 +255,6 @@ class inforFragment : Fragment() {
             .compress(1024)
             .maxResultSize(1080, 1080)
             .createIntent { intent -> imagePickerLauncher.launch(intent) }
-        // Can I choose video instead of image? Show me how to do it.
-
 
 
     }

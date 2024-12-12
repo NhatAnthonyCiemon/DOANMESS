@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import com.github.dhaval2404.imagepicker.ImagePicker
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -12,6 +13,7 @@ import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
@@ -20,10 +22,14 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -62,7 +68,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     private lateinit var recyclerViewMessages: RecyclerView
     private lateinit var message_input: EditText
     private lateinit var database: DatabaseReference
-    private lateinit var attachButton : ImageView
     private lateinit var recyclerSeen: RecyclerView
     private lateinit var seenAdapter: SeenAdapter
     private val chatMessages = mutableListOf<ChatMessage>()
@@ -75,13 +80,13 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     private var audioFilePath: String? = null
     private val storage = FirebaseStorage.getInstance()
     private lateinit var chatAdapter: ChatAdapter
-    private lateinit var locationBtn: ImageButton
     private lateinit var videoCallBtn: ImageButton
     private lateinit var callVoiceBtn: ImageButton
     private val imageSeenList = mutableListOf<ImageSeen>()
     private var userStatusListener: ValueEventListener? = null
     private var groupStatusListener: ValueEventListener? = null
     private var avatarUrlMapping: MutableMap<String, String> = mutableMapOf()
+    private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
     data class ChatMessage(
         val chatId : String = "",
         val content: String = "",
@@ -119,7 +124,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         findViewById<android.widget.TextView>(R.id.user_name).text = name
         val avatar = intent.getStringExtra("avatar") ?: ""
         val avatarView = findViewById<ImageView>(R.id.user_avatar)
-        attachButton = findViewById(R.id.attach_button)
         if (avatar.isNotEmpty()) {
             Glide.with(this)
                 .load(avatar)
@@ -127,6 +131,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 .placeholder(R.drawable.ic_avatar) // Optional placeholder
                 .into(avatarView)
         }
+
 
 //        // Set the user status
 //        var isOnline = true
@@ -352,14 +357,8 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
             }
         }
-        attachButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-        //    intent.addCategory(Intent.CATEGORY_OPENABLE)
-            intent.type = "*/*"
-            val mimeTypes = arrayOf("image/*", "video/*")
-            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-            startActivityForResult(intent, REQUEST_CODE_PICK_MEDIA)
-        }
+
+
         // set on click listener for the mic button to start voice recording
         val micButton = findViewById<ImageView>(R.id.mic_button)
         findViewById<ImageView>(R.id.mic_button).setOnTouchListener { v, event ->
@@ -380,11 +379,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        locationBtn = findViewById(R.id.location_button)
-        locationBtn.setOnClickListener {
-            //send current location
-            sendCurrentLocation()
-        }
+
         videoCallBtn.setOnClickListener {
             var intent = Intent(this, Call::class.java)
             if(isGroup){
@@ -423,6 +418,61 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 MessageController().callVoiceFriend(targetUserUid, currentUserUid)
             }
         }
+
+        val optionsButton: ImageButton = findViewById(R.id.options_button)
+        optionsButton.setOnClickListener {
+            showOptionsMenu(it)
+        }
+        imagePickerLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                val data: Intent? = result.data
+                val uri: Uri? = data?.data
+                uri?.let {  uploadMediaToFirebase(it,true) }
+
+            }
+        }
+    }
+
+    private fun showOptionsMenu(view: View) {
+        val popupMenu = PopupMenu(ContextThemeWrapper(this, R.style.PopupMenuBg), view)
+        popupMenu.menuInflater.inflate(R.menu.options_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { menuItem: MenuItem ->
+            when (menuItem.itemId) {
+                R.id.action_location -> {
+                    // Handle location button click
+                    sendCurrentLocation()
+                    true
+                }
+                R.id.action_attach -> {
+                    // Handle attach button click
+                    val intent = Intent(Intent.ACTION_GET_CONTENT)
+                    //    intent.addCategory(Intent.CATEGORY_OPENABLE)
+                    intent.type = "*/*"
+                    val mimeTypes = arrayOf("image/*", "video/*")
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                    startActivityForResult(intent, REQUEST_CODE_PICK_MEDIA)
+                    true
+                }
+                R.id.action_take_picture -> {
+                    // Handle take picture button click
+                    ImagePicker.with(this)
+                        .crop()
+                        .cameraOnly()
+                        .compress(1024)
+                        .maxResultSize(1080, 1080)
+                        .createIntent { intent -> imagePickerLauncher.launch(intent) }
+                    true
+                }
+                else -> false
+            }
+        }
+        val popup = PopupMenu::class.java.getDeclaredField("mPopup")
+        popup.isAccessible = true
+        val menu = popup.get(popupMenu)
+        menu.javaClass.getDeclaredMethod("setForceShowIcon", Boolean::class.java).invoke(menu, true)
+        popupMenu.show()
     }
 
     fun fetchAvatarUrls(targetUserUid: String, currentUserUid: String, onComplete: () -> Unit) {
@@ -599,11 +649,12 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream) // Adjust quality as needed
         return outputStream.toByteArray()
     }
-    private fun uploadMediaToFirebase(fileUri: Uri) {
+    private fun uploadMediaToFirebase(fileUri: Uri, takePicture : Boolean = false) {
         // Xác định loại MIME của tệp
         val mimeType = contentResolver.getType(fileUri)
+        Log.d("MainChat", "MIME type: $mimeType")
         val storageRef = storage.reference.child("media/${UUID.randomUUID()}")
-        val uploadTask = if (mimeType?.startsWith("image/") == true) {
+        val uploadTask = if (mimeType?.startsWith("image/") == true || takePicture == true) {
             val compressedImage = compressImage(fileUri, this)
             storageRef.putBytes(compressedImage)
         } else {
@@ -614,7 +665,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 val downloadUrl = uri.toString()
                 // Kiểm tra loại tệp và gửi tin nhắn tương ứng
                 when {
-                    mimeType?.startsWith("image/") == true -> {
+                    mimeType?.startsWith("image/") == true || takePicture -> {
                         sendMessage(downloadUrl, "image")
                     }
                     mimeType?.startsWith("video/") == true -> {

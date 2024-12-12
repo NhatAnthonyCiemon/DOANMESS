@@ -225,16 +225,18 @@
                 android:layout_weight="1"
                 android:background="@drawable/rounded_background_white"
                 android:gravity="center|clip_vertical|center_vertical">
-
                 <ImageButton
-                    android:id="@+id/mic_button"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:id="@+id/options_button"
+                    android:layout_width="33dp"
+                    android:layout_height="33dp"
                     android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
+                    android:layout_marginEnd="6dp"
                     android:background="@android:color/transparent"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_mic" />
+                    android:src="@drawable/baseline_add_circle_24" />
+
+
+
 
                 <EditText
 
@@ -245,24 +247,14 @@
                     android:background="@android:color/transparent"
                     android:focusableInTouchMode="true"
                     android:hint="Hello" />
-
                 <ImageButton
-                    android:id="@+id/location_button"
+                    android:id="@+id/mic_button"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="10dp"
                     android:background="@android:color/transparent"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/baseline_location_pin_24" />
-
-                <ImageButton
-                    android:id="@+id/attach_button"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@android:color/transparent"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_attach" />
+                    android:src="@drawable/ic_mic" />
             </LinearLayout>
 
             <ImageButton
