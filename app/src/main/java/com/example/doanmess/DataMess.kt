@@ -46,5 +46,6 @@ class DataMessGroup : DataMess {
         this.groupname = groupname
         if(!isSQL) this.message = "$whosend: $message"
         else this.message = message
+        this.isGroup = true
     }
 }

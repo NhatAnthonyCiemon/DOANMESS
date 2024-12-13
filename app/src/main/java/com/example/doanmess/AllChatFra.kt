@@ -16,6 +16,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -56,6 +57,7 @@ class AllChatFra : Fragment() {
     private lateinit var listOfMessageGroupSQL: MutableList<MessageGroupSQL>
     private var listOff: MutableList<String> = mutableListOf()
     private var copiedList: MutableList<String> = mutableListOf()
+    private var idMess: MutableMap<String,Boolean> = mutableMapOf()
     private lateinit var userListener: ValueEventListener
     private lateinit var groupListener: ValueEventListener
     private val btnGroup: Button by lazy { atvtContext.findViewById(R.id.btnGroup) }
@@ -110,6 +112,9 @@ class AllChatFra : Fragment() {
             }
         )
         list.sortByDescending { it.timestamp }
+        list.forEach {
+            idMess[it.uid] = if (it.isGroup) true else false
+        }
     }
 
 
@@ -435,7 +440,53 @@ class AllChatFra : Fragment() {
         //xem thử Các phần twf của list có trong listOff không
         if(!firstLoad) checkNotify()
         else firstLoad = false
+        checkExistMessage()
+    }
 
+    private fun checkExistMessage() {
+        val firebase_user = Firebase.database.getReference("users").child(User!!.uid)
+        val firebase_group = Firebase.database.getReference("groups")
+        for(item in idMess){
+            if(item.value){
+                firebase_group.child(item.key).child("Messages").addListenerForSingleValueEvent(object : ValueEventListener{
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (!snapshot.exists()) {
+                            idMess.remove(item.key)
+                            idMess[item.key] = false
+                            val index = list.indexOfFirst { it.uid == item.key }
+                            if (index != -1) {
+                                list.removeAt(index)
+                                adapter.notifyItemRemoved(index)
+                                //Toast.makeText(atvtContext, "Group ${item.key} đã bị xóa", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    override fun onCancelled(error: DatabaseError) {
+                        Toast.makeText(atvtContext, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+            else{
+                firebase_user.child(item.key).child("Messages").addListenerForSingleValueEvent(object : ValueEventListener{
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (!snapshot.exists()) {
+                            idMess.remove(item.key)
+                            //list.removeAt(list.indexOfFirst { it.uid == item.key })
+                            //lấy vị trí của item trong list và xóa nó sau đó cập nhật lại adapter
+                            val index = list.indexOfFirst { it.uid == item.key }
+                            if (index != -1) {
+                                list.removeAt(index)
+                                adapter.notifyItemRemoved(index)
+                                adapter.notifyItemRangeChanged(index, list.size)
+                            }
+                        }
+                    }
+                    override fun onCancelled(error: DatabaseError) {
+                        Toast.makeText(atvtContext, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+        }
     }
 
     private fun checkNotify() {
