@@ -24,6 +24,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
@@ -48,6 +49,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.GenericTypeIndicator
+import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
@@ -62,13 +64,13 @@ import java.util.UUID
 
 class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
+    private var limitMessage = 20
     private val REQUEST_CODE_PICK_MEDIA = 100
     private lateinit var valueEventListener: ValueEventListener
     private lateinit var auth: FirebaseAuth
     private lateinit var recyclerViewMessages: RecyclerView
     private lateinit var message_input: EditText
-    private lateinit var database: DatabaseReference
+    private lateinit var database: Query
     private lateinit var recyclerSeen: RecyclerView
     private lateinit var seenAdapter: SeenAdapter
     private val chatMessages = mutableListOf<ChatMessage>()
@@ -134,37 +136,9 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         }
 
 
-//        // Set the user status
-//        var isOnline = true
-//        database = Firebase.database.getReference("users").child(targetUserUid).child("online")
-//        database.addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                isOnline = snapshot.getValue(Boolean::class.java) ?: false
-//                if (isOnline) {
-//                    findViewById<android.widget.TextView>(R.id.user_status).text = "Online"
-//                } else {
-//                    findViewById<android.widget.TextView>(R.id.user_status).text = "Offline"
-//                }
-//            }
-//            override fun onCancelled(error: DatabaseError) {
-//            }
-//        })
 
-//        val avatarUrlMapping = mutableMapOf<String, String>()
-//        if (isGroup) {
-//            val groupData = Firebase.firestore.collection("groups").document(targetUserUid)
-//            groupData.get().addOnSuccessListener { document ->
-//                val participants = document["Participants"] as List<String>
-//                for (participant in participants) {
-//                    if (participant != currentUserUid) {
-//                        Firebase.firestore.collection("users").document(participant).get().addOnSuccessListener { userDocument ->
-//                            val userAvatar = userDocument["Avatar"] as String
-//                            avatarUrlMapping[participant] = userAvatar
-//                        }
-//                    }
-//                }
-//            }
-//        }
+
+
 
         videoCallBtn = findViewById(R.id.videoCallBtn)
         callVoiceBtn = findViewById(R.id.callVoiceBtn)
@@ -185,6 +159,15 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         seenAdapter = SeenAdapter(imageSeenList)
         recyclerSeen.adapter = seenAdapter
 
+        recyclerViewMessages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                if (layoutManager.findFirstVisibleItemPosition() == 0) {
+                    loadOlderMessages()
+                }
+            }
+        })
 
         chatAdapter.setOnItemClickListener(object : ChatAdapter.OnItemClickListener {
             override fun onItemClick(position: Int) {
@@ -198,14 +181,30 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
         })
 
-
         if (!isGroup) {
             if (currentUserUid != null && targetUserUid != null) {
+                // Set the user status
+                var isOnline = true
+                database = Firebase.database.getReference("users").child(targetUserUid).child("online")
+                database.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        isOnline = snapshot.getValue(Boolean::class.java) ?: false
+                        if (isOnline) {
+                            findViewById<android.widget.TextView>(R.id.user_status).text = "Online"
+                        } else {
+                            findViewById<android.widget.TextView>(R.id.user_status).text = "Offline"
+                        }
+                    }
+                    override fun onCancelled(error: DatabaseError) {
+                    }
+                })
                 //set status of user in list chat of last item  to true
                 Firebase.database.getReference("users").child(currentUserUid!!)
                     .child(targetUserUid).child("Status").setValue(true)
+
                 database = Firebase.database.getReference("users").child(currentUserUid)
-                        .child(targetUserUid).child("Messages")
+                        .child(targetUserUid).child("Messages").orderByKey().limitToLast(limitMessage)
+
                 valueEventListener = object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         Firebase.database.getReference("users").child(currentUserUid!!)
@@ -266,9 +265,24 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
         }
         else {
+            // Set the user status
+            var isOnline = true
+            database = Firebase.database.getReference("groups").child(targetUserUid).child("online")
+            database.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    isOnline = snapshot.getValue(Boolean::class.java) ?: false
+                    if (isOnline) {
+                        findViewById<android.widget.TextView>(R.id.user_status).text = "Online"
+                    } else {
+                        findViewById<android.widget.TextView>(R.id.user_status).text = "Offline"
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
             //set status of user of Status of that Group to true
             Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(currentUserUid!!).setValue(true)
-            database = Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
+            database = Firebase.database.getReference("groups").child(targetUserUid).child("Messages").orderByKey().limitToLast(limitMessage)
             valueEventListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     chatMessages.clear() // Clear previous data
@@ -436,6 +450,160 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         }
     }
 
+//    private fun loadOlderMessages() {
+//        val firstMessage = chatMessages.firstOrNull() ?: return
+//        val firstMessageKey = firstMessage.chatId
+//
+//        val olderMessagesQuery = Firebase.database.getReference("users").child(currentUserUid)
+//            .child(targetUserUid).child("Messages")
+//            .orderByKey()
+//            .endBefore(firstMessageKey)
+//            .limitToLast(limitMessage)
+//
+//        olderMessagesQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                val olderMessages = mutableListOf<ChatMessage>()
+//                for (messageSnapshot in snapshot.children) {
+//                    val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
+//                    val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
+//                    val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
+//                    val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
+//                    val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
+//                    val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
+//                    val chatMessage = ChatMessage(
+//                        chatId = messageSnapshot.key ?: "",
+//                        content = content,
+//                        sendId = sendId,
+//                        recvId = recvId,
+//                        time = time,
+//                        type = type,
+//                        isSent = true,
+//                        pinned = pinned
+//                    )
+////                    olderMessages.add(chatMessage)
+//                    if (chatMessages.none { it.chatId == chatMessage.chatId }) {
+//                        olderMessages.add(chatMessage)
+//                    }
+//                }
+//                olderMessages.sortBy { it.time }
+//                chatMessages.addAll(0, olderMessages) // Add older messages to the beginning of the list
+//                chatAdapter.notifyItemRangeInserted(0, olderMessages.size)
+//            }
+//
+//            override fun onCancelled(error: DatabaseError) {
+//                // Handle database error if needed
+//            }
+//        })
+//    }
+
+//    private fun loadOlderMessages() {
+//        val firstMessage = chatMessages.firstOrNull() ?: return
+//        val firstMessageKey = firstMessage.chatId
+//
+//        val olderMessagesQuery = if (isGroup) {
+//            Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
+//                .orderByKey()
+//                .endBefore(firstMessageKey)
+//                .limitToLast(limitMessage)
+//        } else {
+//            Firebase.database.getReference("users").child(currentUserUid)
+//                .child(targetUserUid).child("Messages")
+//                .orderByKey()
+//                .endBefore(firstMessageKey)
+//                .limitToLast(limitMessage)
+//        }
+//
+//        olderMessagesQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                val olderMessages = mutableListOf<ChatMessage>()
+//                for (messageSnapshot in snapshot.children) {
+//                    val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
+//                    val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
+//                    val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
+//                    val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
+//                    val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
+//                    val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
+//                    val chatMessage = ChatMessage(
+//                        chatId = messageSnapshot.key ?: "",
+//                        content = content,
+//                        sendId = sendId,
+//                        recvId = recvId,
+//                        time = time,
+//                        type = type,
+//                        isSent = true,
+//                        pinned = pinned
+//                    )
+//                    if (chatMessages.none { it.chatId == chatMessage.chatId }) {
+//                        olderMessages.add(chatMessage)
+//                    }
+//                }
+//                olderMessages.sortBy { it.time }
+//                chatMessages.addAll(0, olderMessages) // Add older messages to the beginning of the list
+//                chatAdapter.notifyItemRangeInserted(0, olderMessages.size)
+//            }
+//
+//            override fun onCancelled(error: DatabaseError) {
+//                // Handle database error if needed
+//            }
+//        })
+//    }
+
+    private fun loadOlderMessages() {
+        val loadingIndicator = findViewById<ProgressBar>(R.id.loading_indicator)
+        loadingIndicator.visibility = View.VISIBLE // Show the loading indicator
+
+        val firstMessage = chatMessages.firstOrNull() ?: return
+        val firstMessageKey = firstMessage.chatId
+
+        val olderMessagesQuery = if (isGroup) {
+            Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
+                .orderByKey()
+                .endBefore(firstMessageKey)
+                .limitToLast(limitMessage)
+        } else {
+            Firebase.database.getReference("users").child(currentUserUid)
+                .child(targetUserUid).child("Messages")
+                .orderByKey()
+                .endBefore(firstMessageKey)
+                .limitToLast(limitMessage)
+        }
+
+        olderMessagesQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val olderMessages = mutableListOf<ChatMessage>()
+                for (messageSnapshot in snapshot.children) {
+                    val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
+                    val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
+                    val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
+                    val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
+                    val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
+                    val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
+                    val chatMessage = ChatMessage(
+                        chatId = messageSnapshot.key ?: "",
+                        content = content,
+                        sendId = sendId,
+                        recvId = recvId,
+                        time = time,
+                        type = type,
+                        isSent = true,
+                        pinned = pinned
+                    )
+                    if (chatMessages.none { it.chatId == chatMessage.chatId }) {
+                        olderMessages.add(chatMessage)
+                    }
+                }
+                olderMessages.sortBy { it.time }
+                chatMessages.addAll(0, olderMessages) // Add older messages to the beginning of the list
+                chatAdapter.notifyItemRangeInserted(0, olderMessages.size)
+                loadingIndicator.visibility = View.GONE // Hide the loading indicator
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                loadingIndicator.visibility = View.GONE // Hide the loading indicator
+                // Handle database error if needed
+            }
+        })
+    }
     private fun showOptionsMenu(view: View) {
         val popupMenu = PopupMenu(ContextThemeWrapper(this, R.style.PopupMenuBg), view)
         popupMenu.menuInflater.inflate(R.menu.options_menu, popupMenu.menu)
@@ -516,7 +684,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         }
     }
 
-
     private fun sendCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -534,7 +701,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
         }
     }
-
 
     private fun sendMessage(message: String, type: String) {
         if (!isGroup) {
@@ -616,7 +782,10 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                 "Time" to System.currentTimeMillis(),
                                 "Type" to type
                             )
-                            database.push().setValue(newMessage)
+//                            database.push().setValue(newMessage)
+                            val messageRef = Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
+                            messageRef.push().setValue(newMessage)
+                            messageController.newMessageGroup(targetUserUid, currentUserUid, message)
                             messageController.newMessageGroup(targetUserUid, currentUserUid, message)
                         }
                     }
@@ -624,12 +793,14 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
         }
     }
+
     private fun requestPermissions() {
         if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             Log.d("MainChat", "Requesting permissions")
             requestPermissions(arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 200)
         }
     }
+
     private fun startRecordingCheck(){
         if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
             startRecording()
@@ -637,6 +808,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             requestPermissions()
         }
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_PICK_MEDIA && resultCode == RESULT_OK) {
@@ -651,6 +823,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
         }
     }
+
     fun compressImage(fileUri: Uri, context: Context): ByteArray {
         val inputStream = context.contentResolver.openInputStream(fileUri)
         val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -658,6 +831,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream) // Adjust quality as needed
         return outputStream.toByteArray()
     }
+
     private fun uploadMediaToFirebase(fileUri: Uri, takePicture : Boolean = false) {
         // Xác định loại MIME của tệp
         val mimeType = contentResolver.getType(fileUri)
@@ -737,6 +911,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
         }
     }
+
     private fun sendSkeletonMess(type : String){
         val chatMessage = ChatMessage(
             content = "",
@@ -751,6 +926,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         chatAdapter.notifyItemInserted(chatMessages.size - 1)
         recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
     }
+
     private fun stopRecordingAndSave() {
         sendSkeletonMess("audio")
         mediaRecorder?.apply {
@@ -781,7 +957,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 }
         }
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -819,6 +994,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
         }
     }
+
     private fun listenSeen() {
         if (!isGroup) {
             // Khởi tạo listener và lưu vào biến
@@ -870,6 +1046,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 .addValueEventListener(groupStatusListener!!)
         }
     }
+
     private fun removeStatusListeners() {
         userStatusListener?.let {
             Firebase.database.getReference("users")
@@ -886,6 +1063,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 .removeEventListener(it)
         }
     }
+
     override fun onDestroy() {
         super.onDestroy()
         if (::chatAdapter.isInitialized) {
@@ -903,6 +1081,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             database.removeEventListener(valueEventListener)
         }
     }
+
     private fun checkBlockedStatus() {
         val inputBar = findViewById<LinearLayout>(R.id.input_bar)
         val blockedMessage1 = findViewById<FrameLayout>(R.id.blockMsg1)
@@ -976,12 +1155,10 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
     }
 
-
     override fun onMessageLongClick(position: Int, message: MainChat.ChatMessage) {
         // Xử lý khi người dùng long click vào tin nhắn
         showOptionsDialog(position, message)
     }
-
 
     private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
         val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
@@ -1109,6 +1286,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
             .show()
     }
+
     suspend fun fetchName(sendId: String): String {
         val document = Firebase.firestore.collection("users").document(sendId).get().await()
         return if (document.exists()) {
@@ -1122,6 +1300,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         super.onPause()
         removeStatusListeners()
     }
+
     private fun deleteMessage(position: Int) {
         // xóa tin nhắn trong firebase
         val message = chatMessages[position]
