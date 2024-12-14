@@ -1,5 +1,6 @@
 package com.example.createuiproject
 import android.app.Activity
+import android.app.Dialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.view.LayoutInflater
@@ -224,6 +225,16 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         audioPlayerLists.clear() // Xóa tất cả khỏi danh sách
     }
 
+    private fun showZoomedImageDialog(context: Context, imageUrl: String) {
+        val dialog = Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.setContentView(R.layout.dialog_zoom_image)
+        val zoomedImageView = dialog.findViewById<ImageView>(R.id.zoomed_image)
+        Glide.with(context)
+            .load(imageUrl)
+            .into(zoomedImageView)
+        dialog.show()
+    }
+
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         releaseAllPlayers() // Giải phóng toàn bộ player
@@ -348,6 +359,9 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     .placeholder(R.drawable.image_placeholder) // Ảnh chờ
                     .error(R.drawable.image_error) // Ảnh lỗi
                     .into(imageMessageView)
+                imageMessageView.setOnClickListener {
+                    showZoomedImageDialog(itemView.context, chatMessage.content)
+                }
             }
 
             else if (chatMessage.type == "audio") {
@@ -484,6 +498,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     .placeholder(R.drawable.image_placeholder) // Ảnh chờ
                     .error(R.drawable.image_error) // Ảnh lỗi
                     .into(imageMessageView)
+
+                imageMessageView.setOnClickListener {
+                    showZoomedImageDialog(itemView.context, chatMessage.content)
+                }
             }
 
             else if (chatMessage.type == "audio") {
@@ -615,6 +633,12 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     .placeholder(R.drawable.image_placeholder) // Ảnh chờ
                     .error(R.drawable.image_error) // Ảnh lỗi
                     .into(imageMessageView)
+                imageMessageView.setOnClickListener {
+                    showZoomedImageDialog(itemView.context, chatMessage.content)
+                }
+                imageMessageView.setOnClickListener {
+                    showZoomedImageDialog(itemView.context, chatMessage.content)
+                }
             }
 
             else if (chatMessage.type == "audio") {
@@ -786,6 +810,9 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     .placeholder(R.drawable.image_placeholder) // Ảnh chờ
                     .error(R.drawable.image_error) // Ảnh lỗi
                     .into(imageMessageView)
+                imageMessageView.setOnClickListener {
+                    showZoomedImageDialog(itemView.context, chatMessage.content)
+                }
             }
 
             else if (chatMessage.type == "audio") {
