@@ -317,7 +317,7 @@ class inforFragment : Fragment() {
             }
     }
 
-    fun setLocale(languageCode: String) {
+    private fun setLocale(languageCode: String) {
         val locale = Locale(languageCode)
         Locale.setDefault(locale)
 

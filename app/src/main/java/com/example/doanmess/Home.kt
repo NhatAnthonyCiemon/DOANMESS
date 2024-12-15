@@ -47,18 +47,25 @@ class Home : HandleOnlineActivity() {
     private lateinit var auth: FirebaseAuth
     private var User: FirebaseUser? =null
     private var dbfirestore = Firebase.firestore
+    var check = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_home)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, 0 , systemBars.right, systemBars.bottom)
-            insets
-        }
 
         applyDarkMode()
+        // Đọc ngôn ngữ đã lưu trong SharedPreferences
+        val sharedPreferences = getSharedPreferences("LanguagePref", Context.MODE_PRIVATE)
+        val currentLanguage = sharedPreferences?.getString("language", Locale.getDefault().language) ?: Locale.getDefault().language
+
+        // Đặt lại ngôn ngữ khi ứng dụng khởi động
+        if (check) {
+            setLocale(currentLanguage)
+            check= false
+        }
+
+
 
         val auth1 = FirebaseAuth.getInstance()
         val currentUser = auth1.currentUser
@@ -503,6 +510,49 @@ class Home : HandleOnlineActivity() {
             activeListeners.remove(group)
         }
     }
+
+    fun setLocale(languageCode: String) {
+        try {
+            val sharedPreferences = getSharedPreferences("UserLanguagePref", Context.MODE_PRIVATE)  // Đổi tên ở đây
+            val currentLanguage = sharedPreferences.getString("language", Locale.getDefault().language) ?: Locale.getDefault().language
+
+            // Kiểm tra nếu ngôn ngữ đã thay đổi
+            if (currentLanguage != languageCode) {
+                // Tạo đối tượng Locale từ mã ngôn ngữ
+                val locale = Locale(languageCode)
+                Locale.setDefault(locale)
+
+                // Cập nhật cấu hình ngôn ngữ
+                val config = resources.configuration
+                config.setLocale(locale)
+
+                // Tạo context mới với cấu hình ngôn ngữ
+                createConfigurationContext(config)
+
+                // Lưu ngôn ngữ đã thay đổi vào SharedPreferences
+                sharedPreferences.edit().putString("language", languageCode).apply()
+
+                // Tái tạo lại Activity để áp dụng ngôn ngữ mới
+                val intent = intent
+                recreate()  // Tái tạo lại Activity
+                startActivity(intent)  // Khởi động lại Activity với ngôn ngữ mới
+            }
+        } catch (e: Exception) {
+            // Xử lý lỗi nếu có
+            Toast.makeText(this, "Error setting language: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        // Lưu ngôn ngữ vào SharedPreferences khi ứng dụng chuyển sang trạng thái tạm dừng
+        val sharedPreferences = getSharedPreferences("UserLanguagePref", Context.MODE_PRIVATE)
+        val languageCode = Locale.getDefault().language  // Lấy ngôn ngữ hiện tại
+        sharedPreferences.edit().putString("language", languageCode).apply()
+    }
+
+
 
 
     // Hàm để lấy và xóa giá trị từ SharedPreferences
