@@ -95,7 +95,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
-                android:text="Dark Mode"
+                android:text="@string/DarkMode"
                 android:textColor="#000009"
                 android:textSize="20dp" />
 
@@ -133,7 +133,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
-                android:text="Change avatar"
+                android:text="@string/Changeavatar"
                 android:textColor="#000000"
                 android:textSize="20dp" />
 
@@ -163,7 +163,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
-                android:text="Change name"
+                android:text="@string/Changename"
                 android:textColor="#000000"
                 android:textSize="20dp" />
 
@@ -193,7 +193,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
-                android:text="Friend request"
+                android:text="@string/Friendrequest"
                 android:textColor="#000000"
                 android:textSize="20dp" />
 
@@ -230,7 +230,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
-                android:text="Friend list"
+                android:text="@string/Friendlist"
                 android:textColor="#000000"
                 android:textSize="20dp" />
 
@@ -268,7 +268,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="80dp"
                 android:gravity="center_vertical"
-                android:text="Block list"
+                android:text="@string/Blocklist"
                 android:textColor="#000000"
                 android:textSize="20dp" />
 
@@ -305,7 +305,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="80dp"
                 android:gravity="center"
-                android:text="Logout"
+                android:text="@string/Logout"
                 android:textColor="#000000"
                 android:textSize="20dp" />
         </FrameLayout>

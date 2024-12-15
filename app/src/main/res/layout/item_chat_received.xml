@@ -8,16 +8,15 @@
     android:layout_marginBottom="8dp">
 
     <TextView
-        android:layout_marginHorizontal="8dp"
         android:id="@+id/messageTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_background_orange"
-        android:textColor="@android:color/white"
-        android:padding="10dp"
         android:layout_gravity="start"
-        android:text="Sent message"
-        />
+        android:layout_marginHorizontal="8dp"
+        android:background="@drawable/rounded_background_orange"
+        android:padding="10dp"
+        android:text="@string/Sentmessage"
+        android:textColor="@android:color/white" />
     <androidx.cardview.widget.CardView
         android:layout_marginHorizontal="8dp"
         android:padding="5dp"

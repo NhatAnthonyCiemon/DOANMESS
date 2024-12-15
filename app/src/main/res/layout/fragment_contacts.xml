@@ -25,17 +25,18 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             >
+
             <Button
-                android:layout_marginRight="20dp"
                 android:id="@+id/toAddFriendBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="15dp"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="15dp"
+                android:layout_marginRight="20dp"
                 android:background="@drawable/custombtn02_home"
-                android:text="Add Friend"
-                android:textColor="@color/white" />
+                android:paddingHorizontal="15dp"
+                android:paddingVertical="10dp"
+                android:text="@string/Add_Friend"
+                android:textColor="@color/white"
+                android:textSize="15dp" />
             <LinearLayout
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="5dp"
@@ -51,15 +52,15 @@
                     ></ImageButton>-->
 
                 <EditText
-                    android:background="@null"
-                    android:layout_marginLeft="15dp"
                     android:id="@+id/filter_search"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ems="10"
+                    android:layout_marginLeft="15dp"
                     android:layout_weight="1"
-                    android:inputType="text"
-                    android:hint="Search" />
+                    android:background="@null"
+                    android:ems="10"
+                    android:hint="@string/Search"
+                    android:inputType="text" />
                 <ImageButton
                     android:id="@+id/search_btn"
                     android:layout_width="wrap_content"

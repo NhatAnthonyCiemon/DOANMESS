@@ -105,17 +105,16 @@
 
 
     <TextView
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/messageTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_background_white"
-        android:textColor="@android:color/holo_orange_dark"
-        android:padding="10dp"
-        android:layout_marginHorizontal="8dp"
         android:layout_gravity="end"
-        android:text="Sent message"
-        android:maxWidth="250dp" />
+        android:layout_marginHorizontal="8dp"
+        android:background="@drawable/rounded_background_white"
+        android:maxWidth="250dp"
+        android:padding="10dp"
+        android:text="@string/Sentmessage"
+        android:textColor="@android:color/holo_orange_dark" />
 
      <!-- Add padding for timestamp -->
 

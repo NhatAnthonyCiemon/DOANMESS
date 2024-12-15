@@ -15,7 +15,7 @@
       android:layout_below="@+id/imgView"
       android:layout_centerInParent="true"
       android:layout_marginTop="25dp"
-      android:text="Full name"
+      android:text=""
       android:textAlignment="center"
       android:textSize="40sp"
       android:textStyle="bold"
@@ -111,7 +111,7 @@
         android:id="@+id/txtView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Another Option"
+        android:text="@string/AnotherOption"
         android:textSize="25dp"
         android:textStyle="bold" />
 
@@ -136,7 +136,7 @@
           android:layout_height="match_parent"
           android:layout_marginLeft="80dp"
           android:gravity="center_vertical"
-          android:text="Notice option"
+          android:text="@string/Noticeoption"
           android:textSize="25dp" />
 
     </FrameLayout>
@@ -162,7 +162,7 @@
           android:layout_height="match_parent"
           android:layout_marginLeft="80dp"
           android:gravity="center_vertical"
-          android:text="View pinned message"
+          android:text="@string/Viewpinnedmessage"
           android:textSize="25dp" />
 
     </FrameLayout>
@@ -183,7 +183,7 @@
         android:id="@+id/txtSupport"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Privicy - Support"
+        android:text="@string/PrivicySupport"
         android:textSize="25dp"
         android:textStyle="bold" />
 
@@ -199,13 +199,14 @@
           android:layout_marginLeft="10dp"
           android:scaleType="fitCenter"
           app:srcCompat="@drawable/lock" />
+
       <TextView
           android:id="@+id/txtLimit"
           android:layout_width="280dp"
           android:layout_height="match_parent"
           android:layout_marginLeft="80dp"
           android:gravity="center_vertical"
-          android:text="Limit"
+          android:text="@string/Limit"
           android:textSize="25dp" />
     </FrameLayout>
 
@@ -230,7 +231,7 @@
           android:layout_height="match_parent"
           android:layout_marginLeft="80dp"
           android:gravity="center_vertical"
-          android:text="Block"
+          android:text="@string/Block"
           android:textSize="25dp" />
 
     </FrameLayout>
@@ -256,7 +257,7 @@
           android:layout_height="match_parent"
           android:layout_marginLeft="80dp"
           android:gravity="center_vertical"
-          android:text="Delete message"
+          android:text="@string/Deletemessage"
           android:textSize="25dp" />
 
     </FrameLayout>

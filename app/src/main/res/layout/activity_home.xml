@@ -66,7 +66,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_marginBottom="15dp"
-                        android:text="Hello,"
+                        android:text="@string/Hello"
                         android:textColor="#808080"
                         android:textSize="18sp" />
 
@@ -144,7 +144,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/custombtn02_home"
                     android:stateListAnimator="@null"
-                    android:text="All Chat"
+                    android:text="@string/AllChat"
                     android:textColor="#fff" />
 
                 <Button
@@ -155,7 +155,7 @@
                     android:background="@drawable/custonlinear01_home"
                     android:elevation="0dp"
                     android:stateListAnimator="@null"
-                    android:text="Contact"
+                    android:text="@string/Contact"
                     android:textColor="#a3a3a3" />
 
                 <Button
@@ -165,7 +165,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/custonlinear01_home"
                     android:stateListAnimator="@null"
-                    android:text="Info"
+                    android:text="@string/Info"
                     android:textColor="#a3a3a3" />
 
 

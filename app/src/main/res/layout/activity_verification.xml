@@ -43,7 +43,7 @@
             android:layout_marginBottom="40dp"
             android:gravity="center"
             android:paddingHorizontal="20dp"
-            android:text="All user must verify their email to login"
+            android:text="@string/Allusermustverifytheiremailtologin"
             android:textColor="#B46D00"
             android:textSize="34sp"
             android:textStyle="bold" />
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="16dp"
-            android:text="A verification email has been sent to your email address. Please verify your email."
+            android:text="@string/AverificationemailhasbeensenttoyouremailaddressPleaseverifyyouremail"
             android:textSize="16sp" />
 
         <Button
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:backgroundTint="#FF9800"
-            android:text="Go to Login"
+            android:text="@string/GotoLogin"
             android:textColor="#FFFFFF" />
 
     </LinearLayout>

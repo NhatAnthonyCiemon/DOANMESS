@@ -22,7 +22,7 @@
             android:layout_weight="1"
             android:paddingStart="30dp"
             android:paddingTop="40dp"
-            android:text="WELCOME BACK"
+            android:text="@string/WELCOMEBACK"
             android:textSize="34sp" />
 
         <FrameLayout
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:paddingBottom="16dp"
-            android:text="Login"
+            android:text="@string/Login"
             android:textColor="#000000"
             android:textSize="48sp"
             android:textStyle="bold" />
@@ -74,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Please sign in to continue"
+            android:text="@string/Pleasesignintocontinue"
             android:textSize="24sp" />
     </LinearLayout>
 
@@ -192,7 +192,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:text="Don't have an account?"
+                android:text="@string/Donthaveanaccount"
                 android:textAlignment="viewEnd" />
 
             <Button
@@ -204,7 +204,7 @@
                 android:layout_weight="1"
                 android:background="#00FFFFFF"
                 android:paddingLeft="5dp"
-                android:text="Sign up"
+                android:text="@string/Signup"
                 android:textAlignment="textStart"
                 android:textColor="#F89324" />
 

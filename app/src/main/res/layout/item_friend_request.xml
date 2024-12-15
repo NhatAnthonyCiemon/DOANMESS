@@ -38,14 +38,14 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|center_vertical"
-                android:text="Name" />
+                android:text="@string/Name" />
 
             <TextView
                 android:id="@+id/requestTime"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="clip_vertical|start"
-                android:text="Time" />
+                android:text="@string/Time" />
         </LinearLayout>
 
         <Button

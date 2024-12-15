@@ -1,6 +1,64 @@
 <resources>
-    <string name="app_name">DOANMESS</string>
+    <string name="app_name" translatable="false">DOANMESS</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="default_notification_channel_id">TIN_NHAN_MOI</string>
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+    <string name="default_notification_channel_id" translatable="false">TIN_NHAN_MOI</string>
+    <string name="Add_Friend">Add Friend</string>
+    <string name="Search">Search</string>
+    <string name="BlockList">Block List</string>
+    <string name="CreateGroup">Create Group</string>
+    <string name="Nameyourgroup">Name your group</string>
+    <string name="Cancel">Cancel</string>
+    <string name="Create">Create</string>
+    <string name="Forgot">Forgot</string>
+    <string name="Password">Password?</string>
+    <string name="ResetPassword">Reset Password</string>
+    <string name="FriendsList">Friends List</string>
+    <string name="FriendRequests">Friend Requests</string>
+    <string name="Hello">Hello,</string>
+    <string name="AllChat">All Chat</string>
+    <string name="Contact">Contact</string>
+    <string name="Info">Info</string>
+    <string name="AnotherOption">Another Option</string>
+    <string name="Noticeoption">Notice option</string>
+    <string name="Viewpinnedmessage">View pinned message</string>
+    <string name="Limit">Limit</string>
+    <string name="Block">Block</string>
+    <string name="Deletemessage">Delete message</string>
+    <string name="WELCOMEBACK">WELCOME BACK</string>
+    <string name="Login">Login</string>
+    <string name="Pleasesignintocontinue">Please sign in to continue</string>
+    <string name="Donthaveanaccount">Don\'t have an account?</string>
+    <string name="Signup">Sign up</string>
+    <string name="UploadPost">Upload Post</string>
+    <string name="AddPost">Add Post</string>
+    <string name="Entertitle">Enter title</string>
+    <string name="ChooseImageVideo">Choose Image/Video</string>
+    <string name="CreateAccount">Create Account</string>
+    <string name="FULLNAME">FULL NAME</string>
+    <string name="UserName">User Name</string>
+    <string name="PASSWORD">PASSWORD</string>
+    <string name="CONFIRMPASSWORD">CONFIRM PASSWORD</string>
+    <string name="Alreadyhaveanaccount">Already have an account?</string>
+    <string name="Signin">Sign in</string>
+    <string name="Allusermustverifytheiremailtologin">All user must verify their email to login</string>
+    <string name="AverificationemailhasbeensenttoyouremailaddressPleaseverifyyouremail">A verification email has been sent to your email address. Please verify your email.</string>
+    <string name="GotoLogin">Go to Login</string>
+    <string name="YourTextHere">Your Text Here</string>
+    <string name="Add">Add</string>
+    <string name="Added">Added</string>
+    <string name="DarkMode">Dark Mode</string>
+    <string name="Changeavatar">Change avatar</string>
+    <string name="Changename">Change name</string>
+    <string name="Friendrequest">Friend request</string>
+    <string name="Friendlist">Friend list</string>
+    <string name="Blocklist">Block list</string>
+    <string name="Logout">Logout</string>
+    <string name="Name">Name</string>
+    <string name="Sentmessage">Sent message</string>
+    <string name="Time">Time</string>
+    <string name="Seemore">See more</string>
+    <string name="Online">Online</string>
+    <string name="Hellodif">Hello</string>
+    <string name="PrivicySupport">Privicy - Support</string>
 </resources>

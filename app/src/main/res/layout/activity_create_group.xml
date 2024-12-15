@@ -78,7 +78,7 @@
             android:layout_marginBottom="16dp"
             android:layout_toEndOf="@+id/userImageCard"
             android:gravity="center_vertical"
-            android:hint="Name your group"
+            android:hint="@string/Nameyourgroup"
             android:textColorHint="@color/xam"
             android:textSize="17sp" />
 
@@ -89,12 +89,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="Create Group"
+        android:text="@string/CreateGroup"
         android:textColor="#fda13a"
         android:textSize="35dp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@+id/imageView9"
-        tools:layout_editor_absoluteX="-92dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView9" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -173,11 +174,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
-        android:textSize="18dp"
-        android:paddingVertical="10dp"
-        android:paddingHorizontal="20dp"
         android:background="@drawable/custonlinear01_home"
-        android:text="Cancel"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp"
+        android:text="@string/Cancel"
+        android:textSize="18dp"
         app:layout_constraintEnd_toStartOf="@+id/createBtn"
         app:layout_constraintTop_toTopOf="@+id/createBtn" />
 
@@ -187,12 +188,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="40dp"
-        android:textSize="18dp"
-        android:paddingVertical="10dp"
-        android:paddingHorizontal="20dp"
         android:background="@drawable/custombtn02_home"
-        android:text="Create"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp"
+        android:text="@string/Create"
         android:textColor="@color/white"
+        android:textSize="18dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline" />
 

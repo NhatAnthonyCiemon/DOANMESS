@@ -47,7 +47,7 @@
         android:layout_toEndOf="@+id/userImageCard"
         android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical"
-        android:text="Your Text Here"
+        android:text="@string/YourTextHere"
         android:textColor="#605656"
         android:textSize="19sp"
         android:textStyle="normal" />

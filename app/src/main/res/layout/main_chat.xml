@@ -71,7 +71,7 @@
                     android:layout_width="78dp"
                     android:layout_height="20dp"
                     android:paddingStart="8dp"
-                    android:text="Online"
+                    android:text="@string/Online"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
         </LinearLayout>
@@ -244,8 +244,6 @@
                     android:src="@drawable/baseline_add_circle_24" />
 
 
-
-
                 <EditText
 
                     android:id="@+id/message_input"
@@ -254,7 +252,7 @@
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
                     android:focusableInTouchMode="true"
-                    android:hint="Hello" />
+                    android:hint="@string/Hellodif" />
                 <ImageButton
                     android:id="@+id/mic_button"
                     android:layout_width="30dp"

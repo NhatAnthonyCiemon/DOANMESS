@@ -20,7 +20,6 @@ class ListViewPinnedActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_view_pinned)
-
         val currentUserUid = intent.getStringExtra("currentUserUid") ?: return
         val targetUserUid = intent.getStringExtra("targetUserUid") ?: return
 
