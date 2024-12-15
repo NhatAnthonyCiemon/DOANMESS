@@ -1,278 +1,271 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:padding="10dp"
     android:layout_width="match_parent"
+    android:id="@+id/main"
     android:layout_height="match_parent"
     tools:context=".InforChat">
 
-  <TextView
-      android:id="@+id/txtName"
+  <RelativeLayout
+
+      android:padding="10dp"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/imgView"
-      android:layout_centerInParent="true"
-      android:layout_marginTop="25dp"
-      android:text=""
-      android:textAlignment="center"
-      android:textSize="40sp"
-      android:textStyle="bold"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+      android:layout_height="wrap_content">
 
-  <com.google.android.material.imageview.ShapeableImageView
-      android:id="@+id/imgView"
-      android:layout_width="150dp"
-      android:layout_height="150dp"
-      android:layout_alignParentTop="true"
-      android:layout_centerInParent="true"
-      android:layout_marginTop="85dp"
-      android:scaleType="centerCrop"
-      android:src="@drawable/ic_launcher_background"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/txtName"
-      app:shapeAppearanceOverlay="@style/circular">
+    <TextView
+        android:id="@+id/txtName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imgView"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="25dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-  </com.google.android.material.imageview.ShapeableImageView>
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="85dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_launcher_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtName"
+        app:shapeAppearanceOverlay="@style/circular" />
 
-  <FrameLayout
-      android:id="@+id/navBar"
-      android:layout_width="match_parent"
-      android:layout_height="60dp"
-      android:layout_below="@id/txtName"
-      android:layout_marginTop="25dp">
+    <FrameLayout
+        android:id="@+id/navBar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/txtName"
+        android:layout_marginTop="25dp">
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:layout_centerInParent="true"
+          android:orientation="horizontal">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnCall"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:backgroundTint="#D9D9D9"
+            android:scaleType="fitCenter"
+            android:tint="@color/black"
+            app:elevation="0dp"
+            app:srcCompat="@drawable/call" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="#D9D9D9"
+            android:scaleType="fitCenter"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/videocall"
+            app:elevation="0dp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnInfor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="#D9D9D9"
+            android:scaleType="fitCenter"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/account"
+            app:elevation="0dp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnNotice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="#D9D9D9"
+            android:scaleType="fitCenter"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/notifications"
+            app:elevation="0dp" />
+      </LinearLayout>
+    </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/anotherOption"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_below="@+id/navBar"
+        android:layout_alignParentStart="true"
         android:layout_centerInParent="true"
-        android:orientation="horizontal">
+        android:layout_marginTop="40dp"
+        android:orientation="vertical">
 
-      <com.google.android.material.floatingactionbutton.FloatingActionButton
-          android:id="@+id/btnCall"
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:backgroundTint="#D9D9D9"
-          android:scaleType="fitCenter"
-          android:tint="@color/black"
-          app:elevation="0dp"
-          app:srcCompat="@drawable/call" /> <!-- Đặt elevation thành 0 -->
-
-      <com.google.android.material.floatingactionbutton.FloatingActionButton
-          android:id="@+id/btnVideo"
-          android:layout_width="wrap_content"
+      <TextView
+          android:id="@+id/txtView1"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_marginStart="16dp"
-          android:backgroundTint="#D9D9D9"
-          android:scaleType="fitCenter"
-          android:tint="@color/black"
-          app:srcCompat="@drawable/videocall"
-          app:elevation="0dp" /> <!-- Đặt elevation thành 0 -->
+          android:text="@string/AnotherOption"
+          android:textSize="25dp"
+          android:textStyle="bold" />
 
-      <com.google.android.material.floatingactionbutton.FloatingActionButton
-          android:id="@+id/btnInfor"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginStart="16dp"
-          android:backgroundTint="#D9D9D9"
-          android:scaleType="fitCenter"
-          android:tint="@color/black"
-          app:srcCompat="@drawable/account"
-          app:elevation="0dp" /> <!-- Đặt elevation thành 0 -->
+      <FrameLayout
+          android:id="@+id/frmNotice"
+          android:layout_width="match_parent"
+          android:layout_height="40dp"
+          android:layout_marginTop="20dp">
 
-      <com.google.android.material.floatingactionbutton.FloatingActionButton
-          android:id="@+id/btnNotice"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginStart="16dp"
-          android:backgroundTint="#D9D9D9"
-          android:scaleType="fitCenter"
-          android:tint="@color/black"
-          app:srcCompat="@drawable/notifications"
-          app:elevation="0dp" /> <!-- Đặt elevation thành 0 -->
+        <ImageView
+            android:id="@+id/imgNotice"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/notifications" />
+
+        <TextView
+            android:id="@+id/txtNotice"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="80dp"
+            android:gravity="center_vertical"
+            android:text="@string/Noticeoption"
+            android:textSize="25dp" />
+      </FrameLayout>
+
+      <FrameLayout
+          android:id="@+id/frmLink"
+          android:layout_width="match_parent"
+          android:layout_height="40dp"
+          android:layout_marginTop="15dp">
+
+        <ImageView
+            android:id="@+id/imgeLink"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/link" />
+
+        <TextView
+            android:id="@+id/txtLink"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="80dp"
+            android:gravity="center_vertical"
+            android:text="@string/Viewpinnedmessage"
+            android:textSize="25dp" />
+      </FrameLayout>
     </LinearLayout>
-  </FrameLayout>
 
-
-  <LinearLayout
-      android:id="@+id/anotherOption"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/navBar"
-      android:layout_alignParentStart="true"
-      android:layout_centerInParent="true"
-      android:layout_marginTop="40dp"
-      android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/txtView1"
+    <LinearLayout
+        android:id="@+id/support"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/AnotherOption"
-        android:textSize="25dp"
-        android:textStyle="bold" />
-
-    <FrameLayout
-        android:id="@+id/frmNotice"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="20dp">
-
-
-      <ImageView
-          android:id="@+id/imgNotice"
-          android:layout_width="50dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="10dp"
-          android:scaleType="fitCenter"
-          app:srcCompat="@drawable/notifications" />
+        android:layout_below="@+id/anotherOption"
+        android:layout_alignParentStart="true"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="40dp"
+        android:orientation="vertical">
 
       <TextView
-          android:id="@+id/txtNotice"
-          android:layout_width="280dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="80dp"
-          android:gravity="center_vertical"
-          android:text="@string/Noticeoption"
-          android:textSize="25dp" />
+          android:id="@+id/txtSupport"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/PrivicySupport"
+          android:textSize="25dp"
+          android:textStyle="bold" />
 
-    </FrameLayout>
+      <FrameLayout
+          android:id="@+id/frmLimit"
+          android:layout_width="match_parent"
+          android:layout_height="40dp"
+          android:layout_marginTop="20dp">
 
-    <FrameLayout
-        android:id="@+id/frmLink"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="15dp">
+        <ImageView
+            android:id="@+id/imgLimit"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/lock" />
 
+        <TextView
+            android:id="@+id/txtLimit"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="80dp"
+            android:gravity="center_vertical"
+            android:text="@string/Limit"
+            android:textSize="25dp" />
+      </FrameLayout>
 
-      <ImageView
-          android:id="@+id/imgeLink"
-          android:layout_width="50dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="10dp"
-          android:scaleType="fitCenter"
-          app:srcCompat="@drawable/link" />
+      <FrameLayout
+          android:id="@+id/frmBlock"
+          android:layout_width="match_parent"
+          android:layout_height="40dp"
+          android:layout_marginTop="15dp">
 
-      <TextView
-          android:id="@+id/txtLink"
-          android:layout_width="280dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="80dp"
-          android:gravity="center_vertical"
-          android:text="@string/Viewpinnedmessage"
-          android:textSize="25dp" />
+        <ImageView
+            android:id="@+id/imgBlock"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/block" />
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/txtBlock"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="80dp"
+            android:gravity="center_vertical"
+            android:text="@string/Block"
+            android:textSize="25dp" />
+      </FrameLayout>
 
-  </LinearLayout>
+      <FrameLayout
+          android:id="@+id/frmTrash"
+          android:layout_width="match_parent"
+          android:layout_height="40dp"
+          android:layout_marginTop="10dp">
 
-  <LinearLayout
-      android:id="@+id/support"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/anotherOption"
-      android:layout_alignParentStart="true"
-      android:layout_centerInParent="true"
-      android:layout_marginTop="40dp"
-      android:orientation="vertical">
+        <ImageView
+            android:id="@+id/imgTrash"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/trash_black" />
 
-    <TextView
-        android:id="@+id/txtSupport"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/PrivicySupport"
-        android:textSize="25dp"
-        android:textStyle="bold" />
+        <TextView
+            android:id="@+id/txtTrash"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="80dp"
+            android:gravity="center_vertical"
+            android:text="@string/Deletemessage"
+            android:textSize="25dp" />
+      </FrameLayout>
+    </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/frmLimit"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="20dp">
-      <ImageView
-          android:id="@+id/imgLimit"
-          android:layout_width="50dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="10dp"
-          android:scaleType="fitCenter"
-          app:srcCompat="@drawable/lock" />
-
-      <TextView
-          android:id="@+id/txtLimit"
-          android:layout_width="280dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="80dp"
-          android:gravity="center_vertical"
-          android:text="@string/Limit"
-          android:textSize="25dp" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/frmBlock"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="15dp">
-
-
-      <ImageView
-          android:id="@+id/imgBlock"
-          android:layout_width="50dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="10dp"
-          android:scaleType="fitCenter"
-          app:srcCompat="@drawable/block" />
-
-      <TextView
-          android:id="@+id/txtBlock"
-          android:layout_width="280dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="80dp"
-          android:gravity="center_vertical"
-          android:text="@string/Block"
-          android:textSize="25dp" />
-
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/frmTrash"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginTop="10dp">
-
-
-      <ImageView
-          android:id="@+id/imgTrash"
-          android:layout_width="50dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="10dp"
-          android:scaleType="fitCenter"
-          app:srcCompat="@drawable/trash_black" />
-
-      <TextView
-          android:id="@+id/txtTrash"
-          android:layout_width="280dp"
-          android:layout_height="match_parent"
-          android:layout_marginLeft="80dp"
-          android:gravity="center_vertical"
-          android:text="@string/Deletemessage"
-          android:textSize="25dp" />
-
-    </FrameLayout>
-  </LinearLayout>
-
-  <ImageView
-      android:id="@+id/imgBack"
-      android:layout_width="50dp"
-      android:layout_height="50dp"
-      android:layout_alignParentStart="true"
-      android:layout_alignParentTop="true"
-      android:layout_marginStart="21dp"
-      android:layout_marginLeft="10dp"
-      android:layout_marginTop="35dp"
-      android:scaleType="fitCenter"
-      app:srcCompat="@drawable/arrow_back" />
-
-</RelativeLayout>
+    <ImageView
+        android:id="@+id/imgBack"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/arrow_back" />
+  </RelativeLayout>
+</ScrollView>
