@@ -25,7 +25,8 @@ open class DataMess {
         this.status = status
         this.last_name = name.split(" ").last()
         this.othersend = othersend
-        if(!isSQL) this.message = if(!othersend) "${AppLocalization.instance.getString(R.string.You)}: $message" else last_name + ": $message"
+        val sender = MyApp.instance.getString(R.string.You)
+        if(!isSQL) this.message = if(!othersend) "$sender: $message" else last_name + ": $message"
         else this.message = message
         this.timestamp = timestamp
         this.time = convertTimestampToString(timestamp)
