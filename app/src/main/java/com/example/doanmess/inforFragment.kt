@@ -33,6 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
+import java.util.Locale
 
 
 class inforFragment : Fragment() {
@@ -45,6 +46,7 @@ class inforFragment : Fragment() {
     private lateinit var friendReqFrame : FrameLayout
     private lateinit var friendListFrame : FrameLayout
     private lateinit var blockListFrame : FrameLayout
+    private lateinit var changeLanguage : FrameLayout
     private var dbfirestore = Firebase.firestore
 
 
@@ -65,11 +67,13 @@ class inforFragment : Fragment() {
         val txtName = view.findViewById<TextView>(R.id.txtName)
         val txtMode = view.findViewById<TextView>(R.id.txtCheckDarkMode)
         val logOutBtn = view.findViewById<FrameLayout>(R.id.logout)
+        val sharedPreferences = activity?.getSharedPreferences("LanguagePref", Context.MODE_PRIVATE)
 
 
         friendReqFrame = view.findViewById(R.id.friendRequest)
         friendListFrame = view.findViewById(R.id.friendList)
         blockListFrame = view.findViewById(R.id.blockList)
+        changeLanguage = view.findViewById(R.id.changeLanguage)
         imageView = view.findViewById(R.id.imgView)
         button = view.findViewById(R.id.floatingActionButton)
         val requestNumbers = view.findViewById<TextView>(R.id.txtNumberRequest)
@@ -133,6 +137,28 @@ class inforFragment : Fragment() {
                     Log.d("TAG", "get failed with ", exception)
                 }
 
+        }
+
+        changeLanguage.setOnClickListener {
+            // Lấy ngôn ngữ hiện tại
+
+            val currentLanguage = sharedPreferences?.getString("language", Locale.getDefault().language) ?: Locale.getDefault().language
+
+            // Kiểm tra nếu đang là tiếng Việt thì đổi sang tiếng Anh, ngược lại đổi sang tiếng Việt
+            if (currentLanguage == "vi") {
+                setLocale("en") // Đổi sang tiếng Anh
+                // Lưu ngôn ngữ đã chọn
+                sharedPreferences?.edit()?.putString("language", "en")?.apply()
+            } else {
+                setLocale("vi") // Đổi sang tiếng Việt
+                // Lưu ngôn ngữ đã chọn
+                sharedPreferences?.edit()?.putString("language", "vi")?.apply()
+            }
+
+            // Làm mới lại Activity để áp dụng ngôn ngữ mới
+            val intent = activity?.intent
+            activity?.finish()
+            startActivity(intent)
         }
 
         blockListFrame.setOnClickListener {
@@ -289,6 +315,17 @@ class inforFragment : Fragment() {
             .addOnFailureListener { e ->
                 // Xử lý lỗi nếu cập nhật thất bại
             }
+    }
+
+    fun setLocale(languageCode: String) {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = resources.configuration
+        config.setLocale(locale)
+
+        // Cập nhật lại resources với ngữ cảnh mới
+        resources.updateConfiguration(config, resources.displayMetrics)
     }
 
     private fun saveDarkMode(mode: String) {

@@ -1,6 +1,7 @@
 package com.example.doanmess
 
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -29,7 +30,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-
+import java.util.Locale
 
 
 class Home : HandleOnlineActivity() {
@@ -58,8 +59,6 @@ class Home : HandleOnlineActivity() {
         }
 
         applyDarkMode()
-
-
 
         val auth1 = FirebaseAuth.getInstance()
         val currentUser = auth1.currentUser
