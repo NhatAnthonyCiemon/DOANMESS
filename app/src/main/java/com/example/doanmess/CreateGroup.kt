@@ -19,6 +19,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -55,6 +57,11 @@ class CreateGroup : HandleOnlineActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_group)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, 0 , systemBars.right, systemBars.bottom)
+            insets
+        }
         enableEdgeToEdge()
 
 
@@ -104,8 +111,7 @@ class CreateGroup : HandleOnlineActivity() {
             }
         }
         cancelBtn.setOnClickListener{
-            val i = Intent(this, Home::class.java)
-            startActivity(i)
+            finish()
         }
 
         createBtn.setOnClickListener{
