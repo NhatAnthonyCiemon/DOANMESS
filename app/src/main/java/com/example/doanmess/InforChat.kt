@@ -51,6 +51,7 @@ class InforChat : HandleOnlineActivity() {
 
         val btnCall = findViewById<FloatingActionButton>(R.id.btnCall)
         val btnVideo = findViewById<FloatingActionButton>(R.id.btnVideo)
+        val btnInfo  = findViewById<FloatingActionButton>(R.id.btnInfor)
 
         btnCall.setOnClickListener {
             var intent = Intent(this, Call::class.java)
@@ -90,8 +91,14 @@ class InforChat : HandleOnlineActivity() {
                 MessageController().callVideoFriend(chatUserId!!, FirebaseAuth.getInstance().currentUser?.uid!!)
             }
         }
-
-
+        var avatarUrl : String ="";
+        btnInfo.setOnClickListener{
+            val intent = Intent(this, IndividualPost::class.java)
+            intent.putExtra("current", FirebaseAuth.getInstance().currentUser?.uid)
+            intent.putExtra("target", chatUserId)
+            intent.putExtra("avatar", avatarUrl)
+            startActivity(intent)
+        }
         val imgView = findViewById<ImageView>(R.id.imgView) // Avatar ImageView
         val txtName = findViewById<TextView>(R.id.txtName) // Name TextView
 
@@ -104,7 +111,7 @@ class InforChat : HandleOnlineActivity() {
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
                         // Lấy thông tin từ "users"
-                        val avatarUrl = document.getString("Avatar")
+                        avatarUrl = document.getString("Avatar")!!
                         val name = document.getString("Name")
 
                         // Hiển thị thông tin
