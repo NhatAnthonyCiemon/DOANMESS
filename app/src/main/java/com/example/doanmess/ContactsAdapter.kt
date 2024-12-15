@@ -62,6 +62,10 @@ class ContactsAdapter(var cont: Activity,var contactList:  List<Contact>) : Recy
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.nameView.text = contactList[position].name
+        if(contactList[position].avatar == "") {
+            holder.imgView.setImageResource(R.drawable.avatar_placeholder_allchat)
+            return
+        }
         Picasso.get()
             .load(contactList[position].avatar)
             .resize(100, 100)  // Điều chỉnh kích thước ảnh phù hợp với ImageView

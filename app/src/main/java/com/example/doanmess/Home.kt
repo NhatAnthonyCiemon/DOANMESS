@@ -53,7 +53,11 @@ class Home : HandleOnlineActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_home)
-
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, 0 , systemBars.right, systemBars.bottom)
+            insets
+        }
         applyDarkMode()
         // Đọc ngôn ngữ đã lưu trong SharedPreferences
         val sharedPreferences = getSharedPreferences("LanguagePref", Context.MODE_PRIVATE)
