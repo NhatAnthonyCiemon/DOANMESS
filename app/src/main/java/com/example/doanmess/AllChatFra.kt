@@ -142,7 +142,7 @@ class AllChatFra : Fragment() {
                                                         this.othersend = false
                                                         this.avatar = avatar
                                                         this.name = name
-                                                        this.message = if (!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
+                                                        this.message = if (!othersend) "${atvtContext.getString(R.string.You)}: ${content.toString()}" else last_name + ": ${content.toString()}"
                                                         this.timestamp = timestamp!!
                                                         this.status = status
                                                     }
@@ -176,7 +176,7 @@ class AllChatFra : Fragment() {
                                                         this.othersend = true
                                                         this.avatar = avatar
                                                         this.name = name
-                                                        this.message = if (!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
+                                                        this.message = if (!othersend) "${atvtContext.getString(R.string.You)}: ${content.toString()}" else last_name + ": ${content.toString()}"
                                                         this.timestamp = timestamp!!
                                                         this.status = status
                                                     }
@@ -232,15 +232,15 @@ class AllChatFra : Fragment() {
                                     val existingItem = list.find { it.uid == childSnapshot.key.toString() }
                                     if (existingItem != null) {
                                         existingItem.apply {
-                                            this.message = "Bạn: ${content.toString()}"
+                                            this.message = "${atvtContext.getString(R.string.You)}: ${content.toString()}"
                                             this.timestamp = timestamp!!
                                             this.status = status
                                         }
                                     } else {
                                         if (listOff.contains(childSnapshot.key.toString())) {
-                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status, "Bạn", myGroup[childSnapshot.key.toString()].toString(), false))
+                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status, "${atvtContext.getString(R.string.You)}", myGroup[childSnapshot.key.toString()].toString(), false))
                                         } else {
-                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status, "Bạn", myGroup[childSnapshot.key.toString()].toString(), true))
+                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status, "${atvtContext.getString(R.string.You)}", myGroup[childSnapshot.key.toString()].toString(), true))
                                         }
                                     }
                                     list.sortByDescending { it.timestamp }
