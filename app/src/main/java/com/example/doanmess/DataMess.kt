@@ -1,5 +1,6 @@
 package com.example.doanmess
 
+import com.google.common.io.Resources
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,7 +25,7 @@ open class DataMess {
         this.status = status
         this.last_name = name.split(" ").last()
         this.othersend = othersend
-        if(!isSQL) this.message = if(!othersend) "Bạn: $message" else last_name + ": $message"
+        if(!isSQL) this.message = if(!othersend) "${AppLocalization.instance.getString(R.string.You)}: $message" else last_name + ": $message"
         else this.message = message
         this.timestamp = timestamp
         this.time = convertTimestampToString(timestamp)

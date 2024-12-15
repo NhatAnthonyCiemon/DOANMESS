@@ -58,4 +58,9 @@
     <string name="Online">Đang trực tuyến</string>
     <string name="Hellodif">Xin chào</string>
     <string name="PrivicySupport">Quyền riêng tư - Hỗ trợ</string>
+    <string name="DeleteMessage">Xóa tin nhắn</string>
+    <string name="AreYouSureYouWantToDeleteThisMessage">Bạn có chắc chắn muốn xóa tin nhắn này không?</string>
+    <string name="CancelDelete">Hủy</string>
+    <string name="Delete">Xóa</string>
+    <string name="You">Bạn</string>
 </resources>
