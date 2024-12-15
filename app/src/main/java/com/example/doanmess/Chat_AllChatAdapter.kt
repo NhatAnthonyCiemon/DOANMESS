@@ -6,14 +6,10 @@ import androidx.recyclerview.widget.RecyclerView
 import android.widget.ImageView
 import android.widget.TextView
 import android.view.LayoutInflater
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.squareup.picasso.Callback
 import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.launch
-import java.io.File
-import java.io.IOException
+
 
 class Chat_AllChatAdapter(private val cont: Activity, private val list: List<DataMess>) : RecyclerView.Adapter<Chat_AllChatAdapter.MessHolder>() {
 
@@ -23,6 +19,11 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
                 clickListener.onItemClick(adapterPosition)
                 notifyItemChanged(adapterPosition) // Update only the clicked item
             }
+            itemView.setOnLongClickListener {
+                clickListener.onItemClickLong(adapterPosition)
+                notifyItemChanged(adapterPosition) // Update only the clicked item
+                true
+            }
         }
     }
 
@@ -30,6 +31,7 @@ class Chat_AllChatAdapter(private val cont: Activity, private val list: List<Dat
 
     interface OnItemClickListener {
         fun onItemClick(position: Int)
+        fun onItemClickLong(position: Int)
     }
 
     fun setOnItemClickListener(listener: OnItemClickListener) {
