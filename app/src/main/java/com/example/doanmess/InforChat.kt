@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -44,35 +45,7 @@ class InforChat : HandleOnlineActivity() {
 
         val imgView = findViewById<ImageView>(R.id.imgView) // Avatar ImageView
         val txtName = findViewById<TextView>(R.id.txtName) // Name TextView
-//        if (!chatUserId.isNullOrEmpty()) {
-//            // Fetch user data from Firebase Firestore
-//            val firestore = FirebaseFirestore.getInstance()
-//            firestore.collection("users").document(chatUserId).get()
-//                .addOnSuccessListener { document ->
-//                    if (document != null) {
-//                        // Retrieve the avatar URL and name from the document
-//                        val avatarUrl = document.getString("Avatar")
-//                        val name = document.getString("Name")
-//
-//                        // Set the name in the TextView
-//                        txtName.text = name ?: "User"
-//
-//                        // Load the avatar into the ImageView using Glide
-//                        if (!avatarUrl.isNullOrEmpty()) {
-//                            Glide.with(this).load(avatarUrl).into(imgView)
-//                        } else {
-//                            imgView.setImageResource(R.drawable.ic_launcher_background) // Placeholder
-//                        }
-//                    } else {
-//                        Toast.makeText(this, "User not found.", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//                .addOnFailureListener { e ->
-//                    Toast.makeText(this, "Failed to load user data: ${e.message}", Toast.LENGTH_SHORT).show()
-//                }
-//        } else {
-//            Toast.makeText(this, "Invalid user ID.", Toast.LENGTH_SHORT).show()
-//        }
+
 
         if (!chatUserId.isNullOrEmpty()) {
             val firestore = FirebaseFirestore.getInstance()
@@ -125,195 +98,24 @@ class InforChat : HandleOnlineActivity() {
             Toast.makeText(this, "Invalid user ID.", Toast.LENGTH_SHORT).show()
         }
 
-//        val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
-//        val json = sharedPreferences.getString("UnnoticedUsers", "[]")
-//        val unnoticedUsers = Gson().fromJson(json, MutableList::class.java) as MutableList<String>
-//        Toast.makeText(this@InforChat, unnoticedUsers.toString(), Toast.LENGTH_SHORT).show()
-
 
         val frmNotice = findViewById<FrameLayout>(R.id.frmNotice)
         val frmLink = findViewById<FrameLayout>(R.id.frmLink)
         val frmLimit = findViewById<FrameLayout>(R.id.frmLimit)
         val frmBlock = findViewById<FrameLayout>(R.id.frmBlock)
         val frmTrash = findViewById<FrameLayout>(R.id.frmTrash)
-
-
-        // Thiết lập onClickListener cho các FrameLayout
-
-//        frmNotice.setOnClickListener {
-//            // Thay đổi màu nền của frmNotice
-//            changeBackgroundColor(frmNotice, "#D9D9D9", 150)
-//
-//            // Tạo và hiển thị hộp thoại AlertDialog
-//            AlertDialog.Builder(this)
-//                .setTitle("Unnoticed")
-//                .setMessage("Do you want to unnoticed?")
-//                .setPositiveButton("Yes") { dialog, which ->
-//                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-//                    if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
-//                        val firestore = FirebaseFirestore.getInstance()
-//                        firestore.collection("users").document(currentUserId).get()
-//                            .addOnSuccessListener { document ->
-//                                // Lấy danh sách người dùng bị unnotice của người dùng hiện tại
-//                                val unnoticedUsers = document["Unnoticed"] as? List<Map<String, Any>>
-//                                val isAlreadyUnnoticed = unnoticedUsers?.any { it["uid"] == chatUserId } ?: false
-//
-//                                // Kiểm tra nếu người chưa đã bị unnoticed
-//                                if (!isAlreadyUnnoticed) {
-//                                    firestore.collection("users").document(currentUserId)
-//                                        .update("Unnoticed", FieldValue.arrayUnion(mapOf("uid" to chatUserId, "timeStamp" to System.currentTimeMillis())))
-//                                        .addOnSuccessListener {
-//                                            Toast.makeText(this, "User unnoticed successfully.", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                        .addOnFailureListener { e ->
-//                                            Toast.makeText(this, "Failed to unnoticed user: ${e.message}", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                } else {
-//                                    // Nếu người dùng đã bị unnoticed
-//                                    Toast.makeText(this, "User is unnoticed.", Toast.LENGTH_SHORT).show()
-//                                }
-//                            }
-//                            .addOnFailureListener { e ->
-//                                Toast.makeText(this, "Failed to check unnoticed users: ${e.message}", Toast.LENGTH_SHORT).show()
-//                            }
-//                    } else {
-//                        Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//                .setNegativeButton("No") { dialog, which ->
-//                    // Đóng hộp thoại khi người dùng chọn "No"
-//                    dialog.dismiss()
-//                }
-//                .show()
-//        }
+        val btnNotice: FloatingActionButton = findViewById(R.id.btnNotice)
 
         frmNotice.setOnClickListener {
             // Thay đổi màu nền của frmNotice
             changeBackgroundColor(frmNotice, "#D9D9D9", 150)
-
-            // Tạo và hiển thị hộp thoại AlertDialog
-            AlertDialog.Builder(this)
-                .setTitle("Unnoticed")
-                .setMessage("Do you want to toggle unnoticed status?")
-                .setPositiveButton("Yes") { dialog, which ->
-                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-                    if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
-                        val firestore = FirebaseFirestore.getInstance()
-                        firestore.collection("users").document(currentUserId).get()
-                            .addOnSuccessListener { document ->
-                                // Lấy danh sách người dùng bị "Unnoticed" từ Firestore
-                                val unnoticedUsers = document["Unnoticed"] as? List<String> ?: emptyList()
-                                val isAlreadyUnnoticed = unnoticedUsers.contains(chatUserId)
-
-                                // Lưu danh sách hiện tại vào SharedPreferences
-                                val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
-                                val editor = sharedPreferences.edit()
-                                editor.putString("UnnoticedUsers", Gson().toJson(unnoticedUsers))
-                                editor.apply()
-
-                                if (isAlreadyUnnoticed) {
-                                    // Nếu người dùng đã có trong danh sách "Unnoticed", xóa họ ra
-                                    firestore.collection("users").document(currentUserId)
-                                        .update("Unnoticed", FieldValue.arrayRemove(chatUserId))
-                                        .addOnSuccessListener {
-                                            Toast.makeText(this, "User removed from unnoticed list.", Toast.LENGTH_SHORT).show()
-
-                                            // Cập nhật lại SharedPreferences
-                                            val updatedList = unnoticedUsers.toMutableList()
-                                            updatedList.remove(chatUserId)
-                                            editor.putString("UnnoticedUsers", Gson().toJson(updatedList))
-                                            editor.apply()
-                                        }
-                                        .addOnFailureListener { e ->
-                                            Toast.makeText(this, "Failed to remove user: ${e.message}", Toast.LENGTH_SHORT).show()
-                                        }
-                                } else {
-                                    // Nếu người dùng chưa có trong danh sách "Unnoticed", thêm họ vào
-                                    firestore.collection("users").document(currentUserId)
-                                        .update("Unnoticed", FieldValue.arrayUnion(chatUserId))
-                                        .addOnSuccessListener {
-                                            Toast.makeText(this, "User added to unnoticed list.", Toast.LENGTH_SHORT).show()
-
-                                            // Cập nhật lại SharedPreferences
-                                            val updatedList = unnoticedUsers.toMutableList()
-                                            updatedList.add(chatUserId)
-                                            editor.putString("UnnoticedUsers", Gson().toJson(updatedList))
-                                            editor.apply()
-                                        }
-                                        .addOnFailureListener { e ->
-                                            Toast.makeText(this, "Failed to add user: ${e.message}", Toast.LENGTH_SHORT).show()
-                                        }
-                                }
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(this, "Failed to check unnoticed users: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
-                    } else {
-                        Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .setNegativeButton("No") { dialog, which ->
-                    // Đóng hộp thoại khi người dùng chọn "No"
-                    dialog.dismiss()
-                }
-                .show()
+            showUnnoticedDialog(chatUserId)
         }
 
+        btnNotice.setOnClickListener {
+            showUnnoticedDialog(chatUserId)
+        }
 
-//        frmNotice.setOnClickListener {
-//            // Thay đổi màu nền của frmNotice
-//            changeBackgroundColor(frmNotice, "#D9D9D9", 150)
-//
-//            // Tạo và hiển thị hộp thoại AlertDialog
-//            AlertDialog.Builder(this)
-//                .setTitle("Unnoticed")
-//                .setMessage("Do you want to toggle unnoticed status?")
-//                .setPositiveButton("Yes") { dialog, which ->
-//                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-//                    if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
-//                        val firestore = FirebaseFirestore.getInstance()
-//                        firestore.collection("users").document(currentUserId).get()
-//                            .addOnSuccessListener { document ->
-//                                // Lấy danh sách người dùng bị "Unnoticed" của người dùng hiện tại
-//                                val unnoticedUsers = document["Unnoticed"] as? List<String>
-//                                val isAlreadyUnnoticed = unnoticedUsers?.contains(chatUserId) ?: false
-//
-//                                if (isAlreadyUnnoticed) {
-//                                    // Nếu người dùng đã có trong danh sách "Unnoticed", xóa họ ra
-//                                    firestore.collection("users").document(currentUserId)
-//                                        .update("Unnoticed", FieldValue.arrayRemove(chatUserId))
-//                                        .addOnSuccessListener {
-//                                            Toast.makeText(this, "User removed from unnoticed list.", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                        .addOnFailureListener { e ->
-//                                            Toast.makeText(this, "Failed to remove user: ${e.message}", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                } else {
-//                                    // Nếu người dùng chưa có trong danh sách "Unnoticed", thêm họ vào
-//                                    firestore.collection("users").document(currentUserId)
-//                                        .update("Unnoticed", FieldValue.arrayUnion(chatUserId))
-//                                        .addOnSuccessListener {
-//                                            Toast.makeText(this, "User added to unnoticed list.", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                        .addOnFailureListener { e ->
-//                                            Toast.makeText(this, "Failed to add user: ${e.message}", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                }
-//                            }
-//                            .addOnFailureListener { e ->
-//                                Toast.makeText(this, "Failed to check unnoticed users: ${e.message}", Toast.LENGTH_SHORT).show()
-//                            }
-//                    } else {
-//                        Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//                .setNegativeButton("No") { dialog, which ->
-//                    // Đóng hộp thoại khi người dùng chọn "No"
-//                    dialog.dismiss()
-//                }
-//                .show()
-//        }
-//
 
         frmLink.setOnClickListener {
             changeBackgroundColor(frmLink, "#D9D9D9", 150)
@@ -442,101 +244,85 @@ class InforChat : HandleOnlineActivity() {
         view.postDelayed({ view.setBackgroundColor(currentColor) }, duration)
     }
 
-//    private fun fetchPinnedMessages() {
-//        // Lấy UID của người dùng hiện tại và người dùng mục tiêu
-//        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-//        val targetUserUid = intent.getStringExtra("uid") ?: return
-//
-//        // Truy cập vào nhánh PinnedMessages
-//        val isGroup = intent.getBooleanExtra("isGroup", false)
-//        val databaseRef = if (isGroup) {
-//            Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages")
-//        } else {
-//            Firebase.database.getReference("users").child(currentUserUid).child(targetUserUid).child("PinnedMessages")
-//        }
-//
-//        // Lắng nghe dữ liệu
-//        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val pinnedMessages = mutableListOf<Map<String, String>>()
-//
-//                // Lặp qua tất cả các tin nhắn ghim
-//                for (child in snapshot.children) {
-//                    val message = child.value as? Map<String, String>
-//                    if (message != null) {
-//                        pinnedMessages.add(message)
-//                    }
-//                }
-//
-//                // Chuyển dữ liệu tin nhắn ghim sang Intent và chuyển sang ListViewPinnedActivity
-//                val intent = Intent(this@InforChat, ListViewPinnedActivity::class.java)
-//                val bundle = Bundle()
-//                bundle.putSerializable("pinnedMessages", ArrayList(pinnedMessages)) // Chuyển đổi sang ArrayList vì Serializable yêu cầu
-//                intent.putExtras(bundle)
-//
-////                Toast.makeText(this@InforChat, ArrayList(pinnedMessages).toString(), Toast.LENGTH_LONG).show()
-//                startActivity(intent)
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                // Xử lý lỗi nếu có
-//                Toast.makeText(this@InforChat, "Không thể lấy dữ liệu.", Toast.LENGTH_SHORT).show()
-//            }
-//        })
-//    }
+    private fun showUnnoticedDialog(chatUserId: String?) {
+        // Tạo và hiển thị hộp thoại AlertDialog
+        AlertDialog.Builder(this)
+            .setTitle("Unnoticed")
+            .setMessage("Do you want to toggle unnoticed status?")
+            .setPositiveButton("Yes") { dialog, which ->
+                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+                if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
+                    val firestore = FirebaseFirestore.getInstance()
+                    firestore.collection("users").document(currentUserId).get()
+                        .addOnSuccessListener { document ->
+                            // Lấy danh sách người dùng bị "Unnoticed" từ Firestore
+                            val unnoticedUsers = document["Unnoticed"] as? List<String> ?: emptyList()
+                            val isAlreadyUnnoticed = unnoticedUsers.contains(chatUserId)
+
+                            // Lưu danh sách hiện tại vào SharedPreferences
+                            val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                            val editor = sharedPreferences.edit()
+                            editor.putString("UnnoticedUsers", Gson().toJson(unnoticedUsers))
+                            editor.apply()
+
+                            if (isAlreadyUnnoticed) {
+                                // Nếu người dùng đã có trong danh sách "Unnoticed", xóa họ ra
+                                firestore.collection("users").document(currentUserId)
+                                    .update("Unnoticed", FieldValue.arrayRemove(chatUserId))
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this, "User removed from unnoticed list.", Toast.LENGTH_SHORT).show()
+
+                                        // Cập nhật lại SharedPreferences
+                                        val updatedList = unnoticedUsers.toMutableList()
+                                        updatedList.remove(chatUserId)
+                                        editor.putString("UnnoticedUsers", Gson().toJson(updatedList))
+                                        editor.apply()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(this, "Failed to remove user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                // Nếu người dùng chưa có trong danh sách "Unnoticed", thêm họ vào
+                                firestore.collection("users").document(currentUserId)
+                                    .update("Unnoticed", FieldValue.arrayUnion(chatUserId))
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this, "User added to unnoticed list.", Toast.LENGTH_SHORT).show()
+
+                                        // Cập nhật lại SharedPreferences
+                                        val updatedList = unnoticedUsers.toMutableList()
+                                        updatedList.add(chatUserId)
+                                        editor.putString("UnnoticedUsers", Gson().toJson(updatedList))
+                                        editor.apply()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(this, "Failed to add user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Failed to check unnoticed users: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("No") { dialog, which ->
+                // Đóng hộp thoại khi người dùng chọn "No"
+                dialog.dismiss()
+            }
+            .show()
+    }
+
 
     private fun fetchPinnedMessages() {
         // Lấy UID của người dùng hiện tại và người dùng mục tiêu
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val targetUserUid = intent.getStringExtra("uid") ?: return
 
-        // Tham chiếu đến database
-        val database = Firebase.database
-        val groupRef = database.getReference("groups")
-            .child(targetUserUid)
-            .child("PinnedMessages")
+        val intent = Intent(this@InforChat, ListViewPinnedActivity::class.java)
+        intent.putExtra("currentUserUid", currentUserUid)
+        intent.putExtra("targetUserUid", targetUserUid)
+        startActivity(intent)
 
-        groupRef.get().addOnCompleteListener { groupTask ->
-            val databaseRef = if (groupTask.isSuccessful && groupTask.result.exists()) {
-                // Nếu tồn tại trong "groups"
-                groupRef
-            } else {
-                // Nếu không tồn tại trong "groups", sử dụng "users"
-                database.getReference("users")
-                    .child(currentUserUid)
-                    .child(targetUserUid)
-                    .child("PinnedMessages")
-            }
-
-            // Lắng nghe dữ liệu từ databaseRef
-            databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val pinnedMessages = mutableListOf<Map<String, String>>()
-
-                    // Lặp qua tất cả các tin nhắn ghim
-                    for (child in snapshot.children) {
-                        val message = child.value as? Map<String, String>
-                        if (message != null) {
-                            pinnedMessages.add(message)
-                        }
-                    }
-
-                    // Chuyển dữ liệu tin nhắn ghim sang Intent và chuyển sang ListViewPinnedActivity
-                    val intent = Intent(this@InforChat, ListViewPinnedActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putSerializable("pinnedMessages", ArrayList(pinnedMessages)) // Chuyển đổi sang ArrayList vì Serializable yêu cầu
-                    intent.putExtras(bundle)
-
-                    startActivity(intent)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    // Xử lý lỗi nếu có
-                    Toast.makeText(this@InforChat, "Không thể lấy dữ liệu.", Toast.LENGTH_SHORT).show()
-                }
-            })
-        }
     }
-
-
 }

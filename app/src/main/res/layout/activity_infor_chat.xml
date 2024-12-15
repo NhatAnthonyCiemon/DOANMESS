@@ -14,21 +14,21 @@
       android:layout_height="wrap_content"
       android:layout_below="@+id/imgView"
       android:layout_centerInParent="true"
-      android:layout_marginTop="10dp"
+      android:layout_marginTop="25dp"
       android:text="Full name"
       android:textAlignment="center"
-      android:textSize="35sp"
+      android:textSize="40sp"
       android:textStyle="bold"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent" />
 
   <com.google.android.material.imageview.ShapeableImageView
       android:id="@+id/imgView"
-      android:layout_width="100dp"
-      android:layout_height="100dp"
+      android:layout_width="150dp"
+      android:layout_height="150dp"
       android:layout_alignParentTop="true"
       android:layout_centerInParent="true"
-      android:layout_marginTop="20dp"
+      android:layout_marginTop="85dp"
       android:scaleType="centerCrop"
       android:src="@drawable/ic_launcher_background"
       app:layout_constraintStart_toStartOf="parent"
@@ -42,7 +42,7 @@
       android:layout_width="match_parent"
       android:layout_height="60dp"
       android:layout_below="@id/txtName"
-      android:layout_marginTop="10dp">
+      android:layout_marginTop="25dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -104,7 +104,7 @@
       android:layout_below="@+id/navBar"
       android:layout_alignParentStart="true"
       android:layout_centerInParent="true"
-      android:layout_marginTop="35dp"
+      android:layout_marginTop="40dp"
       android:orientation="vertical">
 
     <TextView
@@ -162,7 +162,7 @@
           android:layout_height="match_parent"
           android:layout_marginLeft="80dp"
           android:gravity="center_vertical"
-          android:text="View files and link"
+          android:text="View pinned message"
           android:textSize="25dp" />
 
     </FrameLayout>
@@ -176,7 +176,7 @@
       android:layout_below="@+id/anotherOption"
       android:layout_alignParentStart="true"
       android:layout_centerInParent="true"
-      android:layout_marginTop="35dp"
+      android:layout_marginTop="40dp"
       android:orientation="vertical">
 
     <TextView

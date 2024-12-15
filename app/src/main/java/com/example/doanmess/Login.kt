@@ -59,6 +59,7 @@ class Login : AppCompatActivity() {
                         if (task.isSuccessful) {
                             val user = auth.currentUser
                             if (user != null && user.isEmailVerified) {
+//                            if (user != null) {
                                 Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
                                 val intent = Intent(this, Home::class.java)
                                 val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
