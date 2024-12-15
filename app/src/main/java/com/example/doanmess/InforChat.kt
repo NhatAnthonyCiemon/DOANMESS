@@ -191,7 +191,12 @@ class InforChat : HandleOnlineActivity() {
                     // Đóng hộp thoại khi người dùng chọn "Không"
                     dialog.dismiss()
                 }
+                .create().apply {
+                    // Thiết lập background cho dialog
+                    window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
+                }
                 .show()
+
         }
         frmBlock.setOnClickListener {
             changeBackgroundColor(frmBlock, "#D9D9D9", 150)
@@ -213,6 +218,10 @@ class InforChat : HandleOnlineActivity() {
                                 .setMessage("You have been blocked by this user.")
                                 .setPositiveButton("OK") { dialog, which ->
                                     dialog.dismiss()
+                                }
+                                .create().apply {
+                                    // Thiết lập background cho dialog
+                                    window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
                                 }
                                 .show()
                             return@addOnSuccessListener
@@ -241,6 +250,10 @@ class InforChat : HandleOnlineActivity() {
                                         .setNegativeButton("No") { dialog, which ->
                                             dialog.dismiss()
                                         }
+                                        .create().apply {
+                                            // Thiết lập background cho dialog
+                                            window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
+                                        }
                                         .show()
                                 } else {
                                     AlertDialog.Builder(this)
@@ -258,6 +271,10 @@ class InforChat : HandleOnlineActivity() {
                                         }
                                         .setNegativeButton("No") { dialog, which ->
                                             dialog.dismiss()
+                                        }
+                                        .create().apply {
+                                            // Thiết lập background cho dialog
+                                            window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
                                         }
                                         .show()
                                 }
@@ -285,6 +302,10 @@ class InforChat : HandleOnlineActivity() {
                 .setNegativeButton("No") { dialog, which ->
                     // Đóng hộp thoại khi người dùng chọn "Không"
                     dialog.dismiss()
+                }
+                .create().apply {
+                    // Thiết lập background cho dialog
+                    window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
                 }
                 .show()
         }
@@ -365,6 +386,10 @@ class InforChat : HandleOnlineActivity() {
             .setNegativeButton("No") { dialog, which ->
                 // Đóng hộp thoại khi người dùng chọn "No"
                 dialog.dismiss()
+            }
+            .create().apply {
+                // Thiết lập background cho dialog
+                window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
             }
             .show()
     }

@@ -98,6 +98,10 @@ class ListViewPinnedActivity : AppCompatActivity() {
             .setNegativeButton("Không") { dialog, which ->
                 dialog.dismiss()
             }
+            .create().apply {
+                // Thiết lập background cho dialog
+                window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
+            }
             .show()
     }
 
