@@ -342,6 +342,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             // Navigate to user info activity
             val intent = Intent(this, InforChat::class.java)
             intent.putExtra("uid", targetUserUid) // Pass the uid to InforChat
+            intent.putExtra("isGroup", isGroup)
             startActivity(intent)
         }
 
@@ -350,6 +351,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             // Navigate to user info activity
             val intent = Intent(this, InforChat::class.java)
             intent.putExtra("uid", targetUserUid) // Pass the uid to InforChat
+            intent.putExtra("isGroup", isGroup)
             startActivity(intent)
         }
         recyclerViewMessages.addOnLayoutChangeListener(View.OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->

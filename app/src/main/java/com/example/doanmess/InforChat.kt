@@ -47,6 +47,50 @@ class InforChat : HandleOnlineActivity() {
         }
 
         val chatUserId = intent.getStringExtra("uid") // Retrieve the uid from the intent
+        val isGroup = intent.getBooleanExtra("isGroup", false)
+
+        val btnCall = findViewById<FloatingActionButton>(R.id.btnCall)
+        val btnVideo = findViewById<FloatingActionButton>(R.id.btnVideo)
+
+        btnCall.setOnClickListener {
+            var intent = Intent(this, Call::class.java)
+            if(isGroup){
+                intent = Intent(this, CallGroup::class.java)
+                intent.putExtra("groupId", chatUserId)
+            }
+            else{
+                intent.putExtra("friendId", chatUserId)
+            }
+            intent.putExtra("call", true)
+            intent.putExtra("isVideoCall", false)
+            startActivity(intent)
+            if(isGroup){
+                MessageController().callVoiceGroup(chatUserId!!, FirebaseAuth.getInstance().currentUser?.uid!!)
+            }
+            else {
+                MessageController().callVoiceFriend(chatUserId!!, FirebaseAuth.getInstance().currentUser?.uid!!)
+            }
+        }
+        btnVideo.setOnClickListener {
+            var intent = Intent(this, Call::class.java)
+            if(isGroup){
+                intent = Intent(this, CallGroup::class.java)
+                intent.putExtra("groupId", chatUserId)
+            }
+            else{
+                intent.putExtra("friendId", chatUserId)
+            }
+            intent.putExtra("call", true)
+            intent.putExtra("isVideoCall", true)
+            startActivity(intent)
+            if(isGroup){
+                MessageController().callVideoGroup(chatUserId!!, FirebaseAuth.getInstance().currentUser?.uid!!)
+            }
+            else {
+                MessageController().callVideoFriend(chatUserId!!, FirebaseAuth.getInstance().currentUser?.uid!!)
+            }
+        }
+
 
         val imgView = findViewById<ImageView>(R.id.imgView) // Avatar ImageView
         val txtName = findViewById<TextView>(R.id.txtName) // Name TextView
