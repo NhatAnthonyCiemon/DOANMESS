@@ -2,42 +2,30 @@ package com.example.doanmess
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues.TAG
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TimePicker
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.common.reflect.TypeToken
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.firestoreSettings
-import com.google.gson.Gson
 
 class AllChatFra : Fragment() {
     private var list: MutableList<DataMess> = mutableListOf()
@@ -155,13 +143,13 @@ class AllChatFra : Fragment() {
                                                         this.name = name
                                                         this.message = if (!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
                                                         this.timestamp = timestamp!!
-                                                        this.status = status!!
+                                                        this.status = status
                                                     }
                                                 } else {
                                                     if (listOff.contains(recvId.toString())) {
-                                                        list.add(DataMess(avatar, recvId.toString(), name, content.toString(), timestamp!!, status!!, false, false))
+                                                        list.add(DataMess(avatar, recvId.toString(), name, content.toString(), timestamp!!, status, false, false))
                                                     } else {
-                                                        list.add(DataMess(avatar, recvId.toString(), name, content.toString(), timestamp!!, status!!, false, true))
+                                                        list.add(DataMess(avatar, recvId.toString(), name, content.toString(), timestamp!!, status, false, true))
                                                     }
                                                 }
                                                 list.sortByDescending { it.timestamp }
@@ -189,13 +177,13 @@ class AllChatFra : Fragment() {
                                                         this.name = name
                                                         this.message = if (!othersend) "Bạn: ${content.toString()}" else last_name + ": ${content.toString()}"
                                                         this.timestamp = timestamp!!
-                                                        this.status = status!!
+                                                        this.status = status
                                                     }
                                                 } else {
                                                     if (listOff.contains(sendId.toString())) {
-                                                        list.add(DataMess(avatar, sendId.toString(), name, content.toString(), timestamp!!, status!!, true, false))
+                                                        list.add(DataMess(avatar, sendId.toString(), name, content.toString(), timestamp!!, status, true, false))
                                                     } else {
-                                                        list.add(DataMess(avatar, sendId!!, name, content.toString(), timestamp!!, status!!, true, true))
+                                                        list.add(DataMess(avatar, sendId, name, content.toString(), timestamp!!, status, true, true))
                                                     }
                                                 }
                                                 list.sortByDescending { it.timestamp }
@@ -245,13 +233,13 @@ class AllChatFra : Fragment() {
                                         existingItem.apply {
                                             this.message = "Bạn: ${content.toString()}"
                                             this.timestamp = timestamp!!
-                                            this.status = status!!
+                                            this.status = status
                                         }
                                     } else {
                                         if (listOff.contains(childSnapshot.key.toString())) {
-                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString(), false))
+                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status, "Bạn", myGroup[childSnapshot.key.toString()].toString(), false))
                                         } else {
-                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status!!, "Bạn", myGroup[childSnapshot.key.toString()].toString(), true))
+                                            list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key!!, myGroup[childSnapshot.key.toString()].toString(), content.toString(), timestamp!!, status, "Bạn", myGroup[childSnapshot.key.toString()].toString(), true))
                                         }
                                     }
                                     list.sortByDescending { it.timestamp }
@@ -267,14 +255,14 @@ class AllChatFra : Fragment() {
                                                     existingItem.apply {
                                                         this.message = "$name: ${content.toString()}"
                                                         this.timestamp = timestamp!!
-                                                        this.status = status!!
+                                                        this.status = status
                                                         this.last_name = name
                                                     }
                                                 } else {
                                                     if (listOff.contains(childSnapshot.key.toString())) {
-                                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key.toString(), name, content.toString(), timestamp!!, status!!, name, myGroup[childSnapshot.key.toString()].toString(), false))
+                                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key.toString(), name, content.toString(), timestamp!!, status, name, myGroup[childSnapshot.key.toString()].toString(), false))
                                                     } else {
-                                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key.toString(), name, content.toString(), timestamp!!, status!!, name, myGroup[childSnapshot.key.toString()].toString(), true))
+                                                        list.add(DataMessGroup(avatarList[childSnapshot.key.toString()].toString(), childSnapshot.key.toString(), name, content.toString(), timestamp!!, status, name, myGroup[childSnapshot.key.toString()].toString(), true))
                                                     }
                                                 }
                                                 list.sortByDescending { it.timestamp }
@@ -410,29 +398,7 @@ class AllChatFra : Fragment() {
         //fadeOutAndHide(view)
         return view
     }
-    private fun fadeOutAndHide(view: View) {
-        val fadeOut = AlphaAnimation(1.0f, 0.0f)
-        fadeOut.duration = 600
-        fadeOut.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
 
-            override fun onAnimationEnd(animation: Animation) {
-                view.visibility = View.GONE
-
-                // Delay for 0.25 seconds before making the view visible again
-                Handler(Looper.getMainLooper()).postDelayed({
-                    view.visibility = View.VISIBLE
-                }, 600)
-            }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
-        view.startAnimation(fadeOut)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-    }
 
     override fun onResume() {
         super.onResume()
@@ -471,6 +437,7 @@ class AllChatFra : Fragment() {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (!snapshot.exists()) {
                             idMess.remove(item.key)
+                            idMess[item.key] = false
                             //list.removeAt(list.indexOfFirst { it.uid == item.key })
                             //lấy vị trí của item trong list và xóa nó sau đó cập nhật lại adapter
                             val index = list.indexOfFirst { it.uid == item.key }
@@ -479,6 +446,7 @@ class AllChatFra : Fragment() {
                                 adapter.notifyItemRemoved(index)
                                 adapter.notifyItemRangeChanged(index, list.size)
                             }
+                            //Toast.makeText(atvtContext, "User ${item.key} đã bị xóa", Toast.LENGTH_SHORT).show()
                         }
                     }
                     override fun onCancelled(error: DatabaseError) {
@@ -527,6 +495,10 @@ class AllChatFra : Fragment() {
         //val deepCopiedList: MutableList<String> = originalList.map { it }.toMutableList()
         copiedList = listOff.map{it}.toMutableList()
         writeToSQL()
+        idMess.clear()
+        list.forEach {
+            idMess[it.uid] = if (it.isGroup) true else false
+        }
     }
 
     fun writeToSQL() {
