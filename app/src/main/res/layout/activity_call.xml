@@ -148,7 +148,7 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/acceptBtnCard"
             android:layout_width="wrap_content"
-            android:layout_marginRight="80dp"
+            android:layout_marginRight="50dp"
             app:cardCornerRadius="50dp"
             app:cardBackgroundColor="#ffffff"
             android:padding="100dp"
@@ -156,9 +156,9 @@
 
             <ImageView
                 android:id="@+id/acceptBtn"
-                android:layout_width="80dp"
+                android:layout_width="50dp"
                 android:layout_margin="10dp"
-                android:layout_height="80dp"
+                android:layout_height="50dp"
 
 
                 android:src="@drawable/ic_baseline_call_24" />
@@ -173,8 +173,8 @@
 
             <ImageView
                 android:id="@+id/rejectBtn"
-                android:layout_width="76dp"
-                android:layout_height="69dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_alignParentEnd="true"
                 android:layout_margin="10dp"
 
@@ -191,8 +191,8 @@
 
             <ImageView
                 android:id="@+id/endCallBtn"
-                android:layout_width="76dp"
-                android:layout_height="69dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_alignParentEnd="true"
                 android:layout_margin="10dp"
 
