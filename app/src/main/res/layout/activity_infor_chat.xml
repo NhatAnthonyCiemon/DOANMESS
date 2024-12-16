@@ -141,7 +141,7 @@
           android:id="@+id/frmNotice"
           android:layout_width="match_parent"
           android:layout_height="40dp"
-          android:layout_marginTop="20dp">
+          android:layout_marginTop="25dp">
 
         <ImageView
             android:id="@+id/imgNotice"
@@ -165,7 +165,7 @@
           android:id="@+id/frmLink"
           android:layout_width="match_parent"
           android:layout_height="40dp"
-          android:layout_marginTop="15dp">
+          android:layout_marginTop="20dp">
 
         <ImageView
             android:id="@+id/imgeLink"
@@ -194,7 +194,7 @@
         android:layout_below="@+id/anotherOption"
         android:layout_alignParentStart="true"
         android:layout_centerInParent="true"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="30dp"
         android:orientation="vertical">
 
       <TextView
@@ -209,7 +209,7 @@
           android:id="@+id/frmLimit"
           android:layout_width="match_parent"
           android:layout_height="40dp"
-          android:layout_marginTop="20dp">
+          android:layout_marginTop="25dp">
 
         <ImageView
             android:id="@+id/imgLimit"
@@ -233,7 +233,7 @@
           android:id="@+id/frmBlock"
           android:layout_width="match_parent"
           android:layout_height="40dp"
-          android:layout_marginTop="15dp">
+          android:layout_marginTop="20dp">
 
         <ImageView
             android:id="@+id/imgBlock"
@@ -257,7 +257,7 @@
           android:id="@+id/frmTrash"
           android:layout_width="match_parent"
           android:layout_height="40dp"
-          android:layout_marginTop="10dp">
+          android:layout_marginTop="20dp">
 
         <ImageView
             android:id="@+id/imgTrash"
@@ -285,7 +285,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="50dp"
         android:scaleType="fitCenter"
         app:srcCompat="@drawable/arrow_back" />
   </RelativeLayout>
