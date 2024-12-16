@@ -6,12 +6,31 @@
     android:id="@+id/main"
     android:layout_height="match_parent"
     tools:context=".InforChat">
-
   <RelativeLayout
-
-      android:padding="10dp"
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+      <ImageView
+          android:id="@+id/imageView7"
+          android:layout_width="wrap_content"
+          android:layout_height="55dp"
+          android:layout_gravity="center_horizontal"
+          android:scaleX="2"
+          app:srcCompat="@drawable/top2" />
+
+      <ImageView
+          android:id="@+id/imageView4"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal"
+          android:scaleX="1.2"
+          app:srcCompat="@drawable/top" />
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/txtName"
@@ -100,6 +119,7 @@
     </FrameLayout>
 
     <LinearLayout
+        android:padding="10dp"
         android:id="@+id/anotherOption"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -168,6 +188,7 @@
 
     <LinearLayout
         android:id="@+id/support"
+        android:padding="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/anotherOption"

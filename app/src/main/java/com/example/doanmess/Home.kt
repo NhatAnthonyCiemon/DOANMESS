@@ -64,10 +64,7 @@ class Home : HandleOnlineActivity() {
         val currentLanguage = sharedPreferences?.getString("language", Locale.getDefault().language) ?: Locale.getDefault().language
 
         // Đặt lại ngôn ngữ khi ứng dụng khởi động
-        if (check) {
-            setLocale(currentLanguage)
-            check= false
-        }
+        setLocale(currentLanguage)
 
 
 
