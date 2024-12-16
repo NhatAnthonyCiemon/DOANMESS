@@ -194,6 +194,20 @@ class inforFragment : Fragment() {
         loadUserData()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        // Kiểm tra nếu view không null
+        view?.let {
+            val requestNumbers = it.findViewById<TextView>(R.id.txtNumberRequest)
+            val blockNumbers = it.findViewById<TextView>(R.id.txtNumberBlock)
+            val friendsNumber = it.findViewById<TextView>(R.id.txtFriendList)
+            loadUserData(requestNumbers, blockNumbers, friendsNumber)
+        }
+    }
+
+
+
     private fun loadUserData(requestNumbers: TextView, blockNumbers: TextView, friendsNumber: TextView) {
         val userDocRef = firestore.collection("users").document(userId)
 
@@ -276,7 +290,6 @@ class inforFragment : Fragment() {
             .show()
     }
 
-
     private fun changeAvata() {
         // Gọi ImagePicker để chọn hình ảnh
         ImagePicker.with(this)
@@ -287,12 +300,14 @@ class inforFragment : Fragment() {
 
 
     }
+
     private fun chooseMedia(){
         // Chọn hình ảnh hoặc video từ thư viện
         ImagePicker.with(this)
             .galleryOnly()
             .createIntent { intent -> imagePickerLauncher.launch(intent) }
     }
+
     private fun changeBackgroundColor(view: View, color: String, duration: Long) {
         val background = view.background
         val currentColor = if (background is ColorDrawable) background.color else Color.TRANSPARENT
