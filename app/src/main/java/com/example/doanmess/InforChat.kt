@@ -191,7 +191,6 @@ class InforChat : HandleOnlineActivity() {
                     window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
                 }
                 .show()
-
         }
         frmBlock.setOnClickListener {
             changeBackgroundColor(frmBlock, "#D9D9D9", 150)

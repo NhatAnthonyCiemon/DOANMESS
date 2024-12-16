@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -38,15 +39,30 @@ class LanguageSelectionActivity : AppCompatActivity() {
         // Xử lý khi người dùng chọn ngôn ngữ
         listView.setOnItemClickListener { _, _, position, _ ->
             val selectedLanguage = languages[position].first
-            editor.putString("language", selectedLanguage).apply()
+            AlertDialog.Builder(this)
+                .setTitle("Change Language")
+                .setMessage("Do you want to switch to ${languages[position].second}?")
+                .setPositiveButton("Yes") { dialog, which ->
+                    // Người dùng đồng ý thay đổi ngôn ngữ
+                    editor.putString("language", selectedLanguage).apply()
 
-            // Cập nhật ngôn ngữ
-            setLocale(selectedLanguage)
+                    // Cập nhật ngôn ngữ
+                    setLocale(selectedLanguage)
 
-            // Làm mới lại Activity chính
-            val intent = Intent(this, Home::class.java)
-            startActivity(intent)
-            finish()
+                    // Làm mới lại Activity chính
+                    val intent = Intent(this, Home::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+                .setNegativeButton("No") { dialog, which ->
+                    // Đóng hộp thoại nếu người dùng không đồng ý
+                    dialog.dismiss()
+                }
+                .create().apply {
+                    // Thiết lập background cho dialog (nếu có)
+                    window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
+                }
+                .show()
         }
 
         btnBack.setOnClickListener {
