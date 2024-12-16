@@ -65,4 +65,5 @@
     <string name="You">Bạn</string>
     <string name="ChangeLanguage">Thay đổi ngôn ngữ</string>
     <string name="PinnedMessages">Tin nhắn đã ghim</string>
+    <string name="Language">Ngôn ngữ</string>
 </resources>

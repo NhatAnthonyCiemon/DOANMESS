@@ -140,24 +140,7 @@ class inforFragment : Fragment() {
         }
 
         changeLanguage.setOnClickListener {
-            // Lấy ngôn ngữ hiện tại
-
-            val currentLanguage = sharedPreferences?.getString("language", Locale.getDefault().language) ?: Locale.getDefault().language
-
-            // Kiểm tra nếu đang là tiếng Việt thì đổi sang tiếng Anh, ngược lại đổi sang tiếng Việt
-            if (currentLanguage == "vi") {
-                setLocale("en") // Đổi sang tiếng Anh
-                // Lưu ngôn ngữ đã chọn
-                sharedPreferences?.edit()?.putString("language", "en")?.apply()
-            } else {
-                setLocale("vi") // Đổi sang tiếng Việt
-                // Lưu ngôn ngữ đã chọn
-                sharedPreferences?.edit()?.putString("language", "vi")?.apply()
-            }
-
-            // Làm mới lại Activity để áp dụng ngôn ngữ mới
-            val intent = activity?.intent
-            activity?.finish()
+            val intent = Intent(activity, LanguageSelectionActivity::class.java)
             startActivity(intent)
         }
 
