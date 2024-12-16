@@ -203,8 +203,8 @@ class InforChat : HandleOnlineActivity() {
                 // Kiểm tra nếu currentUserId nằm trong Blocks của chatUserId
                 firestore.collection("users").document(chatUserId).get()
                     .addOnSuccessListener { document ->
-                        val blockedUsers = document["Blocks"] as? List<Map<String, Any>>
-                        val isBlockedByChatUser = blockedUsers?.any { it["uid"] == currentUserId } ?: false
+                        val blockedUsers = document["Blocks"] as? List<String>
+                        val isBlockedByChatUser = blockedUsers?.contains(currentUserId) ?: false
 
                         if (isBlockedByChatUser) {
                             AlertDialog.Builder(this)
@@ -224,8 +224,8 @@ class InforChat : HandleOnlineActivity() {
                         // Nếu không bị block bởi chatUserId, tiếp tục xử lý kiểm tra block/unblock
                         firestore.collection("users").document(currentUserId).get()
                             .addOnSuccessListener { userDocument ->
-                                val currentUserBlockedUsers = userDocument["Blocks"] as? List<Map<String, Any>>
-                                val isAlreadyBlocked = currentUserBlockedUsers?.any { it["uid"] == chatUserId } ?: false
+                                val currentUserBlockedUsers = userDocument["Blocks"] as? List<String>
+                                val isAlreadyBlocked = currentUserBlockedUsers?.contains(chatUserId) ?: false
 
                                 if (isAlreadyBlocked) {
                                     AlertDialog.Builder(this)
@@ -233,7 +233,7 @@ class InforChat : HandleOnlineActivity() {
                                         .setMessage("Do you want to unblock?")
                                         .setPositiveButton("Yes") { dialog, which ->
                                             firestore.collection("users").document(currentUserId)
-                                                .update("Blocks", FieldValue.arrayRemove(mapOf("uid" to chatUserId)))
+                                                .update("Blocks", FieldValue.arrayRemove(chatUserId))
                                                 .addOnSuccessListener {
                                                     Toast.makeText(this, "User unblocked successfully.", Toast.LENGTH_SHORT).show()
                                                 }
@@ -255,7 +255,7 @@ class InforChat : HandleOnlineActivity() {
                                         .setMessage("Do you want to block?")
                                         .setPositiveButton("Yes") { dialog, which ->
                                             firestore.collection("users").document(currentUserId)
-                                                .update("Blocks", FieldValue.arrayUnion(mapOf("uid" to chatUserId)))
+                                                .update("Blocks", FieldValue.arrayUnion(chatUserId))
                                                 .addOnSuccessListener {
                                                     Toast.makeText(this, "User blocked successfully.", Toast.LENGTH_SHORT).show()
                                                 }
@@ -282,7 +282,6 @@ class InforChat : HandleOnlineActivity() {
                     }
             }
         }
-
 
         frmTrash.setOnClickListener {
             changeBackgroundColor(frmTrash, "#D9D9D9", 150)
