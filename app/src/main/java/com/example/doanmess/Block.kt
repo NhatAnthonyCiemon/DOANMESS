@@ -48,12 +48,12 @@ class Block : HandleOnlineActivity() {
             .addOnSuccessListener { document ->
                 blockLists.clear()
                 if (document.exists()) {
-                    val blockedUsers = document["Blocks"] as? List<Map<String, Any>>
+                    val blockedUsers = document["Blocks"] as? List<String>
                     if (blockedUsers.isNullOrEmpty()) {
                         Log.d("Block", "No blocked users found")
                     } else {
                         for (blockedUser in blockedUsers) {
-                            val uid = blockedUser["uid"] as? String ?: continue
+                            val uid = blockedUser as? String ?: continue
                             fetchUserDetails(uid)
                         }
                     }
