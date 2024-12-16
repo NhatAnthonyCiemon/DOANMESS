@@ -21,6 +21,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.bumptech.glide.Glide
@@ -253,9 +254,28 @@ class inforFragment : Fragment() {
     }
 
     private fun toggleDarkMode(txtMode: TextView) {
-        txtMode.text = if (txtMode.text.toString() == "Off") "On" else "Off"
-        saveDarkMode(txtMode.text.toString())
+        val currentMode = txtMode.text.toString()
+
+        // Tạo hộp thoại xác nhận
+        AlertDialog.Builder(requireContext())
+            .setTitle("Dark Mode")
+            .setMessage("Do you want to turn ${if (currentMode == "Off") "On" else "Off"} Dark Mode?")
+            .setPositiveButton("Yes") { _, _ ->
+                // Thay đổi chế độ Dark Mode
+                txtMode.text = if (currentMode == "Off") "On" else "Off"
+                saveDarkMode(txtMode.text.toString())
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                // Đóng hộp thoại
+                dialog.dismiss()
+            }
+            .create().apply {
+                // Thiết lập background cho dialog (tùy chọn)
+                window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
+            }
+            .show()
     }
+
 
     private fun changeAvata() {
         // Gọi ImagePicker để chọn hình ảnh
