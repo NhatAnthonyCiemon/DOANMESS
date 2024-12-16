@@ -2,6 +2,7 @@ package com.example.doanmess
 
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
@@ -78,7 +79,7 @@ class ListViewPinnedActivity : AppCompatActivity() {
             })
         }
 
-        val imgBack = findViewById<ImageView>(R.id.imgBack)
+        val imgBack = findViewById<Button>(R.id.imgBack)
         imgBack.setOnClickListener {
             finish() // Close the current activity and go back to the previous one
         }
