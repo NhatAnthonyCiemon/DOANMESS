@@ -844,12 +844,16 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         val mimeType = contentResolver.getType(fileUri)
         Log.d("MainChat", "MIME type: $mimeType")
         val storageRef = storage.reference.child("media/${UUID.randomUUID()}")
+
         val uploadTask = if (mimeType?.startsWith("image/") == true || takePicture == true) {
+            Toast.makeText(this, "Uploading image...", Toast.LENGTH_LONG).show()
             val compressedImage = compressImage(fileUri, this)
             storageRef.putBytes(compressedImage)
         } else {
+            sendSkeletonMess("video")
             storageRef.putFile(fileUri)
         }
+
         uploadTask.addOnSuccessListener {
             storageRef.downloadUrl.addOnSuccessListener { uri ->
                 val downloadUrl = uri.toString()

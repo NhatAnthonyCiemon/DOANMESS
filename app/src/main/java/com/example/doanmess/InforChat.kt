@@ -93,11 +93,26 @@ class InforChat : HandleOnlineActivity() {
         }
         var avatarUrl : String ="";
         btnInfo.setOnClickListener{
-            val intent = Intent(this, IndividualPost::class.java)
-            intent.putExtra("current", FirebaseAuth.getInstance().currentUser?.uid)
-            intent.putExtra("target", chatUserId)
-            intent.putExtra("avatar", avatarUrl)
-            startActivity(intent)
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+            if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
+                val firestore = FirebaseFirestore.getInstance()
+                firestore.collection("users").document(currentUserId).get().addOnSuccessListener { document ->
+                    val friends = document["Friends"] as? List<String> ?: emptyList()
+                    if (friends.contains(chatUserId) || chatUserId == currentUserId) {
+                        val intent = Intent(this, IndividualPost::class.java)
+                        intent.putExtra("current", currentUserId)
+                        intent.putExtra("target", chatUserId)
+                        intent.putExtra("avatar", avatarUrl)
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this, "This user is not your friend.", Toast.LENGTH_SHORT).show()
+                    }
+                }.addOnFailureListener { e ->
+                    Toast.makeText(this, "Failed to check friends: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
+            }
         }
         val imgView = findViewById<ImageView>(R.id.imgView) // Avatar ImageView
         val txtName = findViewById<TextView>(R.id.txtName) // Name TextView
@@ -105,7 +120,6 @@ class InforChat : HandleOnlineActivity() {
 
         if (!chatUserId.isNullOrEmpty()) {
             val firestore = FirebaseFirestore.getInstance()
-
             // Tìm trong collection "users"
             firestore.collection("users").document(chatUserId).get()
                 .addOnSuccessListener { document ->
@@ -113,7 +127,6 @@ class InforChat : HandleOnlineActivity() {
                         // Lấy thông tin từ "users"
                         avatarUrl = document.getString("Avatar")!!
                         val name = document.getString("Name")
-
                         // Hiển thị thông tin
                         txtName.text = name ?: "User"
                         if (!avatarUrl.isNullOrEmpty()) {

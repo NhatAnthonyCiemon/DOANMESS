@@ -291,10 +291,10 @@ class AllChatFra : Fragment() {
 
     private fun changeContent(content: String?, type: String?): String? {
         return when (type) {
-            "image" -> "Đã gửi một ảnh"
-            "video" -> "Đã gửi một video"
-            "location" -> "Đã gửi một vị trí"
-            "audio" -> "Đã gửi một tin nhắn thoại"
+            "image" -> atvtContext.getString(R.string.Image)
+            "video" -> atvtContext.getString(R.string.Video)
+            "location" -> atvtContext.getString(R.string.Image)
+            "audio" -> atvtContext.getString(R.string.Location)
             else -> content
         }
     }
