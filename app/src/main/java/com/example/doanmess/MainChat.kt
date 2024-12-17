@@ -1185,9 +1185,52 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         val deleteButton: Button = dialogView.findViewById(R.id.delete_button)
         val cancelButton: Button = dialogView.findViewById(R.id.cancel_button)
 
-        // Set the text for the "Pin/Unpin" button
-        pinButton.text = if (message.pinned) "Bỏ ghim" else "Ghim"
 
+        if(isGroup){
+            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(message.chatId)
+                .child("Pinned").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.exists()){
+                        val isPinned = snapshot.getValue(Boolean::class.java) ?: false
+                        if(isPinned){
+                            pinButton.text = getString(R.string.unpin)
+                        }
+                        else {
+                            pinButton.text = getString(R.string.pin)
+                        }
+                    }
+                    else {
+                        pinButton.text = getString(R.string.pin)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle possible errors.
+                }
+            })
+        }
+        else{
+            Firebase.database.getReference("users").child(currentUserUid)
+                .child(targetUserUid).child("Messages").child(message.chatId).child("Pinned")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val isPinned = snapshot.getValue(Boolean::class.java) ?: false
+                            if (isPinned) {
+                                pinButton.text = getString(R.string.unpin)
+                            } else {
+                                pinButton.text = getString(R.string.pin)
+                            }
+                        } else {
+                            pinButton.text = getString(R.string.pin)
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle possible errors.
+                    }
+                })
+        }
         // Create the dialog
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
@@ -1245,11 +1288,11 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         "Name" to name,
                     )
                     Firebase.database.getReference("users").child(currentUserUid)
-                        .child(targetUserUid).child("PinnedMessages").push()
+                        .child(targetUserUid).child("PinnedMessages").child(messageId)
                         .setValue(newMessage)
 
                     Firebase.database.getReference("users").child(targetUserUid)
-                        .child(currentUserUid).child("PinnedMessages").push()
+                        .child(currentUserUid).child("PinnedMessages").child(messageId)
                         .setValue(newMessage)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1267,7 +1310,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         "Content" to message.content,
                         "Name" to name,
                     )
-                    Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").push()
+                    Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").child(messageId)
                         .setValue(newMessage)
                 } catch (e: Exception) {
                     e.printStackTrace()

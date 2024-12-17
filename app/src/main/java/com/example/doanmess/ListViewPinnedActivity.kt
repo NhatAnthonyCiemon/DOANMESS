@@ -17,8 +17,9 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
 class ListViewPinnedActivity : AppCompatActivity() {
-
+    val idMess = mutableListOf<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_view_pinned)
         val currentUserUid = intent.getStringExtra("currentUserUid") ?: return
@@ -47,10 +48,12 @@ class ListViewPinnedActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val pinnedMessages = mutableListOf<Map<String, String>>()
 
+
                     for (child in snapshot.children) {
                         val message = child.value as? Map<String, String>
                         if (message != null) {
                             pinnedMessages.add(message)
+                            idMess.add(child.key.toString())
                         }
                     }
 
@@ -68,7 +71,7 @@ class ListViewPinnedActivity : AppCompatActivity() {
                     // Xử lý sự kiện khi người dùng nhấn vào một mục
                     listView.setOnItemClickListener { parent, view, position, id ->
                         pinnedMessages[position]?.let { selectedMessage ->
-                            showUnpinDialog(selectedMessage)
+                            showUnpinDialog(selectedMessage, idMess[position])
                         }
                     }
                 }
@@ -86,7 +89,7 @@ class ListViewPinnedActivity : AppCompatActivity() {
     }
 
     // Hàm hiển thị AlertDialog để bỏ ghim
-    private fun showUnpinDialog(message: Map<String, String>) {
+    private fun showUnpinDialog(message: Map<String, String>, chatId: String) {
         val content = message["Content"] ?: "Nội dung không xác định"
         val name = message["Name"] ?: "Tên không xác định"
 
@@ -94,7 +97,7 @@ class ListViewPinnedActivity : AppCompatActivity() {
             .setTitle("Unpinned message")
             .setMessage("Are you sure to unpinned message:\n$name: $content?")
             .setPositiveButton("Yes") { dialog, which ->
-                unpinMessage(message)
+                unpinMessage(message, chatId)
             }
             .setNegativeButton("No") { dialog, which ->
                 dialog.dismiss()
@@ -108,7 +111,7 @@ class ListViewPinnedActivity : AppCompatActivity() {
 
     // Hàm xử lý bỏ ghim tin nhắn
     // Hàm xử lý bỏ ghim tin nhắn
-    private fun unpinMessage(message: Map<String, String>) {
+    private fun unpinMessage(message: Map<String, String>, chatId: String) {
         val contentToUnpin = message["Content"] ?: return // Lấy nội dung tin nhắn cần bỏ ghim
         val nameToUnpin = message["Name"] ?: return // Lấy tên người gửi tin nhắn cần bỏ ghim
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -122,15 +125,55 @@ class ListViewPinnedActivity : AppCompatActivity() {
             .child(targetUserUid)
             .child("PinnedMessages")
 
+        Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(chatId)
+            .child("Pinned").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        snapshot.ref.setValue(false)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@ListViewPinnedActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+
         val userRefCurrentToTarget = database.getReference("users")
             .child(currentUserUid)
             .child(targetUserUid)
             .child("PinnedMessages")
 
+        Firebase.database.getReference("users").child(currentUserUid)
+            .child(targetUserUid).child("Messages").child(chatId).child("Pinned").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        snapshot.ref.setValue(false)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@ListViewPinnedActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+
         val userRefTargetToCurrent = database.getReference("users")
             .child(targetUserUid)
             .child(currentUserUid)
             .child("PinnedMessages")
+
+        Firebase.database.getReference("users").child(targetUserUid)
+            .child(currentUserUid).child("Messages").child(chatId).child("Pinned").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        snapshot.ref.setValue(false)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@ListViewPinnedActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
 
         // Kiểm tra từng nhóm dữ liệu để tìm và xóa tin nhắn
         val databaseRefList = listOf(groupRefCurrentToTarget, userRefCurrentToTarget, userRefTargetToCurrent)
@@ -190,11 +233,12 @@ class ListViewPinnedActivity : AppCompatActivity() {
             databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val pinnedMessages = mutableListOf<Map<String, String>>()
-
+                    idMess.clear()
                     for (child in snapshot.children) {
                         val message = child.value as? Map<String, String>
                         if (message != null) {
                             pinnedMessages.add(message)
+                            idMess.add(child.key.toString())
                         }
                     }
 
@@ -216,7 +260,7 @@ class ListViewPinnedActivity : AppCompatActivity() {
                     // Xử lý sự kiện khi người dùng nhấn vào một mục
                     listView.setOnItemClickListener { parent, view, position, id ->
                         pinnedMessages[position]?.let { selectedMessage ->
-                            showUnpinDialog(selectedMessage)
+                            showUnpinDialog(selectedMessage, idMess[position])
                         }
                     }
                 }

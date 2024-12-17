@@ -73,4 +73,7 @@
     <string name="Image">Sent an image</string>
     <string name="Video">Sent a video</string>
     <string name="Location">Sent a location</string>
+    <string name="option">Option</string>
+    <string name="pin">Pin</string>
+    <string name="unpin">UnPin</string>
 </resources>
