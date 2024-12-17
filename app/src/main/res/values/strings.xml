@@ -69,4 +69,8 @@
     <string name="ChangeLanguage">Change Language</string>
     <string name="PinnedMessages">Pinned Messages</string>
     <string name="Language">Language</string>
+    <string name="Audio">Sent an audio</string>
+    <string name="Image">Sent an image</string>
+    <string name="Video">Sent a video</string>
+    <string name="Location">Sent a location</string>
 </resources>

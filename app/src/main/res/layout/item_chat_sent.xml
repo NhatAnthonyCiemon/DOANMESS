@@ -81,7 +81,14 @@
         android:layout_gravity="center"
         android:visibility="gone"
         android:id="@+id/cardVideo">
-
+        <ProgressBar
+            android:indeterminateTint="@color/white"
+            android:id="@+id/LoadingVideoBar"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:translationZ="5dp"
+            android:visibility="gone"
+            android:layout_gravity="center"/>
         <androidx.media3.ui.PlayerView
             android:id="@+id/videoMessageView"
             android:layout_width="match_parent"

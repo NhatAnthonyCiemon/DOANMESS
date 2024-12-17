@@ -172,9 +172,13 @@ class CreateGroup : HandleOnlineActivity() {
             Toast.makeText(this, "Please choose a group avatar", Toast.LENGTH_SHORT).show()
             return
         }
+        if(added.size < 2){
+            Toast.makeText(this, "Please add at least 2 members", Toast.LENGTH_SHORT).show()
+            return
+        }
         createBtn.isEnabled = false
         cancelBtn.isEnabled = false
-
+        Toast.makeText(this, "Creating group...", Toast.LENGTH_SHORT).show()
         // Upload imageUri to Firebase Storage
         val storage = FirebaseStorage.getInstance()
         val avatarRef = storage.reference.child("avatars/${UUID.randomUUID()}.jpg")

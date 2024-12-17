@@ -66,4 +66,8 @@
     <string name="ChangeLanguage">Thay đổi ngôn ngữ</string>
     <string name="PinnedMessages">Tin nhắn đã ghim</string>
     <string name="Language">Ngôn ngữ</string>
+    <string name="Audio">Đã gửi một tin nhắn thoại</string>
+    <string name="Image">Đã gửi một ảnh</string>
+    <string name="Video">Đã gửi một video</string>
+    <string name="Location">Đã gửi một vị trí</string>
 </resources>

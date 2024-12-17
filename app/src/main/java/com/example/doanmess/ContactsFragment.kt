@@ -39,7 +39,6 @@ class ContactsFragment : Fragment() {
 
     private var list: MutableList<Contact> = mutableListOf()
     lateinit var recyclerView: RecyclerView
-    lateinit var searchBtn: ImageButton
     lateinit var searchFilter: EditText
     lateinit var toAddFriendBtn: Button
     private lateinit var database: FirebaseDatabase
@@ -69,7 +68,6 @@ class ContactsFragment : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        searchBtn = view.findViewById(R.id.search_btn)
         searchFilter = view.findViewById(R.id.filter_search)
         toAddFriendBtn = view.findViewById(R.id.toAddFriendBtn)
         progressBar = view.findViewById(R.id.progressBar)
@@ -78,11 +76,6 @@ class ContactsFragment : Fragment() {
             startActivity(intent)
         }
 
-
-
-        searchBtn.setOnClickListener {
-
-        }
         searchFilter.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 

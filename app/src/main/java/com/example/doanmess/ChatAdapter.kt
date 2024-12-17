@@ -69,29 +69,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         val timeStampTextView: TextView = itemView.findViewById(R.id.timestampTextView) // Your TextView for the sent message
     }
 
-//    override fun getItemViewType(position: Int): Int {
-//
-//        val currentMessage = chatMessages[position]
-//        if (position == 0) {
-//            lastSenderId = ""
-//        }
-//        // Check if the current message is sent by the current user
-//        if (currentMessage.sendId == currentUser?.uid) {
-//            lastSenderId = currentMessage.sendId
-//            return VIEW_TYPE_SENT
-//        } else if (isGroup) {
-//            // Check if this message's sender ID is the same as the last message's sender ID
-//            return if (currentMessage.sendId == lastSenderId) {
-//                VIEW_TYPE_NO_AVATAR // Same sender, no avatar
-//            } else {
-//                // Different sender, update lastSenderId
-//                lastSenderId = currentMessage.sendId
-//                VIEW_TYPE_WITH_AVATAR // New sender, show avatar and name
-//            }
-//        } else {
-//            return VIEW_TYPE_RECEIVED
-//        }
-//    }
+
 
     override fun getItemViewType(position: Int): Int {
         val currentMessage = chatMessages[position]
@@ -278,6 +256,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val loadingBar : ProgressBar = itemView.findViewById(R.id.LoadingBar)
+        private val loadingVideoBar : ProgressBar = itemView.findViewById(R.id.LoadingVideoBar)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
@@ -285,65 +264,78 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         fun bind(chatMessage: MainChat.ChatMessage) {
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
-                imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
                 videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
-                cardVideo.visibility = View.GONE
+                if (!chatMessage.isSent) {
+                    loadingVideoBar.visibility = View.VISIBLE
+                    cardVideo.visibility = View.VISIBLE
+                    imageMessageView.visibility = View.GONE
+                } else {
+                    loadingVideoBar.visibility = View.GONE
+                    imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
+                    cardVideo.visibility = View.GONE
 
-                // Show a placeholder while loading the thumbnail
-                Glide.with(itemView.context)
-                    .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
-                    .placeholder(R.drawable.video_placeholder) // Placeholder image
-                    .error(R.drawable.video_placeholder) // Fallback image in case of error
-                    .into(imageMessageView)
+                    // Show a placeholder while loading the thumbnail
+                    Glide.with(itemView.context)
+                        .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                        .placeholder(R.drawable.video_placeholder) // Placeholder image
+                        .error(R.drawable.video_placeholder) // Fallback image in case of error
+                        .into(imageMessageView)
 
-                // Retrieve video thumbnail in background thread
-                CoroutineScope(Dispatchers.IO).launch {
-                    val retriever = MediaMetadataRetriever()
-                    var bitmap: Bitmap? = null
-                    try {
-                        retriever.setDataSource(chatMessage.content, HashMap()) // Use video URL
-                        bitmap = retriever.frameAtTime // Capture the first frame as a thumbnail
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    } finally {
-                        retriever.release() // Release resources
-                    }
+                    // Retrieve video thumbnail in background thread
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val retriever = MediaMetadataRetriever()
+                        var bitmap: Bitmap? = null
+                        try {
+                            retriever.setDataSource(chatMessage.content, HashMap()) // Use video URL
+                            bitmap = retriever.frameAtTime // Capture the first frame as a thumbnail
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        } finally {
+                            retriever.release() // Release resources
+                        }
 
-                    // Update UI on the main thread
-                    withContext(Dispatchers.Main) {
-                        if (bitmap != null) {
-                            val context = itemView.context
-                            val activity = context as? Activity
+                        // Update UI on the main thread
+                        withContext(Dispatchers.Main) {
+                            if (bitmap != null) {
+                                val context = itemView.context
+                                val activity = context as? Activity
 
-                            // Kiểm tra nếu context không phải là Activity hoặc Activity đã bị hủy
-                            if (activity == null || activity.isDestroyed || activity.isFinishing) {
-                                return@withContext
+                                // Kiểm tra nếu context không phải là Activity hoặc Activity đã bị hủy
+                                if (activity == null || activity.isDestroyed || activity.isFinishing) {
+                                    return@withContext
+                                }
+                                Glide.with(itemView.context)
+                                    .load(bitmap) // Use extracted bitmap
+                                    .placeholder(R.drawable.video_placeholder) // Placeholder image
+                                    .error(R.drawable.video_placeholder) // Fallback image in case of error
+                                    .into(imageMessageView)
                             }
-                            Glide.with(itemView.context)
-                                .load(bitmap) // Use extracted bitmap
-                                .placeholder(R.drawable.video_placeholder) // Placeholder image
-                                .error(R.drawable.video_placeholder) // Fallback image in case of error
-                                .into(imageMessageView)
                         }
                     }
-                }
 
-                // Set click listener to start video playback
-                imageMessageView.setOnClickListener {
-                    imageMessageView.visibility = View.GONE // Hide thumbnail when video starts playing
-                    videoMessageView.visibility = View.VISIBLE // Show the video player
-                    cardVideo.visibility = View.VISIBLE
-                    setUpVideoPlayer(chatMessage.chatId, itemView.context, videoMessageView, chatMessage.content)
-                }
-
-                // Long click listener on the video card
-                videoMessageView.setOnLongClickListener {
-                    val position = adapterPosition
-                    if (position != RecyclerView.NO_POSITION) {
-                        listener.onMessageLongClick(position, chatMessages[position])
+                    // Set click listener to start video playback
+                    imageMessageView.setOnClickListener {
+                        imageMessageView.visibility =
+                            View.GONE // Hide thumbnail when video starts playing
+                        videoMessageView.visibility = View.VISIBLE // Show the video player
+                        cardVideo.visibility = View.VISIBLE
+                        setUpVideoPlayer(
+                            chatMessage.chatId,
+                            itemView.context,
+                            videoMessageView,
+                            chatMessage.content
+                        )
                     }
-                    true // Return true to handle long click event
+
+                    // Long click listener on the video card
+                    videoMessageView.setOnLongClickListener {
+                        val position = adapterPosition
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onMessageLongClick(position, chatMessages[position])
+                        }
+                        true // Return true to handle long click event
+                    }
                 }
             }
 

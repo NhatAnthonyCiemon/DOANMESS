@@ -7,7 +7,7 @@
     <item
         android:id="@+id/action_attach"
         android:title="Attach"
-        android:icon="@drawable/ic_attach" />
+        android:icon="@drawable/baseline_attach_file_24" />
     <item
         android:id="@+id/action_take_picture"
         android:title="Take picture"
