@@ -213,6 +213,24 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         dialog.show()
     }
 
+    private fun showZoomedVideoDialog(context: Context, videoUrl: String) {
+        val dialog = Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.setContentView(R.layout.dialog_zoom_video)
+        val zoomedVideoView = dialog.findViewById<PlayerView>(R.id.zoomed_video)
+
+        val player = ExoPlayer.Builder(context).build()
+        zoomedVideoView.player = player
+        val mediaItem = MediaItem.fromUri(videoUrl)
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        player.playWhenReady = true
+
+        dialog.setOnDismissListener {
+            player.release()
+        }
+        dialog.show()
+    }
+
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         releaseAllPlayers() // Giải phóng toàn bộ player
@@ -475,6 +493,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     }
                     true // Return true to handle long click event
                 }
+
+                videoMessageView.setOnClickListener {
+                    showZoomedVideoDialog(itemView.context, chatMessage.content)
+                }
             }
 
             else if (chatMessage.type == "image") {
@@ -610,6 +632,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                         listener.onMessageLongClick(position, chatMessages[position])
                     }
                     true // Return true to handle long click event
+                }
+
+                videoMessageView.setOnClickListener {
+                    showZoomedVideoDialog(itemView.context, chatMessage.content)
                 }
             }
 
@@ -787,6 +813,14 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                         listener.onMessageLongClick(position, chatMessages[position])
                     }
                     true // Return true to handle long click event
+                }
+
+                videoMessageView.setOnClickListener {
+                    showZoomedVideoDialog(itemView.context, chatMessage.content)
+                }
+
+                videoMessageView.setOnClickListener {
+                    showZoomedVideoDialog(itemView.context, chatMessage.content)
                 }
             }
 
