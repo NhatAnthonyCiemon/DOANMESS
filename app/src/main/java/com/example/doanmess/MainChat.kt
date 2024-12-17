@@ -90,6 +90,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     private var groupStatusListener: ValueEventListener? = null
     private var avatarUrlMapping: MutableMap<String, String> = mutableMapOf()
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
+    private var isBlocked = false
     data class ChatMessage(
         val chatId : String = "",
         val content: String = "",
@@ -343,6 +344,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             val intent = Intent(this, InforChat::class.java)
             intent.putExtra("uid", targetUserUid) // Pass the uid to InforChat
             intent.putExtra("isGroup", isGroup)
+            intent.putExtra("isBlocked", isBlocked)
             startActivity(intent)
         }
 
@@ -1106,6 +1108,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                             val uid = blockedUser as? String
                             if (uid == targetUserUid) {
                                 // A đã block B
+                                isBlocked = true
                                 inputBar.visibility = View.GONE
                                 blockedMessage2.visibility = View.VISIBLE
                                 videoCallBtn.visibility = View.GONE
@@ -1126,6 +1129,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                     val uid = blockedUser as? String
                                     if (uid == userId) {
                                         // B đã block A
+                                        isBlocked = true
                                         inputBar.visibility = View.GONE
                                         blockedMessage1.visibility = View.VISIBLE
                                         videoCallBtn.visibility = View.GONE
@@ -1136,6 +1140,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                             }
                         }
                         // Nếu không có ai block ai, hiển thị giao diện bình thường
+                        isBlocked = false
                         inputBar.visibility = View.VISIBLE
                         blockedMessage1.visibility = View.GONE
                         blockedMessage2.visibility = View.GONE

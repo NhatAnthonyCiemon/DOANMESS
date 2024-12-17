@@ -32,6 +32,8 @@ import com.google.gson.Gson
 
 
 class InforChat : HandleOnlineActivity() {
+    private var isBlocked = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -43,10 +45,13 @@ class InforChat : HandleOnlineActivity() {
 
         val chatUserId = intent.getStringExtra("uid") // Retrieve the uid from the intent
         val isGroup = intent.getBooleanExtra("isGroup", false)
+        isBlocked = intent.getBooleanExtra("isBlocked", false)
 
         val btnCall = findViewById<FloatingActionButton>(R.id.btnCall)
         val btnVideo = findViewById<FloatingActionButton>(R.id.btnVideo)
         val btnInfo  = findViewById<FloatingActionButton>(R.id.btnInfor)
+
+        checkBlock(isBlocked)
 
         btnCall.setOnClickListener {
             var intent = Intent(this, Call::class.java)
@@ -235,6 +240,8 @@ class InforChat : HandleOnlineActivity() {
                                             firestore.collection("users").document(currentUserId)
                                                 .update("Blocks", FieldValue.arrayRemove(chatUserId))
                                                 .addOnSuccessListener {
+                                                    isBlocked = false
+                                                    checkBlock(isBlocked)
                                                     Toast.makeText(this, "User unblocked successfully.", Toast.LENGTH_SHORT).show()
                                                 }
                                                 .addOnFailureListener { e ->
@@ -257,6 +264,8 @@ class InforChat : HandleOnlineActivity() {
                                             firestore.collection("users").document(currentUserId)
                                                 .update("Blocks", FieldValue.arrayUnion(chatUserId))
                                                 .addOnSuccessListener {
+                                                    isBlocked = true
+                                                    checkBlock(isBlocked)
                                                     Toast.makeText(this, "User blocked successfully.", Toast.LENGTH_SHORT).show()
                                                 }
                                                 .addOnFailureListener { e ->
@@ -290,7 +299,6 @@ class InforChat : HandleOnlineActivity() {
                 .setMessage("Do you want to delete?")
                 .setPositiveButton("Yes") { dialog, which ->
                     // Xử lý khi người dùng chọn "Có"
-                    // Thực hiện thao tác block ở đây
                 }
                 .setNegativeButton("No") { dialog, which ->
                     // Đóng hộp thoại khi người dùng chọn "Không"
@@ -304,6 +312,18 @@ class InforChat : HandleOnlineActivity() {
         }
 
 
+    }
+
+    private fun checkBlock(isBlocked: Boolean) {
+        val btnCall = findViewById<FloatingActionButton>(R.id.btnCall)
+        val btnVideo = findViewById<FloatingActionButton>(R.id.btnVideo)
+        if (isBlocked) {
+            btnCall.visibility = View.GONE
+            btnVideo.visibility = View.GONE
+        } else {
+            btnCall.visibility = View.VISIBLE
+            btnVideo.visibility = View.VISIBLE
+        }
     }
 
     private fun changeBackgroundColor(view: View, color: String, duration: Long) {
