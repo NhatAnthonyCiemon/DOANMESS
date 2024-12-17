@@ -91,12 +91,12 @@ class ListViewPinnedActivity : AppCompatActivity() {
         val name = message["Name"] ?: "Tên không xác định"
 
         AlertDialog.Builder(this)
-            .setTitle("Bỏ ghim tin nhắn")
-            .setMessage("Bạn có chắc chắn muốn bỏ ghim tin nhắn:\n$name: $content?")
-            .setPositiveButton("Có") { dialog, which ->
+            .setTitle("Unpinned message")
+            .setMessage("Are you sure to unpinned message:\n$name: $content?")
+            .setPositiveButton("Yes") { dialog, which ->
                 unpinMessage(message)
             }
-            .setNegativeButton("Không") { dialog, which ->
+            .setNegativeButton("No") { dialog, which ->
                 dialog.dismiss()
             }
             .create().apply {
@@ -107,6 +107,7 @@ class ListViewPinnedActivity : AppCompatActivity() {
     }
 
     // Hàm xử lý bỏ ghim tin nhắn
+    // Hàm xử lý bỏ ghim tin nhắn
     private fun unpinMessage(message: Map<String, String>) {
         val contentToUnpin = message["Content"] ?: return // Lấy nội dung tin nhắn cần bỏ ghim
         val nameToUnpin = message["Name"] ?: return // Lấy tên người gửi tin nhắn cần bỏ ghim
@@ -115,56 +116,54 @@ class ListViewPinnedActivity : AppCompatActivity() {
 
         // Tham chiếu đến database
         val database = FirebaseDatabase.getInstance()
-        val groupRef = database.getReference("groups")
+
+        // Kiểm tra và xử lý chiều của currentUserUid và targetUserUid
+        val groupRefCurrentToTarget = database.getReference("groups")
             .child(targetUserUid)
             .child("PinnedMessages")
 
-        val databaseRef = if (groupRef.get().isSuccessful) {
-            // Nếu tồn tại trong "groups"
-            groupRef
-        } else {
-            // Nếu không tồn tại trong "groups", sử dụng "users"
-            database.getReference("users")
-                .child(currentUserUid)
-                .child(targetUserUid)
-                .child("PinnedMessages")
-        }
+        val userRefCurrentToTarget = database.getReference("users")
+            .child(currentUserUid)
+            .child(targetUserUid)
+            .child("PinnedMessages")
 
-        // Lấy dữ liệu từ databaseRef, xóa tin nhắn và cập nhật
-        databaseRef.get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val snapshot = task.result
-                var isRemoved = false
+        val userRefTargetToCurrent = database.getReference("users")
+            .child(targetUserUid)
+            .child(currentUserUid)
+            .child("PinnedMessages")
 
-                for (child in snapshot.children) {
-                    val pinnedMessage = child.value as? Map<String, String>
-                    if (pinnedMessage != null) {
-                        // Kiểm tra cả nội dung và tên
-                        val content = pinnedMessage["Content"]
-                        val name = pinnedMessage["Name"]
+        // Kiểm tra từng nhóm dữ liệu để tìm và xóa tin nhắn
+        val databaseRefList = listOf(groupRefCurrentToTarget, userRefCurrentToTarget, userRefTargetToCurrent)
 
-                        if (content == contentToUnpin && name == nameToUnpin) {
-                            // Xóa tin nhắn có cả nội dung và tên trùng khớp
-                            child.ref.removeValue()
-                            isRemoved = true
-                            break
+        for (databaseRef in databaseRefList) {
+            databaseRef.get().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val snapshot = task.result
+                    for (child in snapshot.children) {
+                        val pinnedMessage = child.value as? Map<String, String>
+                        if (pinnedMessage != null) {
+                            // Kiểm tra cả nội dung và tên
+                            val content = pinnedMessage["Content"]
+                            val name = pinnedMessage["Name"]
+
+                            if (content == contentToUnpin && name == nameToUnpin) {
+                                // Xóa tin nhắn có cả nội dung và tên trùng khớp
+                                child.ref.removeValue()
+                                break
+                            }
                         }
                     }
                 }
-
-                if (isRemoved) {
-                    Toast.makeText(this@ListViewPinnedActivity, "Đã bỏ ghim tin nhắn.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@ListViewPinnedActivity, "Không tìm thấy tin nhắn để bỏ ghim.", Toast.LENGTH_SHORT).show()
-                }
-
-                // Sau khi xóa xong, lấy lại dữ liệu để cập nhật
-                refreshPinnedMessages()
-            } else {
-                Toast.makeText(this@ListViewPinnedActivity, "Lỗi: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
             }
         }
+
+        Toast.makeText(this@ListViewPinnedActivity, "Unpinned message sucessfull.", Toast.LENGTH_SHORT).show()
+
+        // Sau khi xóa xong, lấy lại dữ liệu để cập nhật
+        refreshPinnedMessages()
     }
+
+
 
 
     private fun refreshPinnedMessages() {
