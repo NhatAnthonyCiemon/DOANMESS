@@ -1350,17 +1350,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 
                 if (snapshot != null && snapshot.exists()) {
                     checkBlockedStatus()
-//                    val blockedUsers = snapshot["Blocks"] as? List<String>
-//                    if (blockedUsers != null && blockedUsers.contains(targetUserUid)) {
-//                        // A has blocked B
-////                        isBlocked = true
-////                        updateUIForBlockedStatus()
-//
-//                    } else {
-//                        // A has not blocked B
-////                        isBlocked = false
-////                        updateUIForBlockedStatus()
-//                    }
                 }
             }
 
@@ -1374,37 +1363,8 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 
                 if (snapshot != null && snapshot.exists()) {
                     checkBlockedStatus()
-//                    val blockedByTarget = snapshot["Blocks"] as? List<String>
-//                    if (blockedByTarget != null && blockedByTarget.contains(userId)) {
-//                        // B has blocked A
-//                        isBlocked = true
-//                        updateUIForBlockedStatus()
-//                    } else {
-//                        // B has not blocked A
-//                        isBlocked = false
-//                        updateUIForBlockedStatus()
-//                    }
                 }
             }
-    }
-    private fun updateUIForBlockedStatus() {
-        val inputBar = findViewById<LinearLayout>(R.id.input_bar)
-        val blockedMessage1 = findViewById<FrameLayout>(R.id.blockMsg1)
-        val blockedMessage2 = findViewById<FrameLayout>(R.id.blockMsg2)
-
-        if (isBlocked) {
-            inputBar.visibility = View.GONE
-            blockedMessage1.visibility = View.VISIBLE
-            blockedMessage2.visibility = View.VISIBLE
-            videoCallBtn.visibility = View.GONE
-            callVoiceBtn.visibility = View.GONE
-        } else {
-            inputBar.visibility = View.VISIBLE
-            blockedMessage1.visibility = View.GONE
-            blockedMessage2.visibility = View.GONE
-            videoCallBtn.visibility = View.VISIBLE
-            callVoiceBtn.visibility = View.VISIBLE
-        }
     }
 
 }
