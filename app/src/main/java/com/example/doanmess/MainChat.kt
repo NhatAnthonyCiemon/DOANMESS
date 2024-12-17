@@ -52,6 +52,7 @@ import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
@@ -91,6 +92,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     private var avatarUrlMapping: MutableMap<String, String> = mutableMapOf()
     private lateinit var imagePickerLauncher: ActivityResultLauncher<Intent>
     private var isBlocked = false
+    private lateinit var blockListener: ListenerRegistration
     data class ChatMessage(
         val chatId : String = "",
         val content: String = "",
@@ -328,6 +330,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 
 
         checkBlockedStatus()
+        addBlockListener()
 
         // set on click listener for the back button to navigate back to the home activity
         findViewById<ImageButton>(R.id.back_button).setOnClickListener {
@@ -1070,6 +1073,9 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::blockListener.isInitialized) {
+            blockListener.remove()
+        }
         if (::chatAdapter.isInitialized) {
             chatAdapter.releaseResources()
         }
@@ -1326,6 +1332,79 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 
         chatMessages.removeAt(position)
         recyclerViewMessages.adapter?.notifyItemRemoved(position)
+    }
+
+    private fun addBlockListener() {
+        val userId = auth.currentUser?.uid ?: return
+        val targetUserUid = intent.getStringExtra("uid") ?: return
+
+        val db = Firebase.firestore
+
+        // Listen for changes in the current user's Blocks field
+        blockListener = db.collection("users").document(userId)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w("MainChat", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    checkBlockedStatus()
+//                    val blockedUsers = snapshot["Blocks"] as? List<String>
+//                    if (blockedUsers != null && blockedUsers.contains(targetUserUid)) {
+//                        // A has blocked B
+////                        isBlocked = true
+////                        updateUIForBlockedStatus()
+//
+//                    } else {
+//                        // A has not blocked B
+////                        isBlocked = false
+////                        updateUIForBlockedStatus()
+//                    }
+                }
+            }
+
+        // Listen for changes in the target user's Blocks field
+        blockListener = db.collection("users").document(targetUserUid)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w("MainChat", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    checkBlockedStatus()
+//                    val blockedByTarget = snapshot["Blocks"] as? List<String>
+//                    if (blockedByTarget != null && blockedByTarget.contains(userId)) {
+//                        // B has blocked A
+//                        isBlocked = true
+//                        updateUIForBlockedStatus()
+//                    } else {
+//                        // B has not blocked A
+//                        isBlocked = false
+//                        updateUIForBlockedStatus()
+//                    }
+                }
+            }
+    }
+    private fun updateUIForBlockedStatus() {
+        val inputBar = findViewById<LinearLayout>(R.id.input_bar)
+        val blockedMessage1 = findViewById<FrameLayout>(R.id.blockMsg1)
+        val blockedMessage2 = findViewById<FrameLayout>(R.id.blockMsg2)
+
+        if (isBlocked) {
+            inputBar.visibility = View.GONE
+            blockedMessage1.visibility = View.VISIBLE
+            blockedMessage2.visibility = View.VISIBLE
+            videoCallBtn.visibility = View.GONE
+            callVoiceBtn.visibility = View.GONE
+        } else {
+            inputBar.visibility = View.VISIBLE
+            blockedMessage1.visibility = View.GONE
+            blockedMessage2.visibility = View.GONE
+            videoCallBtn.visibility = View.VISIBLE
+            callVoiceBtn.visibility = View.VISIBLE
+        }
     }
 
 }
