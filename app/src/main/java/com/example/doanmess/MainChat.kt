@@ -1176,133 +1176,285 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         // Xử lý khi người dùng long click vào tin nhắn
         showOptionsDialog(position, message)
     }
-
     private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
-        val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
+        // Inflate custom layout
+        val dialogView = layoutInflater.inflate(R.layout.dialog_options, null)
 
-        // Ví dụ hiển thị dialog với các tùy chọn
-        AlertDialog.Builder(this)
-            .setTitle("Tùy chọn")
-            .setMessage("Bạn muốn làm gì với tin nhắn này?")
-            .setPositiveButton("Xóa") { _, _ ->
-                deleteMessage(position)
-            }
-            .setNegativeButton("Hủy", null)
-            .setNeutralButton(neutralButton) { _, _ ->
-                // pin message
-                val messageId = message.chatId
+        // Find views in the dialog layout
+        val pinButton: Button = dialogView.findViewById(R.id.pin_button)
+        val deleteButton: Button = dialogView.findViewById(R.id.delete_button)
+        val cancelButton: Button = dialogView.findViewById(R.id.cancel_button)
 
-                if (messageId.isNotEmpty()) {
-                    if (!message.pinned) {
-                        if (!isGroup) {
-                            Firebase.database.getReference("users").child(currentUserUid)
-                                .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
-                                .setValue(!message.pinned)
+        // Set the text for the "Pin/Unpin" button
+        pinButton.text = if (message.pinned) "Bỏ ghim" else "Ghim"
 
-                            Firebase.database.getReference("users").child(targetUserUid)
-                                .child(currentUserUid).child("Messages").child(messageId)
-                                .child("Pinned")
-                                .setValue(!message.pinned)
+        // Create the dialog
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
 
-                            lifecycleScope.launch {
-                                try {
-                                    val name = fetchName(message.sendId)
-                                    val newMessage = mapOf(
-                                        "Content" to message.content,
-                                        "Name" to name,
-                                    )
-                                    Firebase.database.getReference("users").child(currentUserUid)
-                                        .child(targetUserUid).child("PinnedMessages").push()
-                                        .setValue(newMessage)
-                                    Firebase.database.getReference("users").child(targetUserUid)
-                                        .child(currentUserUid).child("PinnedMessages").push()
-                                        .setValue(newMessage)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            }
-                        }
-                        else {
-                            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(messageId).child("Pinned")
-                                .setValue(!message.pinned)
-
-                            lifecycleScope.launch {
-                                try {
-                                    val name = fetchName(message.sendId)
-                                    val newMessage = mapOf(
-                                        "Content" to message.content,
-                                        "Name" to name,
-                                    )
-                                    Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").push()
-                                        .setValue(newMessage)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-                            }
-                        }
-                    }
-                    else {
-                        if (!isGroup) {
-                            Firebase.database.getReference("users").child(currentUserUid)
-                                .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
-                                .setValue(!message.pinned)
-
-                            Firebase.database.getReference("users").child(targetUserUid)
-                                .child(currentUserUid).child("Messages").child(messageId)
-                                .child("Pinned")
-                                .setValue(!message.pinned)
-
-                            Firebase.database.getReference("users").child(currentUserUid)
-                                .child(targetUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
-                                .addListenerForSingleValueEvent(object : ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        for (child in snapshot.children) {
-                                            child.ref.removeValue()
-                                        }
-                                    }
-
-                                    override fun onCancelled(error: DatabaseError) {
-                                    }
-                                })
-
-                            Firebase.database.getReference("users").child(targetUserUid)
-                                .child(currentUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
-                                .addListenerForSingleValueEvent(object : ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        for (child in snapshot.children) {
-                                            child.ref.removeValue()
-                                        }
-                                    }
-
-                                    override fun onCancelled(error: DatabaseError) {
-                                    }
-                                })
-                        }
-                        else {
-                            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(messageId).child("Pinned")
-                                .setValue(!message.pinned)
-
-                            Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
-                                .addListenerForSingleValueEvent(object : ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        for (child in snapshot.children) {
-                                            child.ref.removeValue()
-                                        }
-                                    }
-
-                                    override fun onCancelled(error: DatabaseError) {
-                                    }
-                                })
-                        }
-                    }
+        // Set button actions
+        pinButton.setOnClickListener {
+            val messageId = message.chatId
+            if (messageId.isNotEmpty()) {
+                if (!message.pinned) {
+                    // Pin the message
+                    pinMessage(message, messageId)
+                } else {
+                    // Unpin the message
+                    unpinMessage(message, messageId)
                 }
             }
-            .create()
-            .apply {
-                setCanceledOnTouchOutside(true)
-            }
-            .show()
+            dialog.dismiss()
+        }
+
+        deleteButton.setOnClickListener {
+            // Delete the message
+            deleteMessage(position)
+            dialog.dismiss()
+        }
+
+        cancelButton.setOnClickListener {
+            // Dismiss the dialog
+            dialog.dismiss()
+        }
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        // Show the dialog
+        dialog.show()
     }
+
+    // Helper function to pin the message
+    private fun pinMessage(message: MainChat.ChatMessage, messageId: String) {
+        if (!isGroup) {
+            // Pin message for private chat
+            Firebase.database.getReference("users").child(currentUserUid)
+                .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
+                .setValue(true)
+
+            Firebase.database.getReference("users").child(targetUserUid)
+                .child(currentUserUid).child("Messages").child(messageId).child("Pinned")
+                .setValue(true)
+
+            lifecycleScope.launch {
+                try {
+                    val name = fetchName(message.sendId)
+                    val newMessage = mapOf(
+                        "Content" to message.content,
+                        "Name" to name,
+                    )
+                    Firebase.database.getReference("users").child(currentUserUid)
+                        .child(targetUserUid).child("PinnedMessages").push()
+                        .setValue(newMessage)
+
+                    Firebase.database.getReference("users").child(targetUserUid)
+                        .child(currentUserUid).child("PinnedMessages").push()
+                        .setValue(newMessage)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            // Pin message for group chat
+            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(messageId)
+                .child("Pinned").setValue(true)
+
+            lifecycleScope.launch {
+                try {
+                    val name = fetchName(message.sendId)
+                    val newMessage = mapOf(
+                        "Content" to message.content,
+                        "Name" to name,
+                    )
+                    Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").push()
+                        .setValue(newMessage)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    // Helper function to unpin the message
+    private fun unpinMessage(message: MainChat.ChatMessage, messageId: String) {
+        if (!isGroup) {
+            // Unpin message for private chat
+            Firebase.database.getReference("users").child(currentUserUid)
+                .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
+                .setValue(false)
+
+            Firebase.database.getReference("users").child(targetUserUid)
+                .child(currentUserUid).child("Messages").child(messageId).child("Pinned")
+                .setValue(false)
+
+            Firebase.database.getReference("users").child(currentUserUid)
+                .child(targetUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (child in snapshot.children) {
+                            child.ref.removeValue()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {}
+                })
+
+            Firebase.database.getReference("users").child(targetUserUid)
+                .child(currentUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (child in snapshot.children) {
+                            child.ref.removeValue()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {}
+                })
+        } else {
+            // Unpin message for group chat
+            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(messageId)
+                .child("Pinned").setValue(false)
+
+            Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (child in snapshot.children) {
+                            child.ref.removeValue()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {}
+                })
+        }
+    }
+
+//    private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
+//        val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
+//
+//        // Ví dụ hiển thị dialog với các tùy chọn
+//        AlertDialog.Builder(this)
+//            .setTitle("Tùy chọn")
+//            .setMessage("Bạn muốn làm gì với tin nhắn này?")
+//            .setPositiveButton("Xóa") { _, _ ->
+//                deleteMessage(position)
+//            }
+//            .setNegativeButton("Hủy", null)
+//            .setNeutralButton(neutralButton) { _, _ ->
+//                // pin message
+//                val messageId = message.chatId
+//
+//                if (messageId.isNotEmpty()) {
+//                    if (!message.pinned) {
+//                        if (!isGroup) {
+//                            Firebase.database.getReference("users").child(currentUserUid)
+//                                .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
+//                                .setValue(!message.pinned)
+//
+//                            Firebase.database.getReference("users").child(targetUserUid)
+//                                .child(currentUserUid).child("Messages").child(messageId)
+//                                .child("Pinned")
+//                                .setValue(!message.pinned)
+//
+//                            lifecycleScope.launch {
+//                                try {
+//                                    val name = fetchName(message.sendId)
+//                                    val newMessage = mapOf(
+//                                        "Content" to message.content,
+//                                        "Name" to name,
+//                                    )
+//                                    Firebase.database.getReference("users").child(currentUserUid)
+//                                        .child(targetUserUid).child("PinnedMessages").push()
+//                                        .setValue(newMessage)
+//                                    Firebase.database.getReference("users").child(targetUserUid)
+//                                        .child(currentUserUid).child("PinnedMessages").push()
+//                                        .setValue(newMessage)
+//                                } catch (e: Exception) {
+//                                    e.printStackTrace()
+//                                }
+//                            }
+//                        }
+//                        else {
+//                            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(messageId).child("Pinned")
+//                                .setValue(!message.pinned)
+//
+//                            lifecycleScope.launch {
+//                                try {
+//                                    val name = fetchName(message.sendId)
+//                                    val newMessage = mapOf(
+//                                        "Content" to message.content,
+//                                        "Name" to name,
+//                                    )
+//                                    Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").push()
+//                                        .setValue(newMessage)
+//                                } catch (e: Exception) {
+//                                    e.printStackTrace()
+//                                }
+//                            }
+//                        }
+//                    }
+//                    else {
+//                        if (!isGroup) {
+//                            Firebase.database.getReference("users").child(currentUserUid)
+//                                .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
+//                                .setValue(!message.pinned)
+//
+//                            Firebase.database.getReference("users").child(targetUserUid)
+//                                .child(currentUserUid).child("Messages").child(messageId)
+//                                .child("Pinned")
+//                                .setValue(!message.pinned)
+//
+//                            Firebase.database.getReference("users").child(currentUserUid)
+//                                .child(targetUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
+//                                .addListenerForSingleValueEvent(object : ValueEventListener {
+//                                    override fun onDataChange(snapshot: DataSnapshot) {
+//                                        for (child in snapshot.children) {
+//                                            child.ref.removeValue()
+//                                        }
+//                                    }
+//
+//                                    override fun onCancelled(error: DatabaseError) {
+//                                    }
+//                                })
+//
+//                            Firebase.database.getReference("users").child(targetUserUid)
+//                                .child(currentUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
+//                                .addListenerForSingleValueEvent(object : ValueEventListener {
+//                                    override fun onDataChange(snapshot: DataSnapshot) {
+//                                        for (child in snapshot.children) {
+//                                            child.ref.removeValue()
+//                                        }
+//                                    }
+//
+//                                    override fun onCancelled(error: DatabaseError) {
+//                                    }
+//                                })
+//                        }
+//                        else {
+//                            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(messageId).child("Pinned")
+//                                .setValue(!message.pinned)
+//
+//                            Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
+//                                .addListenerForSingleValueEvent(object : ValueEventListener {
+//                                    override fun onDataChange(snapshot: DataSnapshot) {
+//                                        for (child in snapshot.children) {
+//                                            child.ref.removeValue()
+//                                        }
+//                                    }
+//
+//                                    override fun onCancelled(error: DatabaseError) {
+//                                    }
+//                                })
+//                        }
+//                    }
+//                }
+//            }
+//            .create()
+//            .apply {
+//                setCanceledOnTouchOutside(true)
+//            }
+//            .show()
+//    }
 
     suspend fun fetchName(sendId: String): String {
         val document = Firebase.firestore.collection("users").document(sendId).get().await()
