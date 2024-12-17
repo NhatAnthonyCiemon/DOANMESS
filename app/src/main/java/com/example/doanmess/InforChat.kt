@@ -213,6 +213,20 @@ class InforChat : HandleOnlineActivity() {
         frmBlock.setOnClickListener {
             changeBackgroundColor(frmBlock, "#D9D9D9", 150)
 
+            if (isGroup) {
+                AlertDialog.Builder(this)
+                    .setTitle("Cannot Block")
+                    .setMessage("Cannot block group!")
+                    .setPositiveButton("OK") { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .create().apply {
+                        window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
+                    }
+                    .show()
+                return@setOnClickListener
+            }
+
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
             if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
@@ -227,7 +241,7 @@ class InforChat : HandleOnlineActivity() {
                         if (isBlockedByChatUser) {
                             AlertDialog.Builder(this)
                                 .setTitle("Blocked")
-                                .setMessage("You have been blocked by this user.")
+                                .setMessage("You have been blocked by this person.")
                                 .setPositiveButton("OK") { dialog, which ->
                                     dialog.dismiss()
                                 }
