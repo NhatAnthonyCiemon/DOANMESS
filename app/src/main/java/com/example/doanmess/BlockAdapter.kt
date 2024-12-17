@@ -46,6 +46,43 @@ class BlockAdapter(
             .into(holder.profileImage)
 
 
+        holder.btnDelete.setOnClickListener { view ->
+            val context = view.context
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+            val chatUserId = blockLists[position].uid
+            val firestore = FirebaseFirestore.getInstance()
+
+            if (currentUserId != null && chatUserId != null) {
+                androidx.appcompat.app.AlertDialog.Builder(context)
+                    .setTitle("Unblock")
+                    .setMessage("Do you want to unblock?")
+                    .setPositiveButton("Yes") { dialog, which ->
+                        firestore.collection("users").document(currentUserId)
+                            .update("Blocks", FieldValue.arrayRemove(chatUserId))
+                            .addOnSuccessListener {
+                                Toast.makeText(context, "User unblocked successfully.", Toast.LENGTH_SHORT).show()
+                                blockLists.removeAt(position)
+                                notifyItemRemoved(position)
+                                if (blockLists.isEmpty()) {
+                                    Toast.makeText(context, "No more blocked users.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(context, "Failed to unblock user: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                    .setNegativeButton("No") { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .create().apply {
+                        // Thiết lập background cho dialog
+                        window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
+                    }
+                    .show()
+            } else {
+                Toast.makeText(context, "Unable to find user information.", Toast.LENGTH_SHORT).show()
+            }
+        }
         // Nút xóa tin nhắn và hủy block
 //        holder.btnDelete.setOnClickListener {
 //            val pos = holder.adapterPosition
