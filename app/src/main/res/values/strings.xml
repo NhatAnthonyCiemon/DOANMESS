@@ -76,4 +76,9 @@
     <string name="option">Option</string>
     <string name="pin">Pin</string>
     <string name="unpin">UnPin</string>
+    <string name="unpinned_message_title">Unpinned message</string>
+    <string name="unpinned_message_confirmation">Are you sure to unpin message:%s: %s?</string>
+    <string name="unpinned_message_content">Are you sure to unpin message:\n{name}:{content}?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

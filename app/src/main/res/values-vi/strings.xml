@@ -73,4 +73,9 @@
     <string name="option">Tùy chọn</string>
     <string name="pin">Ghim</string>
     <string name="unpin">Bỏ ghim</string>
+    <string name="unpinned_message_title">Gỡ tin nhắn</string>
+    <string name="unpinned_message_confirmation">"Bạn có muốn gỡ tin nhắn: "</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
+    <string name="unpinned_message_content">Bạn có chắc chắn muốn bỏ ghim tin nhắn:\n{name}:{content}?</string>
 </resources>

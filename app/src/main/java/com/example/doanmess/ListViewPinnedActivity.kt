@@ -90,16 +90,20 @@ class ListViewPinnedActivity : AppCompatActivity() {
 
     // Hàm hiển thị AlertDialog để bỏ ghim
     private fun showUnpinDialog(message: Map<String, String>, chatId: String) {
-        val content = message["Content"] ?: "Nội dung không xác định"
-        val name = message["Name"] ?: "Tên không xác định"
+        val content = message["Content"] ?: "Undefine"
+        val name = message["Name"] ?: "Undefine"
+
+        val messageText = getString(R.string.unpinned_message_content)
+            .replace("{name}", name)
+            .replace("{content}", content)
 
         AlertDialog.Builder(this)
-            .setTitle("Unpinned message")
-            .setMessage("Are you sure to unpinned message:\n$name: $content?")
-            .setPositiveButton("Yes") { dialog, which ->
+            .setTitle(getString(R.string.unpinned_message_title))
+            .setMessage(messageText)
+            .setPositiveButton(getString(R.string.yes)) { dialog, which ->
                 unpinMessage(message, chatId)
             }
-            .setNegativeButton("No") { dialog, which ->
+            .setNegativeButton(getString(R.string.no)) { dialog, which ->
                 dialog.dismiss()
             }
             .create().apply {
