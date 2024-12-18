@@ -33,7 +33,7 @@ class LanguageSelectionActivity : AppCompatActivity() {
 
         // Hiển thị danh sách ngôn ngữ
         val listView = findViewById<ListView>(R.id.languageListView)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, languages.map { it.second })
+        val adapter = LanguageAdapter(this, languages)
         listView.adapter = adapter
 
         // Xử lý khi người dùng chọn ngôn ngữ
