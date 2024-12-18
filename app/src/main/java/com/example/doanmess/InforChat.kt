@@ -175,7 +175,6 @@ class InforChat : HandleOnlineActivity() {
 
         val frmNotice = findViewById<FrameLayout>(R.id.frmNotice)
         val frmLink = findViewById<FrameLayout>(R.id.frmLink)
-        val frmLimit = findViewById<FrameLayout>(R.id.frmLimit)
         val frmBlock = findViewById<FrameLayout>(R.id.frmBlock)
         val frmTrash = findViewById<FrameLayout>(R.id.frmTrash)
         val btnNotice: FloatingActionButton = findViewById(R.id.btnNotice)
@@ -197,24 +196,6 @@ class InforChat : HandleOnlineActivity() {
             fetchPinnedMessages()
         }
 
-        frmLimit.setOnClickListener {
-            changeBackgroundColor(frmLimit, "#D9D9D9", 150)
-            AlertDialog.Builder(this)
-                .setTitle("Limit")
-                .setMessage("Do you want to limit?")
-                .setPositiveButton("Yes") { dialog, which ->
-                    // Xử lý khi người dùng chọn "Có"
-                }
-                .setNegativeButton("No") { dialog, which ->
-                    // Đóng hộp thoại khi người dùng chọn "Không"
-                    dialog.dismiss()
-                }
-                .create().apply {
-                    // Thiết lập background cho dialog
-                    window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
-                }
-                .show()
-        }
         frmBlock.setOnClickListener {
             changeBackgroundColor(frmBlock, "#D9D9D9", 150)
 
