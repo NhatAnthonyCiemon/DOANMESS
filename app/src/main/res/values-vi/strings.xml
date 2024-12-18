@@ -70,6 +70,7 @@
     <string name="Image">Đã gửi một ảnh</string>
     <string name="Video">Đã gửi một video</string>
     <string name="Location">Đã gửi một vị trí</string>
+    <string name="File">Đã gửi một tập tin</string>
     <string name="option">Tùy chọn</string>
     <string name="pin">Ghim</string>
     <string name="unpin">Bỏ ghim</string>

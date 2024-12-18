@@ -7,7 +7,7 @@
     <item
         android:id="@+id/action_attach"
         android:title="Attach"
-        android:icon="@drawable/baseline_attach_file_24" />
+        android:icon="@drawable/baseline_image_24" />
     <item
         android:id="@+id/action_take_picture"
         android:title="Take picture"
@@ -16,4 +16,8 @@
         android:id="@+id/action_video_recording"
         android:title="Video Recording"
         android:icon="@drawable/baseline_videocam_24_orange" />
+    <item
+        android:id="@+id/action_send_file"
+        android:title="File"
+        android:icon="@drawable/baseline_attach_file_24" />
 </menu>
