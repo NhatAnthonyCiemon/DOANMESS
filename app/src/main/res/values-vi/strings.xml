@@ -78,4 +78,13 @@
     <string name="yes">Có</string>
     <string name="no">Không</string>
     <string name="unpinned_message_content">Bạn có chắc chắn muốn bỏ ghim tin nhắn:\n{name}:{content}?</string>
+    <string name="unnoticed_title">Điều chỉnh thông báo</string>
+    <string name="unnoticed_message">Bạn có muốn điều chỉnh thông báo không?</string>
+    <string name="user_removed_from_unnoticed">Người dùng đã được xóa khỏi danh sách thông báo.</string>
+    <string name="user_added_to_unnoticed">Người dùng đã được thêm vào danh sách tắt thông báo.</string>
+    <string name="failed_to_remove_user">Không thể xóa người dùng: %1$s</string>
+    <string name="failed_to_add_user">Không thể thêm người dùng: %1$s</string>
+    <string name="failed_to_check_unnoticed">Không thể kiểm tra danh sách thông báo: %1$s</string>
+    <string name="invalid_user_data">Dữ liệu người dùng không hợp lệ.</string>
+
 </resources>
