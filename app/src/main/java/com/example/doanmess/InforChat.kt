@@ -175,7 +175,6 @@ class InforChat : HandleOnlineActivity() {
 
         val frmNotice = findViewById<FrameLayout>(R.id.frmNotice)
         val frmLink = findViewById<FrameLayout>(R.id.frmLink)
-        val frmLimit = findViewById<FrameLayout>(R.id.frmLimit)
         val frmBlock = findViewById<FrameLayout>(R.id.frmBlock)
         val frmTrash = findViewById<FrameLayout>(R.id.frmTrash)
         val btnNotice: FloatingActionButton = findViewById(R.id.btnNotice)
@@ -197,24 +196,6 @@ class InforChat : HandleOnlineActivity() {
             fetchPinnedMessages()
         }
 
-        frmLimit.setOnClickListener {
-            changeBackgroundColor(frmLimit, "#D9D9D9", 150)
-            AlertDialog.Builder(this)
-                .setTitle("Limit")
-                .setMessage("Do you want to limit?")
-                .setPositiveButton("Yes") { dialog, which ->
-                    // Xử lý khi người dùng chọn "Có"
-                }
-                .setNegativeButton("No") { dialog, which ->
-                    // Đóng hộp thoại khi người dùng chọn "Không"
-                    dialog.dismiss()
-                }
-                .create().apply {
-                    // Thiết lập background cho dialog
-                    window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
-                }
-                .show()
-        }
         frmBlock.setOnClickListener {
             changeBackgroundColor(frmBlock, "#D9D9D9", 150)
 
@@ -367,77 +348,141 @@ class InforChat : HandleOnlineActivity() {
     }
 
     private fun showUnnoticedDialog(chatUserId: String?) {
-        // Tạo và hiển thị hộp thoại AlertDialog
         AlertDialog.Builder(this)
-            .setTitle("Unnoticed")
-            .setMessage("Do you want to toggle unnoticed status?")
-            .setPositiveButton("Yes") { dialog, which ->
+            .setTitle(getString(R.string.unnoticed_title))
+            .setMessage(getString(R.string.unnoticed_message))
+            .setPositiveButton(getString(R.string.yes)) { dialog, which ->
                 val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
                 if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
                     val firestore = FirebaseFirestore.getInstance()
                     firestore.collection("users").document(currentUserId).get()
                         .addOnSuccessListener { document ->
-                            // Lấy danh sách người dùng bị "Unnoticed" từ Firestore
                             val unnoticedUsers = document["Unnoticed"] as? List<String> ?: emptyList()
                             val isAlreadyUnnoticed = unnoticedUsers.contains(chatUserId)
 
-                            // Lưu danh sách hiện tại vào SharedPreferences
                             val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
                             val editor = sharedPreferences.edit()
                             editor.putString("UnnoticedUsers", Gson().toJson(unnoticedUsers))
                             editor.apply()
 
                             if (isAlreadyUnnoticed) {
-                                // Nếu người dùng đã có trong danh sách "Unnoticed", xóa họ ra
                                 firestore.collection("users").document(currentUserId)
                                     .update("Unnoticed", FieldValue.arrayRemove(chatUserId))
                                     .addOnSuccessListener {
-                                        Toast.makeText(this, "User removed from unnoticed list.", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, getString(R.string.user_removed_from_unnoticed), Toast.LENGTH_SHORT).show()
 
-                                        // Cập nhật lại SharedPreferences
                                         val updatedList = unnoticedUsers.toMutableList()
                                         updatedList.remove(chatUserId)
                                         editor.putString("UnnoticedUsers", Gson().toJson(updatedList))
                                         editor.apply()
                                     }
                                     .addOnFailureListener { e ->
-                                        Toast.makeText(this, "Failed to remove user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, getString(R.string.failed_to_remove_user, e.message), Toast.LENGTH_SHORT).show()
                                     }
                             } else {
-                                // Nếu người dùng chưa có trong danh sách "Unnoticed", thêm họ vào
                                 firestore.collection("users").document(currentUserId)
                                     .update("Unnoticed", FieldValue.arrayUnion(chatUserId))
                                     .addOnSuccessListener {
-                                        Toast.makeText(this, "User added to unnoticed list.", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, getString(R.string.user_added_to_unnoticed), Toast.LENGTH_SHORT).show()
 
-                                        // Cập nhật lại SharedPreferences
                                         val updatedList = unnoticedUsers.toMutableList()
                                         updatedList.add(chatUserId)
                                         editor.putString("UnnoticedUsers", Gson().toJson(updatedList))
                                         editor.apply()
                                     }
                                     .addOnFailureListener { e ->
-                                        Toast.makeText(this, "Failed to add user: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, getString(R.string.failed_to_add_user, e.message), Toast.LENGTH_SHORT).show()
                                     }
                             }
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(this, "Failed to check unnoticed users: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, getString(R.string.failed_to_check_unnoticed, e.message), Toast.LENGTH_SHORT).show()
                         }
                 } else {
-                    Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.invalid_user_data), Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("No") { dialog, which ->
-                // Đóng hộp thoại khi người dùng chọn "No"
+            .setNegativeButton(getString(R.string.no)) { dialog, which ->
                 dialog.dismiss()
             }
             .create().apply {
-                // Thiết lập background cho dialog
                 window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
             }
             .show()
     }
+
+//    private fun showUnnoticedDialog(chatUserId: String?) {
+//        // Tạo và hiển thị hộp thoại AlertDialog
+//        AlertDialog.Builder(this)
+//            .setTitle("Unnoticed")
+//            .setMessage("Do you want to toggle unnoticed status?")
+//            .setPositiveButton("Yes") { dialog, which ->
+//                val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+//                if (currentUserId != null && !chatUserId.isNullOrEmpty()) {
+//                    val firestore = FirebaseFirestore.getInstance()
+//                    firestore.collection("users").document(currentUserId).get()
+//                        .addOnSuccessListener { document ->
+//                            // Lấy danh sách người dùng bị "Unnoticed" từ Firestore
+//                            val unnoticedUsers = document["Unnoticed"] as? List<String> ?: emptyList()
+//                            val isAlreadyUnnoticed = unnoticedUsers.contains(chatUserId)
+//
+//                            // Lưu danh sách hiện tại vào SharedPreferences
+//                            val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+//                            val editor = sharedPreferences.edit()
+//                            editor.putString("UnnoticedUsers", Gson().toJson(unnoticedUsers))
+//                            editor.apply()
+//
+//                            if (isAlreadyUnnoticed) {
+//                                // Nếu người dùng đã có trong danh sách "Unnoticed", xóa họ ra
+//                                firestore.collection("users").document(currentUserId)
+//                                    .update("Unnoticed", FieldValue.arrayRemove(chatUserId))
+//                                    .addOnSuccessListener {
+//                                        Toast.makeText(this, "User removed from unnoticed list.", Toast.LENGTH_SHORT).show()
+//
+//                                        // Cập nhật lại SharedPreferences
+//                                        val updatedList = unnoticedUsers.toMutableList()
+//                                        updatedList.remove(chatUserId)
+//                                        editor.putString("UnnoticedUsers", Gson().toJson(updatedList))
+//                                        editor.apply()
+//                                    }
+//                                    .addOnFailureListener { e ->
+//                                        Toast.makeText(this, "Failed to remove user: ${e.message}", Toast.LENGTH_SHORT).show()
+//                                    }
+//                            } else {
+//                                // Nếu người dùng chưa có trong danh sách "Unnoticed", thêm họ vào
+//                                firestore.collection("users").document(currentUserId)
+//                                    .update("Unnoticed", FieldValue.arrayUnion(chatUserId))
+//                                    .addOnSuccessListener {
+//                                        Toast.makeText(this, "User added to unnoticed list.", Toast.LENGTH_SHORT).show()
+//
+//                                        // Cập nhật lại SharedPreferences
+//                                        val updatedList = unnoticedUsers.toMutableList()
+//                                        updatedList.add(chatUserId)
+//                                        editor.putString("UnnoticedUsers", Gson().toJson(updatedList))
+//                                        editor.apply()
+//                                    }
+//                                    .addOnFailureListener { e ->
+//                                        Toast.makeText(this, "Failed to add user: ${e.message}", Toast.LENGTH_SHORT).show()
+//                                    }
+//                            }
+//                        }
+//                        .addOnFailureListener { e ->
+//                            Toast.makeText(this, "Failed to check unnoticed users: ${e.message}", Toast.LENGTH_SHORT).show()
+//                        }
+//                } else {
+//                    Toast.makeText(this, "Invalid user data.", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//            .setNegativeButton("No") { dialog, which ->
+//                // Đóng hộp thoại khi người dùng chọn "No"
+//                dialog.dismiss()
+//            }
+//            .create().apply {
+//                // Thiết lập background cho dialog
+//                window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
+//            }
+//            .show()
+//    }
 
 
     private fun fetchPinnedMessages() {

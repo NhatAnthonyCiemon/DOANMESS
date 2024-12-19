@@ -278,8 +278,12 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
-
+        private val cardFile : CardView = itemView.findViewById(R.id.cardFile)
+        private val fileLoadingBar : ProgressBar = itemView.findViewById(R.id.fileLoadingBar)
+        private val fileMessageView : TextView = itemView.findViewById(R.id.fileMessageView)
         fun bind(chatMessage: MainChat.ChatMessage) {
+            cardFile.visibility = View.GONE
+            fileLoadingBar.visibility = View.GONE
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
                 videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
@@ -356,7 +360,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     }
                 }
             }
-
             else if (chatMessage.type == "image") {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
@@ -373,7 +376,6 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     showZoomedImageDialog(itemView.context, chatMessage.content)
                 }
             }
-
             else if (chatMessage.type == "audio") {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
@@ -389,7 +391,23 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     loadingBar.visibility = View.VISIBLE
                 }
             }
-
+            else if(chatMessage.type == "file"){
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
+                cardFile.visibility = View.VISIBLE
+                if(chatMessage.isSent){
+                    fileMessageView.visibility = View.VISIBLE
+                    fileLoadingBar.visibility = View.GONE
+                    fileMessageView.text = chatMessage.content
+                }
+                else {
+                    fileMessageView.visibility = View.GONE
+                    fileLoadingBar.visibility = View.VISIBLE
+                }
+            }
             else {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE

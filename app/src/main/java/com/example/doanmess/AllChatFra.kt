@@ -295,6 +295,7 @@ class AllChatFra : Fragment() {
             "video" -> atvtContext.getString(R.string.Video)
             "location" -> atvtContext.getString(R.string.Image)
             "audio" -> atvtContext.getString(R.string.Location)
+            "file" -> atvtContext.getString(R.string.File)
             else -> content
         }
     }

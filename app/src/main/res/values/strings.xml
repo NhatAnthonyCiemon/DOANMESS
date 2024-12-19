@@ -73,4 +73,22 @@
     <string name="Image">Sent an image</string>
     <string name="Video">Sent a video</string>
     <string name="Location">Sent a location</string>
+    <string name="File">Sent a file</string>
+    <string name="option">Option</string>
+    <string name="pin">Pin</string>
+    <string name="unpin">UnPin</string>
+    <string name="unpinned_message_title">Unpinned message</string>
+    <string name="unpinned_message_confirmation">Are you sure to unpin message:%s: %s?</string>
+    <string name="unpinned_message_content">Are you sure to unpin message:\n{name}:{content}?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="unnoticed_title">Unnoticed</string>
+    <string name="unnoticed_message">Do you want to toggle unnoticed status?</string>
+    <string name="user_removed_from_unnoticed">User removed from unnoticed list.</string>
+    <string name="user_added_to_unnoticed">User added to unnoticed list.</string>
+    <string name="failed_to_remove_user">Failed to remove user: %1$s</string>
+    <string name="failed_to_add_user">Failed to add user: %1$s</string>
+    <string name="failed_to_check_unnoticed">Failed to check unnoticed users: %1$s</string>
+    <string name="invalid_user_data">Invalid user data.</string>
+
 </resources>

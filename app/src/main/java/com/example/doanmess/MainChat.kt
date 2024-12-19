@@ -61,7 +61,11 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.util.UUID
-
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
+import android.util.Base64
 
 class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -140,9 +144,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 
 
 
-
-
-
         videoCallBtn = findViewById(R.id.videoCallBtn)
         callVoiceBtn = findViewById(R.id.callVoiceBtn)
         // Set up the RecyclerView
@@ -218,7 +219,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         lastSenderId = "" // Reset lastSenderId for fresh load
                         for (messageSnapshot in snapshot.children) {
                             // Manually extract each field and handle null cases
-                            val content =
+                            var content =
                                 messageSnapshot.child("Content").getValue(String::class.java) ?: ""
                             val sendId =
                                 messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
@@ -230,6 +231,32 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                 messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                             val pinned =
                                 messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
+
+//                            if (type == "text") {
+//                                val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
+//                                val secretKey = decodeBase64ToSecretKey(base64Key)
+//
+//                                // Kiểm tra nếu `content` là null hoặc không hợp lệ
+//                                val contentStr = content?.toString() ?: "Invalid content"
+//
+//                                // Giải mã nội dung với try-catch
+//                                val txt = try {
+//                                    decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+//                                } catch (e: Exception) {
+//                                    e.printStackTrace() // Log lỗi nếu có
+//                                    null // Trả về null nếu xảy ra lỗi
+//                                }
+//
+//                                // Kiểm tra kết quả giải mã
+//                                if (txt != null) {
+//                                    // Hiển thị nội dung nếu thành công
+//                                    content = txt
+//                                } else {
+//                                    // Hiển thị lỗi nếu giải mã thất bại
+//                                }
+//                            }
+
+
                             val chatMessage = ChatMessage(
                                 chatId = messageSnapshot.key ?: "",
                                 content = content,
@@ -297,12 +324,37 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                     val tempMessages = mutableListOf<ChatMessage>()
 
                     for (messageSnapshot in snapshot.children) {
-                        val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
+                        var content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
                         val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                         val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
                         val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
                         val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
                         val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
+
+//                        if (type == "text") {
+//                            val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
+//                            val secretKey = decodeBase64ToSecretKey(base64Key)
+//
+//                            // Kiểm tra nếu `content` là null hoặc không hợp lệ
+//                            val contentStr = content?.toString() ?: "Invalid content"
+//
+//                            // Giải mã nội dung với try-catch
+//                            val txt = try {
+//                                decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+//                            } catch (e: Exception) {
+//                                e.printStackTrace() // Log lỗi nếu có
+//                                null // Trả về null nếu xảy ra lỗi
+//                            }
+//
+//                            // Kiểm tra kết quả giải mã
+//                            if (txt != null) {
+//                                // Hiển thị nội dung nếu thành công
+//                                content = txt
+//                            } else {
+//                                // Hiển thị lỗi nếu giải mã thất bại
+//                            }
+//                        }
+
                         val chatMessage = ChatMessage(
                             chatId = messageSnapshot.key ?: "",
                             content = content,
@@ -371,7 +423,11 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         message_input = findViewById<android.widget.EditText>(R.id.message_input)
         // set on click listener for the send button to send the message
         findViewById<ImageButton>(R.id.send_button).setOnClickListener {
-            val message = message_input.text.toString()
+            var message = message_input.text.toString()
+//            val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
+//            val secretKey = decodeBase64ToSecretKey(base64Key)
+//            message = encryptMessage(message, secretKey)
+//            Toast.makeText(this, decryptMessage(message, secretKey), Toast.LENGTH_SHORT).show()
             sendMessage(message,"text")
         }
         message_input.setOnFocusChangeListener { _, hasFocus ->
@@ -379,7 +435,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 recyclerViewMessages.scrollToPosition(chatMessages.size - 1)
             }
         }
-
 
         // set on click listener for the mic button to start voice recording
         val micButton = findViewById<ImageView>(R.id.mic_button)
@@ -457,103 +512,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         }
     }
 
-//    private fun loadOlderMessages() {
-//        val firstMessage = chatMessages.firstOrNull() ?: return
-//        val firstMessageKey = firstMessage.chatId
-//
-//        val olderMessagesQuery = Firebase.database.getReference("users").child(currentUserUid)
-//            .child(targetUserUid).child("Messages")
-//            .orderByKey()
-//            .endBefore(firstMessageKey)
-//            .limitToLast(limitMessage)
-//
-//        olderMessagesQuery.addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val olderMessages = mutableListOf<ChatMessage>()
-//                for (messageSnapshot in snapshot.children) {
-//                    val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
-//                    val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
-//                    val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
-//                    val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
-//                    val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
-//                    val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
-//                    val chatMessage = ChatMessage(
-//                        chatId = messageSnapshot.key ?: "",
-//                        content = content,
-//                        sendId = sendId,
-//                        recvId = recvId,
-//                        time = time,
-//                        type = type,
-//                        isSent = true,
-//                        pinned = pinned
-//                    )
-////                    olderMessages.add(chatMessage)
-//                    if (chatMessages.none { it.chatId == chatMessage.chatId }) {
-//                        olderMessages.add(chatMessage)
-//                    }
-//                }
-//                olderMessages.sortBy { it.time }
-//                chatMessages.addAll(0, olderMessages) // Add older messages to the beginning of the list
-//                chatAdapter.notifyItemRangeInserted(0, olderMessages.size)
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                // Handle database error if needed
-//            }
-//        })
-//    }
-
-//    private fun loadOlderMessages() {
-//        val firstMessage = chatMessages.firstOrNull() ?: return
-//        val firstMessageKey = firstMessage.chatId
-//
-//        val olderMessagesQuery = if (isGroup) {
-//            Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
-//                .orderByKey()
-//                .endBefore(firstMessageKey)
-//                .limitToLast(limitMessage)
-//        } else {
-//            Firebase.database.getReference("users").child(currentUserUid)
-//                .child(targetUserUid).child("Messages")
-//                .orderByKey()
-//                .endBefore(firstMessageKey)
-//                .limitToLast(limitMessage)
-//        }
-//
-//        olderMessagesQuery.addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val olderMessages = mutableListOf<ChatMessage>()
-//                for (messageSnapshot in snapshot.children) {
-//                    val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
-//                    val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
-//                    val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
-//                    val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
-//                    val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
-//                    val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
-//                    val chatMessage = ChatMessage(
-//                        chatId = messageSnapshot.key ?: "",
-//                        content = content,
-//                        sendId = sendId,
-//                        recvId = recvId,
-//                        time = time,
-//                        type = type,
-//                        isSent = true,
-//                        pinned = pinned
-//                    )
-//                    if (chatMessages.none { it.chatId == chatMessage.chatId }) {
-//                        olderMessages.add(chatMessage)
-//                    }
-//                }
-//                olderMessages.sortBy { it.time }
-//                chatMessages.addAll(0, olderMessages) // Add older messages to the beginning of the list
-//                chatAdapter.notifyItemRangeInserted(0, olderMessages.size)
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                // Handle database error if needed
-//            }
-//        })
-//    }
 
     private fun loadOlderMessages() {
         val loadingIndicator = findViewById<ProgressBar>(R.id.loading_indicator)
@@ -579,12 +537,38 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val olderMessages = mutableListOf<ChatMessage>()
                 for (messageSnapshot in snapshot.children) {
-                    val content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
+                    var content = messageSnapshot.child("Content").getValue(String::class.java) ?: ""
                     val sendId = messageSnapshot.child("SendId").getValue(String::class.java) ?: ""
                     val recvId = messageSnapshot.child("RecvId").getValue(String::class.java) ?: ""
                     val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
                     val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                     val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
+
+                    // Kiểm tra và mã hóa nếu type là "text"
+//                    if (type == "text") {
+//                        val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
+//                        val secretKey = decodeBase64ToSecretKey(base64Key)
+//
+//                        // Kiểm tra nếu `content` là null hoặc không hợp lệ
+//                        val contentStr = content?.toString() ?: "Invalid content"
+//
+//                        // Giải mã nội dung với try-catch
+//                        val txt = try {
+//                            decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+//                        } catch (e: Exception) {
+//                            e.printStackTrace() // Log lỗi nếu có
+//                            null // Trả về null nếu xảy ra lỗi
+//                        }
+//
+//                        // Kiểm tra kết quả giải mã
+//                        if (txt != null) {
+//                            // Hiển thị nội dung nếu thành công
+//                            content = txt
+//                        } else {
+//                            // Hiển thị lỗi nếu giải mã thất bại
+//                        }
+//                    }
+
                     val chatMessage = ChatMessage(
                         chatId = messageSnapshot.key ?: "",
                         content = content,
@@ -647,6 +631,25 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                     if (intent.resolveActivity(packageManager) != null) {
                         startActivityForResult(intent, REQUEST_CODE_PICK_MEDIA)
                     }
+                    true
+                }
+                R.id.action_send_file -> {
+                    val intent = Intent(Intent.ACTION_GET_CONTENT)
+                    intent.type = "*/*"
+                    val mimeTypes = arrayOf(
+                        "application/pdf",
+                        "application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "application/vnd.ms-excel",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "application/vnd.ms-powerpoint",
+                        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                        "text/plain",
+                        "application/zip",
+                        "application/x-rar-compressed"
+                    )
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                    startActivityForResult(intent, REQUEST_CODE_PICK_MEDIA)
                     true
                 }
                 else -> false
@@ -747,16 +750,19 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                     .child(currentUserUid).child("Messages").push().setValue(newMessage)
                 var noti = message
                 if(type == "audio") {
-                    noti = "Sent an audio"
+                    noti = getString(R.string.Audio)
                 }
                 else if(type == "image") {
-                    noti = "Sent an image"
+                    noti = getString(R.string.Image)
                 }
                 else if(type == "video") {
-                    noti = "Sent a video"
+                    noti = getString(R.string.Video)
                 }
                 else if(type == "location") {
-                    noti = "Sent a location"
+                    noti = getString(R.string.Location)
+                }
+                else if(type == "file") {
+                    noti = getString(R.string.File)
                 }
                 messageController.newMessageFriend(targetUserUid, currentUserUid, noti )
             }
@@ -849,8 +855,12 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             Toast.makeText(this, "Uploading image...", Toast.LENGTH_LONG).show()
             val compressedImage = compressImage(fileUri, this)
             storageRef.putBytes(compressedImage)
-        } else {
+        } else if( mimeType?.startsWith("video/") == true) {
             sendSkeletonMess("video")
+            storageRef.putFile(fileUri)
+        }
+        else {
+            sendSkeletonMess("file")
             storageRef.putFile(fileUri)
         }
 
@@ -866,7 +876,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         sendMessage(downloadUrl, "video")
                     }
                     else -> {
-                        sendMessage(downloadUrl, "unknown")
+                        sendMessage(downloadUrl, "file")
                     }
                 }
             }
@@ -1185,9 +1195,52 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         val deleteButton: Button = dialogView.findViewById(R.id.delete_button)
         val cancelButton: Button = dialogView.findViewById(R.id.cancel_button)
 
-        // Set the text for the "Pin/Unpin" button
-        pinButton.text = if (message.pinned) "Bỏ ghim" else "Ghim"
 
+        if(isGroup){
+            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(message.chatId)
+                .child("Pinned").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.exists()){
+                        val isPinned = snapshot.getValue(Boolean::class.java) ?: false
+                        if(isPinned){
+                            pinButton.text = getString(R.string.unpin)
+                        }
+                        else {
+                            pinButton.text = getString(R.string.pin)
+                        }
+                    }
+                    else {
+                        pinButton.text = getString(R.string.pin)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle possible errors.
+                }
+            })
+        }
+        else{
+            Firebase.database.getReference("users").child(currentUserUid)
+                .child(targetUserUid).child("Messages").child(message.chatId).child("Pinned")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val isPinned = snapshot.getValue(Boolean::class.java) ?: false
+                            if (isPinned) {
+                                pinButton.text = getString(R.string.unpin)
+                            } else {
+                                pinButton.text = getString(R.string.pin)
+                            }
+                        } else {
+                            pinButton.text = getString(R.string.pin)
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle possible errors.
+                    }
+                })
+        }
         // Create the dialog
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)
@@ -1245,11 +1298,11 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         "Name" to name,
                     )
                     Firebase.database.getReference("users").child(currentUserUid)
-                        .child(targetUserUid).child("PinnedMessages").push()
+                        .child(targetUserUid).child("PinnedMessages").child(messageId)
                         .setValue(newMessage)
 
                     Firebase.database.getReference("users").child(targetUserUid)
-                        .child(currentUserUid).child("PinnedMessages").push()
+                        .child(currentUserUid).child("PinnedMessages").child(messageId)
                         .setValue(newMessage)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1267,7 +1320,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         "Content" to message.content,
                         "Name" to name,
                     )
-                    Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").push()
+                    Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").child(messageId)
                         .setValue(newMessage)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -1328,133 +1381,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 })
         }
     }
-
-//    private fun showOptionsDialog(position: Int, message: MainChat.ChatMessage) {
-//        val neutralButton = if (message.pinned) "Bỏ ghim" else "Ghim"
-//
-//        // Ví dụ hiển thị dialog với các tùy chọn
-//        AlertDialog.Builder(this)
-//            .setTitle("Tùy chọn")
-//            .setMessage("Bạn muốn làm gì với tin nhắn này?")
-//            .setPositiveButton("Xóa") { _, _ ->
-//                deleteMessage(position)
-//            }
-//            .setNegativeButton("Hủy", null)
-//            .setNeutralButton(neutralButton) { _, _ ->
-//                // pin message
-//                val messageId = message.chatId
-//
-//                if (messageId.isNotEmpty()) {
-//                    if (!message.pinned) {
-//                        if (!isGroup) {
-//                            Firebase.database.getReference("users").child(currentUserUid)
-//                                .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
-//                                .setValue(!message.pinned)
-//
-//                            Firebase.database.getReference("users").child(targetUserUid)
-//                                .child(currentUserUid).child("Messages").child(messageId)
-//                                .child("Pinned")
-//                                .setValue(!message.pinned)
-//
-//                            lifecycleScope.launch {
-//                                try {
-//                                    val name = fetchName(message.sendId)
-//                                    val newMessage = mapOf(
-//                                        "Content" to message.content,
-//                                        "Name" to name,
-//                                    )
-//                                    Firebase.database.getReference("users").child(currentUserUid)
-//                                        .child(targetUserUid).child("PinnedMessages").push()
-//                                        .setValue(newMessage)
-//                                    Firebase.database.getReference("users").child(targetUserUid)
-//                                        .child(currentUserUid).child("PinnedMessages").push()
-//                                        .setValue(newMessage)
-//                                } catch (e: Exception) {
-//                                    e.printStackTrace()
-//                                }
-//                            }
-//                        }
-//                        else {
-//                            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(messageId).child("Pinned")
-//                                .setValue(!message.pinned)
-//
-//                            lifecycleScope.launch {
-//                                try {
-//                                    val name = fetchName(message.sendId)
-//                                    val newMessage = mapOf(
-//                                        "Content" to message.content,
-//                                        "Name" to name,
-//                                    )
-//                                    Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").push()
-//                                        .setValue(newMessage)
-//                                } catch (e: Exception) {
-//                                    e.printStackTrace()
-//                                }
-//                            }
-//                        }
-//                    }
-//                    else {
-//                        if (!isGroup) {
-//                            Firebase.database.getReference("users").child(currentUserUid)
-//                                .child(targetUserUid).child("Messages").child(messageId).child("Pinned")
-//                                .setValue(!message.pinned)
-//
-//                            Firebase.database.getReference("users").child(targetUserUid)
-//                                .child(currentUserUid).child("Messages").child(messageId)
-//                                .child("Pinned")
-//                                .setValue(!message.pinned)
-//
-//                            Firebase.database.getReference("users").child(currentUserUid)
-//                                .child(targetUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
-//                                .addListenerForSingleValueEvent(object : ValueEventListener {
-//                                    override fun onDataChange(snapshot: DataSnapshot) {
-//                                        for (child in snapshot.children) {
-//                                            child.ref.removeValue()
-//                                        }
-//                                    }
-//
-//                                    override fun onCancelled(error: DatabaseError) {
-//                                    }
-//                                })
-//
-//                            Firebase.database.getReference("users").child(targetUserUid)
-//                                .child(currentUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
-//                                .addListenerForSingleValueEvent(object : ValueEventListener {
-//                                    override fun onDataChange(snapshot: DataSnapshot) {
-//                                        for (child in snapshot.children) {
-//                                            child.ref.removeValue()
-//                                        }
-//                                    }
-//
-//                                    override fun onCancelled(error: DatabaseError) {
-//                                    }
-//                                })
-//                        }
-//                        else {
-//                            Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(messageId).child("Pinned")
-//                                .setValue(!message.pinned)
-//
-//                            Firebase.database.getReference("groups").child(targetUserUid).child("PinnedMessages").orderByChild("Content").equalTo(message.content)
-//                                .addListenerForSingleValueEvent(object : ValueEventListener {
-//                                    override fun onDataChange(snapshot: DataSnapshot) {
-//                                        for (child in snapshot.children) {
-//                                            child.ref.removeValue()
-//                                        }
-//                                    }
-//
-//                                    override fun onCancelled(error: DatabaseError) {
-//                                    }
-//                                })
-//                        }
-//                    }
-//                }
-//            }
-//            .create()
-//            .apply {
-//                setCanceledOnTouchOutside(true)
-//            }
-//            .show()
-//    }
 
     suspend fun fetchName(sendId: String): String {
         val document = Firebase.firestore.collection("users").document(sendId).get().await()
@@ -1523,4 +1449,32 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
     }
 
+    // Tạo khóa AES
+    fun generateAESKey(): SecretKey {
+        val keyGenerator = KeyGenerator.getInstance("AES")
+        keyGenerator.init(128) // Kích thước khóa: 128 bit
+        return keyGenerator.generateKey()
+    }
+
+    fun decodeBase64ToSecretKey(base64Key: String): SecretKey {
+        val decodedKey = Base64.decode(base64Key, Base64.DEFAULT)
+        return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
+    }
+
+    // Mã hóa dữ liệu
+    fun encryptMessage(message: String, secretKey: SecretKey): String {
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+        val encryptedBytes = cipher.doFinal(message.toByteArray())
+        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
+    }
+
+    // Giải mã dữ liệu
+    fun decryptMessage(encryptedMessage: String, secretKey: SecretKey): String {
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.DECRYPT_MODE, secretKey)
+        val decodedBytes = Base64.decode(encryptedMessage, Base64.DEFAULT)
+        val decryptedBytes = cipher.doFinal(decodedBytes)
+        return String(decryptedBytes)
+    }
 }
