@@ -5,11 +5,11 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView2"
-        android:name="com.example.doanmess.inforFragment"
+        android:name="com.example.doanmess.fragments.inforFragment"
         android:layout_width="381dp"
         android:layout_height="780dp"
         tools:layout_editor_absoluteX="18dp"

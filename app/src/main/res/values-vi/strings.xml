@@ -87,5 +87,5 @@
     <string name="failed_to_add_user">Không thể thêm người dùng: %1$s</string>
     <string name="failed_to_check_unnoticed">Không thể kiểm tra danh sách thông báo: %1$s</string>
     <string name="invalid_user_data">Dữ liệu người dùng không hợp lệ.</string>
-
+    <string name="Download">Đang tải xuống...</string>
 </resources>

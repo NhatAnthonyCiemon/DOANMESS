@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.doanmess.models.MessageGroupSQL
+import com.example.doanmess.models.MessageSQL
 
 @Database(entities = [MessageSQL::class, MessageGroupSQL::class], version = 1)
 abstract class MessageSQLDatabase : RoomDatabase() {
