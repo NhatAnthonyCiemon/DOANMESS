@@ -13,7 +13,12 @@
           "package_name": "com.example.doanmess"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "266445649012-62n3i4cqos4pffaoqhq2q8qfv8nu4jvv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBbSHQH_JObKk_lVzbFrAnbn4gQZIe5ZyA"
@@ -21,7 +26,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "266445649012-62n3i4cqos4pffaoqhq2q8qfv8nu4jvv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

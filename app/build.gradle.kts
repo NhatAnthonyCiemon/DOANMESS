@@ -81,5 +81,8 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer-dash:1.4.1")
     implementation("androidx.media3:media3-ui:1.4.1")
     implementation("id.zelory:compressor:3.0.1")
+    // Google sign in
+    implementation("com.google.firebase:firebase-auth:22.0.0")
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
 //
 }

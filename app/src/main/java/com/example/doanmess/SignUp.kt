@@ -22,7 +22,7 @@ data class User(
     @JvmField @PropertyName("Groups") val Groups: List<String> = listOf(),
     @JvmField @PropertyName("Devices") val Devices: List<String> = listOf()
 )
-
+//
 
 
 class SignUp : AppCompatActivity() {

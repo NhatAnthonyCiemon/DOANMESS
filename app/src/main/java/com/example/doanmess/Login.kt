@@ -11,18 +11,32 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.SignInButton
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
 
 
+
 class Login : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private val RC_SIGN_IN = 1
+    private val db = FirebaseFirestore.getInstance()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +46,8 @@ class Login : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
+
+
         // Kiem tra da dang nhap chua
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -40,6 +56,19 @@ class Login : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        // Configure Google Sign-In
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        // Set click listener for the sign-in button
+        findViewById<Button>(R.id.btnGoogleSignIn).setOnClickListener {
+            signInWithGoogle()
+        }
+
 
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
@@ -77,6 +106,7 @@ class Login : AppCompatActivity() {
             }
         }
 
+
         btnForgotPassword.setOnClickListener {
             // Chuyển sang Activity quên mật khẩu
             val intent = Intent(this, ForgotPassword::class.java)
@@ -89,6 +119,116 @@ class Login : AppCompatActivity() {
             startActivity(intent)
         }
     }
+    private fun signInWithGoogle() {
+        googleSignInClient.signOut().addOnCompleteListener {
+            val signInIntent = googleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+        }
+    }
+
+
+    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+        try {
+            val account: GoogleSignInAccount? = completedTask.getResult(ApiException::class.java)
+            account?.let {
+                Toast.makeText(this, "Welcome, ${it.displayName}", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: ApiException) {
+            Toast.makeText(this, "Sign in failed: ${e.statusCode}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                Log.e("Login", "Google Sign-In failed", e)
+                Toast.makeText(this, "Google Sign-In failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    if (user != null && user.isEmailVerified) {
+                        val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                        LoginNewDevice().RegisterNewDevice(androidId, user.uid)
+                        saveUserToFirestoreIfNew(user) { newUser ->
+                            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this, Home::class.java).apply {
+                                putExtra("userName", newUser.Name)
+                                putExtra("userAvatar", newUser.Avatar)
+                            }
+                            startActivity(intent)
+                            finish()
+                        }
+                    } else if (user != null && !user.isEmailVerified) {
+                        auth.signOut()
+                        Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "Login with Google failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    private fun saveUserToFirestoreIfNew(user: FirebaseUser, callback: (User) -> Unit) {
+        val uid = user.uid
+        val userRef = db.collection("users").document(uid)
+        userRef.get().addOnSuccessListener { document ->
+            if (!document.exists()) {
+                val newUser = User(
+                    Avatar = "https://firebasestorage.googleapis.com/v0/b/doan-cb428.appspot.com/o/avatars%2F3a1a9f11-a045-4072-85da-7202c9bc9989.jpg?alt=media&token=4f3a7b0d-7c87-443f-9e1d-4222f8d22bb9",
+                    Name = user.displayName ?: "Temp Name",
+                    RequestSent = listOf(),
+                    Requests = listOf(),
+                    Blocks = listOf(),
+                    Friends = listOf(),
+                    Groups = listOf(),
+                    Devices = listOf(Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID))
+                )
+                userRef.set(newUser).addOnSuccessListener {
+                    callback(newUser)
+                }.addOnFailureListener {
+                    Toast.makeText(this, "Failed to save user: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                val existingUser = document.toObject(User::class.java)
+                if (existingUser != null) {
+                    callback(existingUser)
+                }
+            }
+        }
+    }
+
+    private fun saveUserToFirestoreIfNew() {
+        val uid = auth.currentUser?.uid ?: return
+        val userRef = db.collection("users").document(uid)
+        userRef.get().addOnSuccessListener { document ->
+            if (!document.exists()) {
+                val newUser = User(
+                    Name = auth.currentUser?.displayName ?: "",
+                    Avatar = auth.currentUser?.photoUrl.toString(),
+                    Devices = listOf(Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID))
+                )
+                userRef.set(newUser).addOnSuccessListener {
+                    Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show()
+                }.addOnFailureListener {
+                    Toast.makeText(this, "Failed to save user: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
 
 }
 
