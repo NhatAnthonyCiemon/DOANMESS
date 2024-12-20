@@ -333,6 +333,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     // Show a placeholder while loading the thumbnail
                     Glide.with(itemView.context)
                         .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                        .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
                         .placeholder(R.drawable.video_placeholder) // Placeholder image
                         .error(R.drawable.video_placeholder) // Fallback image in case of error
                         .into(imageMessageView)
@@ -362,6 +363,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                                 }
                                 Glide.with(itemView.context)
                                     .load(bitmap) // Use extracted bitmap
+                                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
                                     .placeholder(R.drawable.video_placeholder) // Placeholder image
                                     .error(R.drawable.video_placeholder) // Fallback image in case of error
                                     .into(imageMessageView)
@@ -518,6 +520,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 // Show a placeholder while loading the thumbnail
                 Glide.with(itemView.context)
                     .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
                     .placeholder(R.drawable.video_placeholder) // Placeholder image
                     .error(R.drawable.video_placeholder) // Fallback image in case of error
                     .into(imageMessageView)
@@ -547,6 +550,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                             }
                             Glide.with(itemView.context)
                                 .load(bitmap) // Use extracted bitmap
+                                .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
                                 .placeholder(R.drawable.video_placeholder) // Placeholder image
                                 .error(R.drawable.video_placeholder) // Fallback image in case of error
                                 .into(imageMessageView)
@@ -691,6 +695,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 // Show a placeholder while loading the thumbnail
                 Glide.with(itemView.context)
                     .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
                     .placeholder(R.drawable.video_placeholder) // Placeholder image
                     .error(R.drawable.video_placeholder) // Fallback image in case of error
                     .into(imageMessageView)
@@ -720,6 +725,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                             }
                             Glide.with(itemView.context)
                                 .load(bitmap) // Use extracted bitmap
+                                .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
                                 .placeholder(R.drawable.video_placeholder) // Placeholder image
                                 .error(R.drawable.video_placeholder) // Fallback image in case of error
                                 .into(imageMessageView)
@@ -900,6 +906,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 // Show a placeholder while loading the thumbnail
                 Glide.with(itemView.context)
                     .load(chatMessage.content) // Use video URL as a placeholder for the thumbnail
+                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
                     .placeholder(R.drawable.video_placeholder) // Placeholder image
                     .error(R.drawable.video_placeholder) // Fallback image in case of error
                     .into(imageMessageView)
@@ -930,6 +937,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                             if (bitmap != null) {
                                 Glide.with(itemView.context)
                                     .load(bitmap) // Use extracted bitmap
+                                    .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
                                     .placeholder(R.drawable.video_placeholder) // Placeholder image
                                     .error(R.drawable.video_placeholder) // Fallback image in case of error
                                     .into(imageMessageView)
