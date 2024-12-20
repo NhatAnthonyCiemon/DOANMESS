@@ -231,6 +231,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 return
             }
         }
+        Toast.makeText(context, R.string.Download, Toast.LENGTH_SHORT).show()
         val request = DownloadManager.Request(Uri.parse(mediaUrl))
             .setTitle(uniqueFileName)
             .setDescription("Downloading media...")
