@@ -35,6 +35,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import java.util.UUID
 
@@ -218,11 +219,17 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         }
         dialog.show()
     }
-    private fun downloadMedia(context: Context, mediaUrl: String, type : String) {
-        Toast.makeText(context, R.string.Download, Toast.LENGTH_SHORT).show()
+    private fun downloadMedia(context: Context, mediaUrl: String, type : String, fileName : String = "") {
         var uniqueFileName = "image_${UUID.randomUUID()}.jpg"
         if(type == "video"){
             uniqueFileName = "video_${UUID.randomUUID()}.mp4"
+        }
+        else if(type == "file"){
+            uniqueFileName = fileName
+            if(fileName.isEmpty()){ // dùng cho các file trước đó gửi khi chưa có tên file
+                Toast.makeText(context, "File name is empty", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
         val request = DownloadManager.Request(Uri.parse(mediaUrl))
             .setTitle(uniqueFileName)
@@ -427,7 +434,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 if(chatMessage.isSent){
                     fileMessageView.visibility = View.VISIBLE
                     fileLoadingBar.visibility = View.GONE
-                    fileMessageView.text = chatMessage.content
+                    fileMessageView.text = chatMessage.fileName
+                    cardFile.setOnClickListener {
+                        downloadMedia(itemView.context, chatMessage.content, "file", chatMessage.fileName)
+                    }
                 }
                 else {
                     fileMessageView.visibility = View.GONE
@@ -473,8 +483,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
-
+        private val cardFile : CardView = itemView.findViewById(R.id.cardFile)
+        private val fileMessageView : TextView = itemView.findViewById(R.id.fileMessageView)
         fun bind(chatMessage: MainChat.ChatMessage) {
+            cardFile.visibility = View.GONE
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
                 imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
@@ -571,7 +583,19 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 audioPlayerView.visibility= View.VISIBLE
                 setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             }
-
+            else if(chatMessage.type == "file"){
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
+                cardFile.visibility = View.VISIBLE
+                fileMessageView.visibility = View.VISIBLE
+                fileMessageView.text = chatMessage.fileName
+                cardFile.setOnClickListener {
+                    downloadMedia(itemView.context, chatMessage.content, "file", chatMessage.fileName)
+                }
+            }
             else {
                 cardVideo.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -613,8 +637,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayerView: PlayerView = itemView.findViewById(R.id.audioPlayerView)
         private val audioPlayerLayout : CardView = itemView.findViewById(R.id.audioPlayerLayout)
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
-
+        private val cardFile : CardView = itemView.findViewById(R.id.cardFile)
+        private val fileMessageView : TextView = itemView.findViewById(R.id.fileMessageView)
         fun bind(chatMessage: MainChat.ChatMessage) {
+            cardFile.visibility = View. GONE
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
                 imageMessageView.visibility = View.VISIBLE // Hiển thị thumbnail trước
@@ -712,7 +738,19 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 audioPlayerView.visibility= View.VISIBLE
                 setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             }
-
+            else if(chatMessage.type == "file"){
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
+                cardFile.visibility = View.VISIBLE
+                fileMessageView.visibility = View.VISIBLE
+                fileMessageView.text = chatMessage.fileName
+                cardFile.setOnClickListener {
+                    downloadMedia(itemView.context, chatMessage.content, "file", chatMessage.fileName)
+                }
+            }
             else {
                 cardVideo.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -788,8 +826,10 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         val videoMessageView: PlayerView = itemView.findViewById(R.id.videoMessageView)
         private val cardVideo: CardView = itemView.findViewById(R.id.cardVideo)
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
-
+        private val cardFile : CardView = itemView.findViewById(R.id.cardFile)
+        private val fileMessageView : TextView = itemView.findViewById(R.id.fileMessageView)
         fun bind(chatMessage: MainChat.ChatMessage) {
+            cardFile.visibility = View. GONE
             // Trong phương thức bind hoặc xử lý
             if (chatMessage.type == "video") {
                 messageTextView.visibility = View.GONE
@@ -892,7 +932,19 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 audioPlayerView.visibility= View.VISIBLE
                 setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             }
-
+            else if(chatMessage.type == "file"){
+                cardVideo.visibility = View.GONE
+                videoMessageView.visibility = View.GONE
+                imageMessageView.visibility = View.GONE
+                messageTextView.visibility = View.GONE
+                audioPlayerLayout.visibility = View.GONE
+                cardFile.visibility = View.VISIBLE
+                fileMessageView.visibility = View.VISIBLE
+                fileMessageView.text = chatMessage.fileName
+                cardFile.setOnClickListener {
+                    downloadMedia(itemView.context, chatMessage.content, "file", chatMessage.fileName)
+                }
+            }
             else {
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE

@@ -16,6 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
+            android:maxWidth="250dp"
             android:layout_weight="1"
             android:background="@drawable/rounded_background_orange"
             android:paddingTop="10dp"
@@ -24,6 +25,37 @@
             android:paddingLeft="5dp"
 
             android:textColor="@android:color/white" />
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="180dp"
+            android:layout_height="45dp"
+            app:cardCornerRadius="16dp"
+            android:layout_marginEnd="5dp"
+            android:layout_gravity="center"
+            app:cardBackgroundColor="#696969"
+            android:visibility="gone"
+            android:id="@+id/cardFile">
+            <ImageView
+                android:id="@+id/fileIconView"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="8dp"
+                android:src="@drawable/baseline_file_copy_24"
+                android:layout_gravity="center_vertical"/>
+            <TextView
+                android:layout_marginLeft="45dp"
+                android:id="@+id/fileMessageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FDFDFD"
+                android:textSize="15dp"
+                android:text="File Name"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:layout_gravity="center_vertical"
+                />
+        </androidx.cardview.widget.CardView>
+
         <androidx.cardview.widget.CardView
             android:layout_marginEnd="5dp"
             android:padding="5dp"

@@ -107,6 +107,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         val sendId: String = "",
         val recvId: String = "",
         val type: String = "",
+        var fileName: String = "",
      //   val status: Boolean = false,
         val time: Long = 0L,
         var showSenderInfo: Boolean = false,
@@ -242,7 +243,8 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                 messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                             val pinned =
                                 messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
-
+                            val fileName =
+                                messageSnapshot.child("FileName").getValue(String::class.java) ?: ""
 //                            if (type == "text") {
 //                                val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
 //                                val secretKey = decodeBase64ToSecretKey(base64Key)
@@ -276,7 +278,8 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                 time = time,
                                 type = type,
                                 isSent =true,
-                                pinned = pinned
+                                pinned = pinned,
+                                fileName = fileName
                             ).apply {
                                 this.senderName = senderName
                                 this.avatarUrl = avatarUrl
@@ -341,7 +344,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         val time = messageSnapshot.child("Time").getValue(Long::class.java) ?: 0L
                         val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
                         val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
-
+                        val fileName = messageSnapshot.child("FileName").getValue(String::class.java) ?: ""
 //                        if (type == "text") {
 //                            val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
 //                            val secretKey = decodeBase64ToSecretKey(base64Key)
@@ -374,7 +377,8 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                             time = time,
                             type = type,
                             isSent = true,
-                            pinned = pinned
+                            pinned = pinned,
+                            fileName = fileName
                         )
                         tempMessages.add(chatMessage)
                     }
@@ -723,7 +727,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         }
     }
 
-    private fun sendMessage(message: String, type: String) {
+    private fun sendMessage(message: String, type: String, fileName : String = "") {
         if (!isGroup) {
             if (message.isNotEmpty()) {
                 Firebase.database.getReference("users").child(currentUserUid!!)
@@ -749,7 +753,8 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                     "SendId" to currentUserUid,
                     "RecvId" to targetUserUid,
                     "Time" to chatMessage.time,
-                    "Type" to type
+                    "Type" to type,
+                    "FileName" to fileName
                 )
                 Firebase.database.getReference("users").child(currentUserUid!!)
                     .child(targetUserUid).child("Messages").push().setValue(newMessage)
@@ -804,7 +809,8 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                 "SendId" to currentUserUid,
                                 "RecvId" to targetUserUid,
                                 "Time" to System.currentTimeMillis(),
-                                "Type" to type
+                                "Type" to type,
+                                "FileName" to fileName
                             )
 //                            database.push().setValue(newMessage)
                             val messageRef = Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
@@ -855,11 +861,24 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream) // Adjust quality as needed
         return outputStream.toByteArray()
     }
-
+    private fun getFileNameFromUri(uri: Uri): String {
+        var fileName = ""
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val nameIndex = it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
+                if (nameIndex != -1) {
+                    fileName = it.getString(nameIndex)
+                }
+            }
+        }
+        return fileName
+    }
     private fun uploadMediaToFirebase(fileUri: Uri, takePicture : Boolean = false) {
         // Xác định loại MIME của tệp
         val mimeType = contentResolver.getType(fileUri)
         Log.d("MainChat", "MIME type: $mimeType")
+        val fileName = getFileNameFromUri(fileUri)
         val storageRef = storage.reference.child("media/${UUID.randomUUID()}")
 
         val uploadTask = if (mimeType?.startsWith("image/") == true || takePicture == true) {
@@ -887,7 +906,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         sendMessage(downloadUrl, "video")
                     }
                     else -> {
-                        sendMessage(downloadUrl, "file")
+                        sendMessage(downloadUrl, "file",fileName!!)
                     }
                 }
             }

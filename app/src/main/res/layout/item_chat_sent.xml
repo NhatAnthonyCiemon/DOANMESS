@@ -77,6 +77,7 @@
         android:layout_height="45dp"
         app:cardCornerRadius="16dp"
         android:layout_margin="8dp"
+        app:cardBackgroundColor="#696969"
         android:layout_gravity="center"
         android:visibility="gone"
         android:id="@+id/cardFile">
@@ -88,7 +89,7 @@
             android:src="@drawable/baseline_file_copy_24"
             android:layout_gravity="center_vertical"/>
         <ProgressBar
-            android:indeterminateTint="#191918"
+            android:indeterminateTint="#CFCFCD"
             android:id="@+id/fileLoadingBar"
             android:layout_width="25dp"
             android:layout_height="25dp"
@@ -96,13 +97,14 @@
             android:visibility="gone"
             android:layout_gravity="center"/>
         <TextView
-            android:layout_marginLeft="42dp"
+            android:layout_marginLeft="45dp"
             android:id="@+id/fileMessageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
+            android:textColor="#FDFDFD"
             android:textSize="15dp"
             android:text="File Name"
+            android:textStyle="bold"
             android:visibility="gone"
             android:layout_gravity="center_vertical"
             />
