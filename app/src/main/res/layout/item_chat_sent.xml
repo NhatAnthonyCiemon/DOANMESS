@@ -133,20 +133,34 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
     </androidx.cardview.widget.CardView>
-    <ImageView
-        android:id="@+id/imageMessageView"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:adjustViewBounds="true"
-        android:visibility="gone"
-        android:scaleType="centerCrop"
-        android:layout_margin="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/image_corner_radius" />
+
+    <FrameLayout
+        android:id="@+id/thumbnailContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageMessageView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            android:scaleType="centerCrop"
+            android:layout_margin="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/image_corner_radius" />
 
 
+        <ImageView
+            android:id="@+id/playButtonOverlay"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_play_icon"
+            android:visibility="gone"/>
+    </FrameLayout>
     <TextView
         android:id="@+id/messageTextView"
         android:layout_width="wrap_content"

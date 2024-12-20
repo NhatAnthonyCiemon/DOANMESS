@@ -312,10 +312,12 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val cardFile : CardView = itemView.findViewById(R.id.cardFile)
         private val fileLoadingBar : ProgressBar = itemView.findViewById(R.id.fileLoadingBar)
         private val fileMessageView : TextView = itemView.findViewById(R.id.fileMessageView)
+        private val playButtonOverlay: ImageView = itemView.findViewById(R.id.playButtonOverlay)
         fun bind(chatMessage: MainChat.ChatMessage) {
             cardFile.visibility = View.GONE
             fileLoadingBar.visibility = View.GONE
             if (chatMessage.type == "video") {
+                playButtonOverlay.visibility = View.VISIBLE // Hiện nút play
                 messageTextView.visibility = View.GONE
                 videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
@@ -369,6 +371,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
                     // Set click listener to start video playback
                     imageMessageView.setOnClickListener {
+                        playButtonOverlay.visibility = View.GONE // Ẩn nút play
                         imageMessageView.visibility =
                             View.GONE // Hide thumbnail when video starts playing
                         videoMessageView.visibility = View.VISIBLE // Show the video player
@@ -380,7 +383,22 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                             chatMessage.content
                         )
                     }
+                    // Cập nhật click listener cho cả thumbnail và nút play
+                    val clickListener = View.OnClickListener {
+                        imageMessageView.visibility = View.GONE
+                        playButtonOverlay.visibility = View.GONE
+                        videoMessageView.visibility = View.VISIBLE
+                        cardVideo.visibility = View.VISIBLE
+                        setUpVideoPlayer(
+                            chatMessage.chatId,
+                            itemView.context,
+                            videoMessageView,
+                            chatMessage.content
+                        )
+                    }
 
+                    imageMessageView.setOnClickListener(clickListener)
+                    playButtonOverlay.setOnClickListener(clickListener)
                     // Long click listener on the video card
                     videoMessageView.setOnLongClickListener {
                         val position = adapterPosition
@@ -486,6 +504,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
         private val cardFile : CardView = itemView.findViewById(R.id.cardFile)
         private val fileMessageView : TextView = itemView.findViewById(R.id.fileMessageView)
+        private val playButtonOverlay: ImageView = itemView.findViewById(R.id.playButtonOverlay)
         fun bind(chatMessage: MainChat.ChatMessage) {
             cardFile.visibility = View.GONE
             if (chatMessage.type == "video") {
@@ -494,6 +513,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
                 cardVideo.visibility = View.GONE
+                playButtonOverlay.visibility = View.VISIBLE // Hiện nút play
 
                 // Show a placeholder while loading the thumbnail
                 Glide.with(itemView.context)
@@ -554,6 +574,22 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 videoMessageView.setOnClickListener {
                     showZoomedVideoDialog(itemView.context, chatMessage.content)
                 }
+                // Cập nhật click listener cho cả thumbnail và nút play
+                val clickListener = View.OnClickListener {
+                    imageMessageView.visibility = View.GONE
+                    playButtonOverlay.visibility = View.GONE
+                    videoMessageView.visibility = View.VISIBLE
+                    cardVideo.visibility = View.VISIBLE
+                    setUpVideoPlayer(
+                        chatMessage.chatId,
+                        itemView.context,
+                        videoMessageView,
+                        chatMessage.content
+                    )
+                }
+
+                imageMessageView.setOnClickListener(clickListener)
+                playButtonOverlay.setOnClickListener(clickListener)
             }
 
             else if (chatMessage.type == "image") {
@@ -562,6 +598,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 imageMessageView.visibility = View.VISIBLE
                 videoMessageView.visibility = View.VISIBLE
                 cardVideo.visibility = View.GONE
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
 
                 Glide.with(itemView.context)
                     .load(chatMessage.content) // Đường dẫn ảnh
@@ -640,6 +677,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
         private val cardFile : CardView = itemView.findViewById(R.id.cardFile)
         private val fileMessageView : TextView = itemView.findViewById(R.id.fileMessageView)
+        private val playButtonOverlay: ImageView = itemView.findViewById(R.id.playButtonOverlay)
         fun bind(chatMessage: MainChat.ChatMessage) {
             cardFile.visibility = View. GONE
             if (chatMessage.type == "video") {
@@ -648,6 +686,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
                 cardVideo.visibility = View.GONE
+                playButtonOverlay.visibility = View.VISIBLE // Hiện nút play
 
                 // Show a placeholder while loading the thumbnail
                 Glide.with(itemView.context)
@@ -708,6 +747,22 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 videoMessageView.setOnClickListener {
                     showZoomedVideoDialog(itemView.context, chatMessage.content)
                 }
+                // Cập nhật click listener cho cả thumbnail và nút play
+                val clickListener = View.OnClickListener {
+                    imageMessageView.visibility = View.GONE
+                    playButtonOverlay.visibility = View.GONE
+                    videoMessageView.visibility = View.VISIBLE
+                    cardVideo.visibility = View.VISIBLE
+                    setUpVideoPlayer(
+                        chatMessage.chatId,
+                        itemView.context,
+                        videoMessageView,
+                        chatMessage.content
+                    )
+                }
+
+                imageMessageView.setOnClickListener(clickListener)
+                playButtonOverlay.setOnClickListener(clickListener)
             }
 
             else if (chatMessage.type == "image") {
@@ -716,6 +771,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 imageMessageView.visibility = View.VISIBLE
                 videoMessageView.visibility = View.VISIBLE
                 cardVideo.visibility = View.GONE
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 Glide.with(itemView.context)
                     .load(chatMessage.content) // Đường dẫn ảnh
                     .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
@@ -829,6 +885,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
         private val audioPlayBtn : ImageButton = itemView.findViewById(R.id.audioPlayBtn)
         private val cardFile : CardView = itemView.findViewById(R.id.cardFile)
         private val fileMessageView : TextView = itemView.findViewById(R.id.fileMessageView)
+        private val playButtonOverlay: ImageView = itemView.findViewById(R.id.playButtonOverlay)
         fun bind(chatMessage: MainChat.ChatMessage) {
             cardFile.visibility = View. GONE
             // Trong phương thức bind hoặc xử lý
@@ -838,6 +895,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 videoMessageView.visibility = View.GONE // Ẩn player khi chưa phát
                 audioPlayerLayout.visibility = View.GONE
                 cardVideo.visibility = View.GONE
+                playButtonOverlay.visibility = View.VISIBLE // Hiện nút play
 
                 // Show a placeholder while loading the thumbnail
                 Glide.with(itemView.context)
@@ -904,7 +962,22 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     showZoomedVideoDialog(itemView.context, chatMessage.content)
                 }
 
+                // Cập nhật click listener cho cả thumbnail và nút play
+                val clickListener = View.OnClickListener {
+                    imageMessageView.visibility = View.GONE
+                    playButtonOverlay.visibility = View.GONE
+                    videoMessageView.visibility = View.VISIBLE
+                    cardVideo.visibility = View.VISIBLE
+                    setUpVideoPlayer(
+                        chatMessage.chatId,
+                        itemView.context,
+                        videoMessageView,
+                        chatMessage.content
+                    )
+                }
 
+                imageMessageView.setOnClickListener(clickListener)
+                playButtonOverlay.setOnClickListener(clickListener)
             }
 
             else if (chatMessage.type == "image") {
@@ -913,6 +986,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.GONE
                 imageMessageView.visibility = View.VISIBLE
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 Glide.with(itemView.context)
                     .load(chatMessage.content) // Đường dẫn ảnh
                     .transform(CenterCrop(), RoundedCorners(16)) // Bo góc 16dp
