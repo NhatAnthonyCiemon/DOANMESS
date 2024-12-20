@@ -617,12 +617,13 @@ class AllChatFra : Fragment() {
         }
     }
     fun deleteChat(uid: String) {
-        val firebase_user = Firebase.database.getReference("users").child(User!!.uid)
+        val firebase_user = Firebase.database.getReference("users")
         val firebase_group = Firebase.database.getReference("groups")
         if (idMess[uid] == true) {
             firebase_group.child(uid).removeValue()
         } else {
-            firebase_user.child(uid).removeValue()
+            firebase_user.child(User!!.uid).child(uid).removeValue()
+            firebase_user.child(uid).child(User!!.uid).removeValue()
         }
         idMess.remove(uid)
     }
