@@ -424,6 +424,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 }
             }
             else if (chatMessage.type == "image") {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 messageTextView.visibility = View.GONE
@@ -448,6 +449,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 })
             }
             else if (chatMessage.type == "audio") {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -463,6 +465,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 }
             }
             else if(chatMessage.type == "file"){
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -490,6 +493,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 })
             }
             else {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -628,6 +632,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             }
 
             else if (chatMessage.type == "image") {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.GONE
                 imageMessageView.visibility = View.VISIBLE
@@ -655,6 +660,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             }
 
             else if (chatMessage.type == "audio") {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -664,6 +670,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             }
             else if(chatMessage.type == "file"){
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -684,6 +691,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 })
             }
             else {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE
@@ -825,6 +833,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             }
 
             else if (chatMessage.type == "image") {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 messageTextView.visibility = View.GONE
                 audioPlayerLayout.visibility = View.GONE
                 imageMessageView.visibility = View.VISIBLE
@@ -854,6 +863,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             }
 
             else if (chatMessage.type == "audio") {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 messageTextView.visibility = View.GONE
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
@@ -863,6 +873,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             }
             else if(chatMessage.type == "file"){
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -883,6 +894,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 })
             }
             else {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
                 messageTextView.visibility = View.VISIBLE
@@ -1064,6 +1076,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             }
 
             else if (chatMessage.type == "image") {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 messageTextView.visibility = View.GONE
@@ -1089,6 +1102,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
             }
 
             else if (chatMessage.type == "audio") {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -1098,6 +1112,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 setupAudioPlayer(audioPlayBtn,chatMessage.chatId ,itemView.context, audioPlayerView, chatMessage.content)
             }
             else if(chatMessage.type == "file"){
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
@@ -1118,6 +1133,7 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 })
             }
             else {
+                playButtonOverlay.visibility = View.GONE // Ẩn nút play
                 cardVideo.visibility = View.GONE
                 videoMessageView.visibility = View.GONE
                 imageMessageView.visibility = View.GONE
