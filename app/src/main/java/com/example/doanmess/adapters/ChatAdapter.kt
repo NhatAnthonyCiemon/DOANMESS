@@ -481,6 +481,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                     fileMessageView.visibility = View.GONE
                     fileLoadingBar.visibility = View.VISIBLE
                 }
+                cardFile.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
             else {
                 cardVideo.visibility = View.GONE
@@ -668,6 +675,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 cardFile.setOnClickListener {
                     downloadMedia(itemView.context, chatMessage.content, "file", chatMessage.fileName)
                 }
+                cardFile.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
             else {
                 cardVideo.visibility = View.GONE
@@ -860,6 +874,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 cardFile.setOnClickListener {
                     downloadMedia(itemView.context, chatMessage.content, "file", chatMessage.fileName)
                 }
+                cardFile.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
             else {
                 cardVideo.visibility = View.GONE
@@ -1088,6 +1109,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 cardFile.setOnClickListener {
                     downloadMedia(itemView.context, chatMessage.content, "file", chatMessage.fileName)
                 }
+                cardFile.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
             else {
                 cardVideo.visibility = View.GONE
