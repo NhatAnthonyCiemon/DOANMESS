@@ -409,9 +409,18 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                         }
                         true // Return true to handle long click event
                     }
+
                     videoMessageView.setOnClickListener {
                         showZoomedVideoDialog(itemView.context, chatMessage.content)
                     }
+
+                    imageMessageView.setOnLongClickListener(View.OnLongClickListener {
+                        val position = adapterPosition
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onMessageLongClick(position, chatMessages[position])
+                        }
+                        true // Trả về true để xử lý sự kiện long click
+                    })
                 }
             }
             else if (chatMessage.type == "image") {
@@ -429,6 +438,14 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 imageMessageView.setOnClickListener {
                     showZoomedImageDialog(itemView.context, chatMessage.content)
                 }
+
+                imageMessageView.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
             else if (chatMessage.type == "audio") {
                 cardVideo.visibility = View.GONE
@@ -594,6 +611,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
                 imageMessageView.setOnClickListener(clickListener)
                 playButtonOverlay.setOnClickListener(clickListener)
+                imageMessageView.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
 
             else if (chatMessage.type == "image") {
@@ -614,6 +638,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 imageMessageView.setOnClickListener {
                     showZoomedImageDialog(itemView.context, chatMessage.content)
                 }
+                imageMessageView.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
 
             else if (chatMessage.type == "audio") {
@@ -769,6 +800,14 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
                 imageMessageView.setOnClickListener(clickListener)
                 playButtonOverlay.setOnClickListener(clickListener)
+
+                imageMessageView.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
 
             else if (chatMessage.type == "image") {
@@ -790,6 +829,14 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 imageMessageView.setOnClickListener {
                     showZoomedImageDialog(itemView.context, chatMessage.content)
                 }
+
+                imageMessageView.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
 
             else if (chatMessage.type == "audio") {
@@ -986,6 +1033,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
 
                 imageMessageView.setOnClickListener(clickListener)
                 playButtonOverlay.setOnClickListener(clickListener)
+                imageMessageView.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
 
             else if (chatMessage.type == "image") {
@@ -1004,6 +1058,13 @@ class ChatAdapter(private val chatMessages: MutableList<MainChat.ChatMessage>, v
                 imageMessageView.setOnClickListener {
                     showZoomedImageDialog(itemView.context, chatMessage.content)
                 }
+                imageMessageView.setOnLongClickListener(View.OnLongClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onMessageLongClick(position, chatMessages[position])
+                    }
+                    true // Trả về true để xử lý sự kiện long click
+                })
             }
 
             else if (chatMessage.type == "audio") {
