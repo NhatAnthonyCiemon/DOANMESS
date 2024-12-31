@@ -69,6 +69,7 @@ import com.example.doanmess.helper.MessageController
 import com.example.doanmess.helper.OnMessageLongClickListener
 import com.example.doanmess.R
 import com.example.doanmess.adapters.SeenAdapter
+import com.example.doanmess.helper.AESUtils
 import com.example.doanmess.models.ImageSeen
 
 class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
@@ -245,27 +246,57 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                 messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
                             val fileName =
                                 messageSnapshot.child("FileName").getValue(String::class.java) ?: ""
+//                            if (type == "text") {
+//                                val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
+//                                val secretKey = decodeBase64ToSecretKey(base64Key)
+//
+//                                // Kiểm tra nếu `content` là null hoặc không hợp lệ
+//                                val contentStr = content?.toString() ?: "Invalid content"
+//
+//                                // Giải mã nội dung với try-catch
+//                                val txt = try {
+//                                    decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+//                                } catch (e: Exception) {
+//                                    e.printStackTrace() // Log lỗi nếu có
+//                                    null // Trả về null nếu xảy ra lỗi
+//                                }
+//
+//                                // Kiểm tra kết quả giải mã
+//                                if (txt != null) {
+//                                    // Hiển thị nội dung nếu thành công
+//                                    content = txt
+//                                } else {
+//                                    // Hiển thị lỗi nếu giải mã thất bại
+//                                }
+//                            }
+
                             if (type == "text") {
                                 val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
-                                val secretKey = decodeBase64ToSecretKey(base64Key)
+
+                                // Tạo đối tượng AESUtils
+                                val aesUtils = AESUtils()
+
+                                // Giải mã khóa từ chuỗi Base64 thành SecretKey
+                                val secretKey = aesUtils.decodeBase64ToSecretKey(base64Key)
 
                                 // Kiểm tra nếu `content` là null hoặc không hợp lệ
                                 val contentStr = content?.toString() ?: "Invalid content"
 
                                 // Giải mã nội dung với try-catch
                                 val txt = try {
-                                    decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+                                    aesUtils.decryptMessage(contentStr, secretKey) // Gọi hàm giải mã từ lớp AESUtils
                                 } catch (e: Exception) {
-                                    e.printStackTrace() // Log lỗi nếu có
+                                    e.printStackTrace() // Ghi log lỗi nếu có
                                     null // Trả về null nếu xảy ra lỗi
                                 }
 
                                 // Kiểm tra kết quả giải mã
                                 if (txt != null) {
-                                    // Hiển thị nội dung nếu thành công
+                                    // Gán nội dung giải mã thành công cho `content`
                                     content = txt
                                 } else {
-                                    // Hiển thị lỗi nếu giải mã thất bại
+                                    // Thực hiện hành động khi giải mã thất bại
+                                    println("Decryption failed. Content remains encrypted or invalid.")
                                 }
                             }
 
@@ -345,29 +376,68 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
                         val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                         val fileName = messageSnapshot.child("FileName").getValue(String::class.java) ?: ""
+//                        if (type == "text") {
+//                            val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
+//                            val secretKey = decodeBase64ToSecretKey(base64Key)
+//
+//                            // Kiểm tra nếu `content` là null hoặc không hợp lệ
+//                            val contentStr = content?.toString() ?: "Invalid content"
+//
+//                            // Giải mã nội dung với try-catch
+//                            val txt = try {
+//                                decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+//                            } catch (e: Exception) {
+//                                e.printStackTrace() // Log lỗi nếu có
+//                                null // Trả về null nếu xảy ra lỗi
+//                            }
+//
+//                            // Kiểm tra kết quả giải mã
+//                            if (txt != null) {
+//                                // Hiển thị nội dung nếu thành công
+//                                content = txt
+//                            } else {
+//                                // Hiển thị lỗi nếu giải mã thất bại
+//                            }
+//                        }
                         if (type == "text") {
                             val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
-                            val secretKey = decodeBase64ToSecretKey(base64Key)
 
-                            // Kiểm tra nếu `content` là null hoặc không hợp lệ
-                            val contentStr = content?.toString() ?: "Invalid content"
+                            // Tạo đối tượng AESUtils
+                            val aesUtils = AESUtils()
 
-                            // Giải mã nội dung với try-catch
-                            val txt = try {
-                                decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+                            // Giải mã khóa từ chuỗi Base64 thành SecretKey
+                            val secretKey = try {
+                                aesUtils.decodeBase64ToSecretKey(base64Key)
                             } catch (e: Exception) {
-                                e.printStackTrace() // Log lỗi nếu có
-                                null // Trả về null nếu xảy ra lỗi
+                                e.printStackTrace() // Ghi log nếu xảy ra lỗi khi tạo khóa
+                                null // Trả về null nếu có lỗi
                             }
 
-                            // Kiểm tra kết quả giải mã
-                            if (txt != null) {
-                                // Hiển thị nội dung nếu thành công
-                                content = txt
+                            if (secretKey != null) {
+                                // Kiểm tra nếu `content` là null hoặc không hợp lệ
+                                val contentStr = content?.toString() ?: "Invalid content"
+
+                                // Giải mã nội dung với try-catch
+                                val txt = try {
+                                    aesUtils.decryptMessage(contentStr, secretKey) // Gọi hàm giải mã từ lớp AESUtils
+                                } catch (e: Exception) {
+                                    e.printStackTrace() // Ghi log lỗi nếu có
+                                    null // Trả về null nếu xảy ra lỗi
+                                }
+
+                                // Kiểm tra kết quả giải mã
+                                if (txt != null) {
+                                    // Gán nội dung giải mã thành công cho `content`
+                                    content = txt
+                                } else {
+                                    // Hiển thị lỗi nếu giải mã thất bại
+                                    println("Decryption failed. Content remains encrypted or invalid.")
+                                }
                             } else {
-                                // Hiển thị lỗi nếu giải mã thất bại
+                                println("Failed to decode Base64 key. Unable to proceed with decryption.")
                             }
                         }
+
 
                         val chatMessage = ChatMessage(
                             chatId = messageSnapshot.key ?: "",
@@ -438,12 +508,20 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         message_input = findViewById<android.widget.EditText>(R.id.message_input)
         // set on click listener for the send button to send the message
         findViewById<ImageButton>(R.id.send_button).setOnClickListener {
+            val aesUtils = AESUtils() // Tạo một instance của class AESUtils
+
             var message = message_input.text.toString()
             val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
-            val secretKey = decodeBase64ToSecretKey(base64Key)
-            message = encryptMessage(message, secretKey)
-//            Toast.makeText(this, decryptMessage(message, secretKey), Toast.LENGTH_SHORT).show()
-            sendMessage(message,"text")
+
+            try {
+                val secretKey = aesUtils.decodeBase64ToSecretKey(base64Key) // Gọi hàm từ AESUtils
+                message = aesUtils.encryptMessage(message, secretKey)       // Gọi hàm từ AESUtils
+                sendMessage(message, "text")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, "Error encrypting the message.", Toast.LENGTH_SHORT).show()
+            }
+
         }
         message_input.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -560,19 +638,43 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                     val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
 
                     // Kiểm tra và mã hóa nếu type là "text"
+//                    if (type == "text") {
+//                        val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
+//                        val secretKey = decodeBase64ToSecretKey(base64Key)
+//
+//                        // Kiểm tra nếu `content` là null hoặc không hợp lệ
+//                        val contentStr = content?.toString() ?: "Invalid content"
+//
+//                        // Giải mã nội dung với try-catch
+//                        val txt = try {
+//                            decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+//                        } catch (e: Exception) {
+//                            e.printStackTrace() // Log lỗi nếu có
+//                            null // Trả về null nếu xảy ra lỗi
+//                        }
+//
+//                        // Kiểm tra kết quả giải mã
+//                        if (txt != null) {
+//                            // Hiển thị nội dung nếu thành công
+//                            content = txt
+//                        } else {
+//                            // Hiển thị lỗi nếu giải mã thất bại
+//                        }
+//                    }
                     if (type == "text") {
                         val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
-                        val secretKey = decodeBase64ToSecretKey(base64Key)
+                        val aesUtils = AESUtils()  // Tạo một instance của class AESUtils
+                        val secretKey = aesUtils.decodeBase64ToSecretKey(base64Key)  // Gọi hàm decodeBase64ToSecretKey từ AESUtils
 
                         // Kiểm tra nếu `content` là null hoặc không hợp lệ
                         val contentStr = content?.toString() ?: "Invalid content"
 
                         // Giải mã nội dung với try-catch
                         val txt = try {
-                            decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
+                            aesUtils.decryptMessage(contentStr, secretKey)  // Gọi hàm decryptMessage từ AESUtils
                         } catch (e: Exception) {
-                            e.printStackTrace() // Log lỗi nếu có
-                            null // Trả về null nếu xảy ra lỗi
+                            e.printStackTrace()  // Log lỗi nếu có
+                            null  // Trả về null nếu xảy ra lỗi
                         }
 
                         // Kiểm tra kết quả giải mã
@@ -583,6 +685,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                             // Hiển thị lỗi nếu giải mã thất bại
                         }
                     }
+
 
                     val chatMessage = ChatMessage(
                         chatId = messageSnapshot.key ?: "",
@@ -1479,56 +1582,33 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             }
     }
 
-//    if (type == "text") {
-//        val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
-//        val secretKey = decodeBase64ToSecretKey(base64Key)
-//
-//        // Kiểm tra nếu `content` là null hoặc không hợp lệ
-//        val contentStr = content?.toString() ?: "Invalid content"
-//
-//        // Giải mã nội dung với try-catch
-//        val txt = try {
-//            decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
-//        } catch (e: Exception) {
-//            e.printStackTrace() // Log lỗi nếu có
-//            null // Trả về null nếu xảy ra lỗi
-//        }
-//
-//        // Kiểm tra kết quả giải mã
-//        if (txt != null) {
-//            // Hiển thị nội dung nếu thành công
-//            content = txt
-//        } else {
-//            // Hiển thị lỗi nếu giải mã thất bại
-//        }
+
+//    // Tạo khóa AES
+//    fun generateAESKey(): SecretKey {
+//        val keyGenerator = KeyGenerator.getInstance("AES")
+//        keyGenerator.init(128) // Kích thước khóa: 128 bit
+//        return keyGenerator.generateKey()
 //    }
-
-    // Tạo khóa AES
-    fun generateAESKey(): SecretKey {
-        val keyGenerator = KeyGenerator.getInstance("AES")
-        keyGenerator.init(128) // Kích thước khóa: 128 bit
-        return keyGenerator.generateKey()
-    }
-
-    fun decodeBase64ToSecretKey(base64Key: String): SecretKey {
-        val decodedKey = Base64.decode(base64Key, Base64.DEFAULT)
-        return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
-    }
-
-    // Mã hóa dữ liệu
-    fun encryptMessage(message: String, secretKey: SecretKey): String {
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        val encryptedBytes = cipher.doFinal(message.toByteArray())
-        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
-    }
-
-    // Giải mã dữ liệu
-    fun decryptMessage(encryptedMessage: String, secretKey: SecretKey): String {
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.DECRYPT_MODE, secretKey)
-        val decodedBytes = Base64.decode(encryptedMessage, Base64.DEFAULT)
-        val decryptedBytes = cipher.doFinal(decodedBytes)
-        return String(decryptedBytes)
-    }
+//
+//    fun decodeBase64ToSecretKey(base64Key: String): SecretKey {
+//        val decodedKey = Base64.decode(base64Key, Base64.DEFAULT)
+//        return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
+//    }
+//
+//    // Mã hóa dữ liệu
+//    fun encryptMessage(message: String, secretKey: SecretKey): String {
+//        val cipher = Cipher.getInstance("AES")
+//        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+//        val encryptedBytes = cipher.doFinal(message.toByteArray())
+//        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
+//    }
+//
+//    // Giải mã dữ liệu
+//    fun decryptMessage(encryptedMessage: String, secretKey: SecretKey): String {
+//        val cipher = Cipher.getInstance("AES")
+//        cipher.init(Cipher.DECRYPT_MODE, secretKey)
+//        val decodedBytes = Base64.decode(encryptedMessage, Base64.DEFAULT)
+//        val decryptedBytes = cipher.doFinal(decodedBytes)
+//        return String(decryptedBytes)
+//    }
 }
