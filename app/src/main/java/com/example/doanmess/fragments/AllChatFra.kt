@@ -24,6 +24,7 @@ import com.example.doanmess.models.MessageSQL
 import com.example.doanmess.MessageSQLDao
 import com.example.doanmess.MessageSQLDatabase
 import com.example.doanmess.R
+import com.example.doanmess.helper.AESUtils
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
@@ -318,7 +319,29 @@ class AllChatFra : Fragment() {
             "location" -> atvtContext.getString(R.string.Image)
             "audio" -> atvtContext.getString(R.string.Location)
             "file" -> atvtContext.getString(R.string.File)
-            else -> content
+            else -> {
+                if (type == "text") {
+                    val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
+                    val aesUtils = AESUtils()  // Tạo một instance của class AESUtils
+                    val secretKey = aesUtils.decodeBase64ToSecretKey(base64Key)  // Gọi hàm decodeBase64ToSecretKey từ AESUtils
+                    // Kiểm tra nếu `content` là null hoặc không hợp lệ
+                    val contentStr = content?.toString() ?: "Invalid content"
+                    // Giải mã nội dung với try-catch
+                    val txt = try {
+                        aesUtils.decryptMessage(contentStr, secretKey)  // Gọi hàm decryptMessage từ AESUtils
+                    } catch (e: Exception) {
+                        e.printStackTrace()  // Log lỗi nếu có
+                        null  // Trả về null nếu xảy ra lỗi
+                    }
+                    // Kiểm tra kết quả giải mã
+                    if (txt != null) {
+                        return txt
+                    } else {
+                        return content.toString()  // Trả về nội dung ban đầu nếu không giải mã được
+                    }
+                }
+                return content
+            }
         }
     }
 

@@ -515,8 +515,9 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 
             try {
                 val secretKey = aesUtils.decodeBase64ToSecretKey(base64Key) // Gọi hàm từ AESUtils
+                val non_encrypted_message = message
                 message = aesUtils.encryptMessage(message, secretKey)       // Gọi hàm từ AESUtils
-                sendMessage(message, "text")
+                sendMessage(message, "text","",non_encrypted_message)
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(this, "Error encrypting the message.", Toast.LENGTH_SHORT).show()
@@ -830,7 +831,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         }
     }
 
-    private fun sendMessage(message: String, type: String, fileName : String = "") {
+    private fun sendMessage(message: String, type: String, fileName : String = "", non_encrypted_message : String = "") {
         if (!isGroup) {
             if (message.isNotEmpty()) {
                 Firebase.database.getReference("users").child(currentUserUid!!)
@@ -867,7 +868,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                 //Save for target user
                 Firebase.database.getReference("users").child(targetUserUid!!)
                     .child(currentUserUid).child("Messages").push().setValue(newMessage)
-                var noti = message
+                var noti = non_encrypted_message
                 if(type == "audio") {
                     noti = getString(R.string.Audio)
                 }
@@ -918,8 +919,24 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
 //                            database.push().setValue(newMessage)
                             val messageRef = Firebase.database.getReference("groups").child(targetUserUid).child("Messages")
                             messageRef.push().setValue(newMessage)
-                            messageController.newMessageGroup(targetUserUid, currentUserUid, message)
-                            messageController.newMessageGroup(targetUserUid, currentUserUid, message)
+                            var noti = non_encrypted_message
+                            if(type == "audio") {
+                                noti = getString(R.string.Audio)
+                            }
+                            else if(type == "image") {
+                                noti = getString(R.string.Image)
+                            }
+                            else if(type == "video") {
+                                noti = getString(R.string.Video)
+                            }
+                            else if(type == "location") {
+                                noti = getString(R.string.Location)
+                            }
+                            else if(type == "file") {
+                                noti = getString(R.string.File)
+                            }
+                            messageController.newMessageGroup(targetUserUid, currentUserUid, noti)
+                            //messageController.newMessageGroup(targetUserUid, currentUserUid, message)
                         }
                     }
                 }
