@@ -1,10 +1,17 @@
 package com.example.doanmess.activities
 
+import android.app.ActivityOptions
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -25,6 +32,19 @@ class PostActivity : HandleOnlineActivity() {
     private var currentUser = ""
     private val postList = mutableListOf<Post>()
     private var posts = listOf<Post>()
+    private lateinit var doanmessText : TextView
+    private fun showCommentSection(post: Post) {
+        val intent = Intent(this, CommentActivity::class.java).apply {
+            putExtra("postId", post.id)
+            putExtra("postTitle", post.title)
+            putExtra("postMediaFile", post.mediaFile)
+            putExtra("postType", post.type)
+            putExtra("postLikes", post.likes)
+            putExtra("postLiked", post.liked)
+        }
+        val options = ActivityOptions.makeCustomAnimation(this, R.anim.slide_in_up, R.anim.no_anim)
+        startActivity(intent, options.toBundle())
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -41,7 +61,7 @@ class PostActivity : HandleOnlineActivity() {
         }
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        postAdapter = PostAdapter(postList, { post -> likePost(post) }, { post -> navigateToIndividualPost(post) })
+        postAdapter = PostAdapter(postList, { post -> likePost(post) }, { post -> navigateToIndividualPost(post) }, { post -> showCommentSection(post) })
         recyclerView.adapter = postAdapter
 
         findViewById<ImageButton>(R.id.addPost).setOnClickListener {
@@ -78,15 +98,22 @@ class PostActivity : HandleOnlineActivity() {
                 }
             }
         })
+        doanmessText = findViewById(R.id.doanmessText)
+        doanmessText.setOnClickListener {
+            recyclerView.smoothScrollToPosition(0)
+            reloadPosts()
+        }
+        loadPosts()
     }
     override fun onResume() {
         super.onResume()
         Log.d("PostActivity", "onResume")
+    }
+    fun reloadPosts() {
         postList.clear()
         postAdapter.notifyDataSetChanged()
         loadPosts()
     }
-
     override fun onPause() {
         super.onPause()
         postAdapter.releaseAllPlayers()
@@ -128,7 +155,8 @@ class PostActivity : HandleOnlineActivity() {
                                         mediaFile = doc.getString("mediaFile") ?: "",
                                         type = doc.getString("type") ?: "",
                                         likes = (doc.getLong("likes") ?: 0L).toInt(),
-                                        liked = liked.contains(doc.id)
+                                        liked = liked.contains(doc.id),
+                                        comments = (doc.getLong("comments") ?: 0L).toInt()
                                     )
                                 }.sortedByDescending { it.time }
 

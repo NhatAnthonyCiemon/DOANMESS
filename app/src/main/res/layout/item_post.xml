@@ -112,6 +112,36 @@
             android:textSize="17dp"
             android:textStyle="bold"
             android:layout_gravity="center_vertical"/>
+
+        <LinearLayout
+            android:layout_marginLeft="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="3dp"
+            android:id="@+id/commentLayout"
+            >
+
+            <ImageButton
+                android:layout_gravity="center_vertical"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:id="@+id/commentButton"
+                android:layout_marginRight="6dp"
+                android:background="@drawable/chat_bubble" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/postComments"
+                android:text="4"
+                android:textSize="17dp"
+                android:textStyle="bold"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+
     </LinearLayout>
 
 

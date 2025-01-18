@@ -43,7 +43,7 @@ class IndividualPost  : HandleOnlineActivity() {
         val profilePic = intent.getStringExtra("avatar") ?: ""
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        postAdapter = PostAdapter(postList, { post -> likePost(post) }, { post -> navigateToIndividualPost(post) })
+        postAdapter = PostAdapter(postList, { post -> likePost(post) }, { post -> navigateToIndividualPost(post) }, { post -> navigateToIndividualPost(post) })
         recyclerView.adapter = postAdapter
         name = findViewById(R.id.name)
         backBtn = findViewById(R.id.back_button)

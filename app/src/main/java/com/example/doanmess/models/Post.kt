@@ -10,6 +10,7 @@ data class Post (
     val mediaFile: String,
     val type : String,
     var likes: Int,
-    var liked: Boolean
+    var liked: Boolean,
+    val comments: Int,
 ){
 }

@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.media3.common.MediaItem
@@ -25,7 +26,8 @@ import com.example.doanmess.models.Post
 class PostAdapter(
     private val postList: List<Post>,
     private val onLikeClick: (Post) -> Unit,
-    private val onUserImageClick: (Post) -> Unit
+    private val onUserImageClick: (Post) -> Unit,
+    private val onCommentClick: (Post) -> Unit,
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -41,6 +43,7 @@ class PostAdapter(
         val username: TextView = itemView.findViewById(R.id.userName)
         val time: TextView = itemView.findViewById(R.id.postTime)
         val toggleButton: Button = itemView.findViewById(R.id.toggleButton)
+        val commentButton : ImageButton = itemView.findViewById(R.id.commentButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -133,7 +136,9 @@ class PostAdapter(
             holder.imagePreview.visibility = View.VISIBLE
             Glide.with(holder.imagePreview.context).load(post.mediaFile).into(holder.imagePreview)
         }
-
+        holder.commentButton.setOnClickListener {
+            onCommentClick(post)
+        }
     }
     val audioPlayerLists : MutableMap<String, ExoPlayer> = mutableMapOf()
     fun setUpVideoPlayer(postId:String, content: String, holder : PostViewHolder){
