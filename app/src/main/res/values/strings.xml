@@ -91,4 +91,6 @@
     <string name="failed_to_check_unnoticed">Failed to check unnoticed users: %1$s</string>
     <string name="invalid_user_data">Invalid user data.</string>
     <string name="Download">Downloading...</string>
+    <string name="writeCmt">Write a comment...</string>
+    <string name="comments">Comments</string>
 </resources>

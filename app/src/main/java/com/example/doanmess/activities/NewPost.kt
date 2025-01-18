@@ -133,7 +133,8 @@ class NewPost : HandleOnlineActivity() {
                     "mediaFile" to "",
                     "type" to "",
                     "time" to System.currentTimeMillis(),
-                    "likes" to 0
+                    "likes" to 0,
+                    "comments" to 0
                 )
                 uploadToFiresStore(post,postId,uid)
             }

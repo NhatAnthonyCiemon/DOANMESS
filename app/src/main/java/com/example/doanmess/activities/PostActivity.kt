@@ -13,6 +13,9 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,18 +36,11 @@ class PostActivity : HandleOnlineActivity() {
     private val postList = mutableListOf<Post>()
     private var posts = listOf<Post>()
     private lateinit var doanmessText : TextView
-    private fun showCommentSection(post: Post) {
-        val intent = Intent(this, CommentActivity::class.java).apply {
-            putExtra("postId", post.id)
-            putExtra("postTitle", post.title)
-            putExtra("postMediaFile", post.mediaFile)
-            putExtra("postType", post.type)
-            putExtra("postLikes", post.likes)
-            putExtra("postLiked", post.liked)
-        }
-        val options = ActivityOptions.makeCustomAnimation(this, R.anim.slide_in_up, R.anim.no_anim)
-        startActivity(intent, options.toBundle())
-    }
+    private val REQUEST_CODE = 1
+    private lateinit var commentActivityLauncher: ActivityResultLauncher<Intent>
+    private var lastPostId = ""
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -104,6 +100,21 @@ class PostActivity : HandleOnlineActivity() {
             reloadPosts()
         }
         loadPosts()
+        commentActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                updatePostComments(lastPostId)
+            }
+        }
+    }
+    private fun showCommentSection(post: Post) {
+        lastPostId = post.id
+        val intent = Intent(this, CommentActivity::class.java).apply {
+            putExtra("postId", post.id)
+            putExtra("postComments", post.comments)
+            putExtra("current", currentUser)
+        }
+        val options = ActivityOptionsCompat.makeCustomAnimation(this, R.anim.slide_in_up, R.anim.no_anim)
+        commentActivityLauncher.launch(intent, options)
     }
     override fun onResume() {
         super.onResume()
@@ -166,7 +177,6 @@ class PostActivity : HandleOnlineActivity() {
                                     if(posts.isNotEmpty()) {
                                         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                                         layoutManager.smoothScrollToPosition(recyclerView, null, 0);
-
                                     }
                             }
                             .addOnFailureListener { exception ->
@@ -210,12 +220,20 @@ class PostActivity : HandleOnlineActivity() {
         intent.putExtra("username", post.username)
         startActivity(intent)
     }
-/*    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 || requestCode == 0) {
-            postList.clear()
-            Log.d("PostActivity", "onActivityResult: $resultCode")
-            loadPosts()
-        }
-    }*/
+
+    private fun updatePostComments(postId: String) {
+        // Implement the logic to update the comments count for the post
+        val firestore = FirebaseFirestore.getInstance()
+        Log.d("PostActivity", "Updating comments count for post: $postId")
+        firestore.collection("posts").document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                val comments = document.getLong("comments") ?: 0
+                postList.find { it.id == postId }?.comments = comments.toInt()
+                postAdapter.notifyDataSetChanged()
+            }.addOnFailureListener() { e ->
+                Log.w("PostActivity", "Error getting post comments count", e)
+            }
+
+    }
 }

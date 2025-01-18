@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="xam">#a3a3a3</color>
     <color name="xanh">#2196F3</color>
+    <color name="liked_color">#DEAB66</color> <!-- Red color for liked comments -->
 </resources>

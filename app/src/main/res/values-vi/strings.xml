@@ -88,4 +88,6 @@
     <string name="failed_to_check_unnoticed">Không thể kiểm tra danh sách thông báo: %1$s</string>
     <string name="invalid_user_data">Dữ liệu người dùng không hợp lệ.</string>
     <string name="Download">Đang tải xuống...</string>
+    <string name="writeCmt">Viết bình luận...</string>
+    <string name="comments">Bình luận</string>
 </resources>

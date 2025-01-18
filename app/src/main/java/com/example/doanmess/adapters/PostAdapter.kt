@@ -44,6 +44,7 @@ class PostAdapter(
         val time: TextView = itemView.findViewById(R.id.postTime)
         val toggleButton: Button = itemView.findViewById(R.id.toggleButton)
         val commentButton : ImageButton = itemView.findViewById(R.id.commentButton)
+        val postComments : TextView = itemView.findViewById(R.id.postComments)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -97,6 +98,10 @@ class PostAdapter(
         holder.userImage.setOnClickListener {
             onUserImageClick(post)
         }
+        holder.postComments.text = post.comments.toString()
+        holder.commentButton.setOnClickListener {
+            onCommentClick(post)
+        }
         if(post.mediaFile==""){
             holder.imagePreview.visibility = View.GONE
             holder.videoPreview.visibility = View.GONE
@@ -136,9 +141,8 @@ class PostAdapter(
             holder.imagePreview.visibility = View.VISIBLE
             Glide.with(holder.imagePreview.context).load(post.mediaFile).into(holder.imagePreview)
         }
-        holder.commentButton.setOnClickListener {
-            onCommentClick(post)
-        }
+
+
     }
     val audioPlayerLists : MutableMap<String, ExoPlayer> = mutableMapOf()
     fun setUpVideoPlayer(postId:String, content: String, holder : PostViewHolder){

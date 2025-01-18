@@ -8,6 +8,9 @@ import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,7 +30,8 @@ class IndividualPost  : HandleOnlineActivity() {
     private var targetUser = ""
     private val postList = mutableListOf<Post>()
     private lateinit var name :TextView
-
+    private var lastPostId = ""
+    private lateinit var commentActivityLauncher: ActivityResultLauncher<Intent>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,15 +41,19 @@ class IndividualPost  : HandleOnlineActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         currentUser = intent.getStringExtra("current") ?: ""
         targetUser = intent.getStringExtra("target") ?: ""
         val profilePic = intent.getStringExtra("avatar") ?: ""
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        postAdapter = PostAdapter(postList, { post -> likePost(post) }, { post -> navigateToIndividualPost(post) }, { post -> navigateToIndividualPost(post) })
+        postAdapter = PostAdapter(postList, { post -> likePost(post) }, { post -> navigateToIndividualPost(post) }, { post -> showCommentSection(post) })
         recyclerView.adapter = postAdapter
         name = findViewById(R.id.name)
+        name.setOnClickListener{
+            postList.clear()
+            postAdapter.notifyDataSetChanged()
+            loadPosts()
+        }
         backBtn = findViewById(R.id.back_button)
         backBtn.setOnClickListener {
             finish()
@@ -85,14 +93,31 @@ class IndividualPost  : HandleOnlineActivity() {
                 }
             }
         })
-      //  loadPosts()
+        loadPosts()
+        commentActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                updatePostComments(lastPostId)
+            }
+        }
+    }
+    private fun updatePostComments(postId: String) {
+        // Implement the logic to update the comments count for the post
+        val firestore = FirebaseFirestore.getInstance()
+        Log.d("PostActivity", "Updating comments count for post: $postId")
+        firestore.collection("posts").document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                val comments = document.getLong("comments") ?: 0
+                postList.find { it.id == postId }?.comments = comments.toInt()
+                postAdapter.notifyDataSetChanged()
+            }.addOnFailureListener() { e ->
+                Log.w("PostActivity", "Error getting post comments count", e)
+            }
+
     }
     override fun onResume() {
         super.onResume()
         Log.d("PostActivity", "onResume")
-        postList.clear()
-        postAdapter.notifyDataSetChanged()
-        loadPosts()
     }
     private fun loadPosts() {
         val firestore = FirebaseFirestore.getInstance()
@@ -118,7 +143,8 @@ class IndividualPost  : HandleOnlineActivity() {
                                     mediaFile = doc.getString("mediaFile") ?: "",
                                     type = doc.getString("type") ?: "",
                                     likes = (doc.getLong("likes") ?: 0L).toInt(),
-                                    liked = liked.contains(doc.id)
+                                    liked = liked.contains(doc.id),
+                                    comments = (doc.getLong("comments") ?: 0L).toInt()
                                 )
                             }.sortedByDescending { it.time }
                             postList.clear()
@@ -162,5 +188,15 @@ class IndividualPost  : HandleOnlineActivity() {
     }
     private fun navigateToIndividualPost(post: Post) {
         // do nothing
+    }
+    private fun showCommentSection(post: Post) {
+        lastPostId = post.id
+        val intent = Intent(this, CommentActivity::class.java).apply {
+            putExtra("postId", post.id)
+            putExtra("postComments", post.comments)
+            putExtra("current", currentUser)
+        }
+        val options = ActivityOptionsCompat.makeCustomAnimation(this, R.anim.slide_in_up, R.anim.no_anim)
+        commentActivityLauncher.launch(intent, options)
     }
 }
