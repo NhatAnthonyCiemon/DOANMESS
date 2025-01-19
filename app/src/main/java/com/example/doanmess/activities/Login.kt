@@ -125,16 +125,6 @@ class Login : AppCompatActivity() {
     }
 
 
-    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        try {
-            val account: GoogleSignInAccount? = completedTask.getResult(ApiException::class.java)
-            account?.let {
-                Toast.makeText(this, "Welcome, ${it.displayName}", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: ApiException) {
-            Toast.makeText(this, "Sign in failed: ${e.statusCode}", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -202,25 +192,6 @@ class Login : AppCompatActivity() {
                 val existingUser = document.toObject(User::class.java)
                 if (existingUser != null) {
                     callback(existingUser)
-                }
-            }
-        }
-    }
-
-    private fun saveUserToFirestoreIfNew() {
-        val uid = auth.currentUser?.uid ?: return
-        val userRef = db.collection("users").document(uid)
-        userRef.get().addOnSuccessListener { document ->
-            if (!document.exists()) {
-                val newUser = User(
-                    Name = auth.currentUser?.displayName ?: "",
-                    Avatar = auth.currentUser?.photoUrl.toString(),
-                    Devices = listOf(Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID))
-                )
-                userRef.set(newUser).addOnSuccessListener {
-                    Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show()
-                }.addOnFailureListener {
-                    Toast.makeText(this, "Failed to save user: ${it.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
