@@ -170,7 +170,6 @@ class InforChat : HandleOnlineActivity() {
         val frmNotice = findViewById<FrameLayout>(R.id.frmNotice)
         val frmLink = findViewById<FrameLayout>(R.id.frmLink)
         val frmBlock = findViewById<FrameLayout>(R.id.frmBlock)
-        val frmTrash = findViewById<FrameLayout>(R.id.frmTrash)
         val btnNotice: FloatingActionButton = findViewById(R.id.btnNotice)
 
         frmNotice.setOnClickListener {
@@ -298,27 +297,6 @@ class InforChat : HandleOnlineActivity() {
                     }
             }
         }
-
-        frmTrash.setOnClickListener {
-            changeBackgroundColor(frmTrash, "#D9D9D9", 150)
-            AlertDialog.Builder(this)
-                .setTitle("Delete")
-                .setMessage("Do you want to delete?")
-                .setPositiveButton("Yes") { dialog, which ->
-                    // Xử lý khi người dùng chọn "Có"
-                }
-                .setNegativeButton("No") { dialog, which ->
-                    // Đóng hộp thoại khi người dùng chọn "Không"
-                    dialog.dismiss()
-                }
-                .create().apply {
-                    // Thiết lập background cho dialog
-                    window?.setBackgroundDrawableResource(R.drawable.background_dialog_delete)
-                }
-                .show()
-        }
-
-
     }
 
     private fun checkBlock(isBlocked: Boolean) {

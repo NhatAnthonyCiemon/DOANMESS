@@ -229,29 +229,6 @@
             android:textSize="25dp" />
       </FrameLayout>
 
-      <FrameLayout
-          android:id="@+id/frmTrash"
-          android:layout_width="match_parent"
-          android:layout_height="40dp"
-          android:layout_marginTop="20dp">
-
-        <ImageView
-            android:id="@+id/imgTrash"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/trash_black" />
-
-        <TextView
-            android:id="@+id/txtTrash"
-            android:layout_width="280dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="80dp"
-            android:gravity="center_vertical"
-            android:text="@string/Deletemessage"
-            android:textSize="25dp" />
-      </FrameLayout>
     </LinearLayout>
 
     <ImageView
