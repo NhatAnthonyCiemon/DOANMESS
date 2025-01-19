@@ -89,7 +89,7 @@
                 app:srcCompat="@drawable/background_email_input" />
 
             <ImageView
-                android:id="@+id/imageView6"
+                android:id="@+id/imageView62"
                 android:layout_width="28dp"
                 android:layout_height="26dp"
                 android:layout_gravity="center"
@@ -125,14 +125,14 @@
             android:layout_marginBottom="10dp">
 
             <ImageView
-                android:id="@+id/imageView5"
+                android:id="@+id/imageView52"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 app:srcCompat="@drawable/background_email_input" />
 
             <ImageView
-                android:id="@+id/imageView6"
+                android:id="@+id/imageView64"
                 android:layout_width="28dp"
                 android:layout_height="26dp"
                 android:layout_gravity="center"
@@ -160,7 +160,7 @@
             android:layout_marginBottom="10dp">
 
             <ImageView
-                android:id="@+id/imageView5"
+                android:id="@+id/imageView53"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -195,14 +195,14 @@
             android:layout_marginBottom="10dp">
 
             <ImageView
-                android:id="@+id/imageView5"
+                android:id="@+id/imageView59"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 app:srcCompat="@drawable/background_email_input" />
 
             <ImageView
-                android:id="@+id/imageView6"
+                android:id="@+id/imageView66"
                 android:layout_width="28dp"
                 android:layout_height="26dp"
                 android:layout_gravity="center"
