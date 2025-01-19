@@ -30,6 +30,7 @@ import com.example.doanmess.MessageSQLDatabase
 import com.example.doanmess.R
 import com.example.doanmess.activities.Block
 import com.example.doanmess.activities.FriendRequest
+import com.example.doanmess.activities.Home
 import com.example.doanmess.activities.friendList
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -245,12 +246,20 @@ class inforFragment : Fragment() {
 
     private fun changeNameFunc(view: View) {
         val edtChangeName = view.findViewById<EditText>(R.id.edtChangeName)
-        val txtName = view.findViewById<TextView>(R.id.txtName)
+        val txtNameFragment = view.findViewById<TextView>(R.id.txtName)
 
-        edtChangeName.setText(txtName.text.toString())
+        // Truy cập TextView trong Activity
+        val parentActivity = activity as? Home
+        val txtNameActivity = parentActivity?.findViewById<TextView>(R.id.txtName)
+
+        // Đồng bộ EditText với TextView (ưu tiên Fragment trước)
+        txtNameFragment?.let {
+            edtChangeName.setText(it.text.toString())
+        }
         edtChangeName.setSelection(edtChangeName.text.length)
 
-        txtName.visibility = View.INVISIBLE
+        // Hiển thị EditText và ẩn TextView trong Fragment
+        txtNameFragment.visibility = View.INVISIBLE
         edtChangeName.visibility = View.VISIBLE
         edtChangeName.requestFocus()
 
@@ -259,11 +268,21 @@ class inforFragment : Fragment() {
 
         edtChangeName.setOnKeyListener { _, keyCode, event ->
             if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                txtName.text = edtChangeName.text.toString()
-                edtChangeName.visibility = View.INVISIBLE
-                txtName.visibility = View.VISIBLE
+                val newName = edtChangeName.text.toString()
 
-                saveUserName(txtName.text.toString())
+                // Cập nhật TextView trong Fragment
+                txtNameFragment.text = newName
+                txtNameFragment.visibility = View.VISIBLE
+
+                // Cập nhật TextView trong Activity
+                txtNameActivity?.text = newName
+
+                edtChangeName.visibility = View.INVISIBLE
+
+                // Gọi hàm lưu tên người dùng
+                saveUserName(newName)
+
+                // Ẩn bàn phím
                 imm.hideSoftInputFromWindow(edtChangeName.windowToken, 0)
                 true
             } else {
@@ -271,6 +290,7 @@ class inforFragment : Fragment() {
             }
         }
     }
+
 
     private fun toggleDarkMode(txtMode: TextView) {
         val currentMode = txtMode.text.toString()
