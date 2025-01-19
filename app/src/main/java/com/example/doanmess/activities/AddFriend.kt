@@ -63,6 +63,7 @@ class AddFriend :  HandleOnlineActivity() {
                 } else {
                     userList.clear()
                     adapter.changeList(userList)
+                    lastVisible = null
                     fetchUsers(filter)
       /*              val filterLowerCase = filter.toLowerCase()
                     val filteredList = userList.filter { it.name.toLowerCase().contains(filterLowerCase) }
