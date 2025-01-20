@@ -60,11 +60,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.util.UUID
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-import javax.crypto.spec.SecretKeySpec
-import android.util.Base64
 import com.example.doanmess.helper.MessageController
 import com.example.doanmess.helper.OnMessageLongClickListener
 import com.example.doanmess.R
@@ -183,10 +178,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
             override fun onItemClick(position: Int) {
                 val message = chatMessages[position]
                 if (message.type == "location") {
-                /*    val intent = Intent(this@MainChat, MapsActivity::class.java).apply {
-                        putExtra("content", message.content)
-                    }
-                    startActivity(intent)*/
                     val url = message.content.split(" ").getOrNull(1) // Assuming the URL is the second part of the content
                     if (url != null) {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -1344,7 +1335,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
         val pinButton: Button = dialogView.findViewById(R.id.pin_button)
         val deleteButton: Button = dialogView.findViewById(R.id.delete_button)
         val cancelButton: Button = dialogView.findViewById(R.id.cancel_button)
-
 
         if(isGroup){
             Firebase.database.getReference("groups").child(targetUserUid).child("Messages").child(message.chatId)

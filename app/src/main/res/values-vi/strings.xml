@@ -90,4 +90,6 @@
     <string name="Download">Đang tải xuống...</string>
     <string name="writeCmt">Viết bình luận...</string>
     <string name="comments">Bình luận</string>
+    <string name="name_in_main_chat">Tên người dùng</string>
+    <string name="image_holder">Ảnh tạm</string>
 </resources>

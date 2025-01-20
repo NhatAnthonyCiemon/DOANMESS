@@ -93,4 +93,7 @@
     <string name="Download">Downloading...</string>
     <string name="writeCmt">Write a comment...</string>
     <string name="comments">Comments</string>
+    <string name="name_in_main_chat">Username</string>
+    <string name="image_holder">Placeholder Image</string>
+
 </resources>
