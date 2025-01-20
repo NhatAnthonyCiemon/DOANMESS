@@ -237,29 +237,6 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                 messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
                             val fileName =
                                 messageSnapshot.child("FileName").getValue(String::class.java) ?: ""
-//                            if (type == "text") {
-//                                val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
-//                                val secretKey = decodeBase64ToSecretKey(base64Key)
-//
-//                                // Kiểm tra nếu `content` là null hoặc không hợp lệ
-//                                val contentStr = content?.toString() ?: "Invalid content"
-//
-//                                // Giải mã nội dung với try-catch
-//                                val txt = try {
-//                                    decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
-//                                } catch (e: Exception) {
-//                                    e.printStackTrace() // Log lỗi nếu có
-//                                    null // Trả về null nếu xảy ra lỗi
-//                                }
-//
-//                                // Kiểm tra kết quả giải mã
-//                                if (txt != null) {
-//                                    // Hiển thị nội dung nếu thành công
-//                                    content = txt
-//                                } else {
-//                                    // Hiển thị lỗi nếu giải mã thất bại
-//                                }
-//                            }
 
                             if (type == "text") {
                                 val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
@@ -367,29 +344,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                         val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
                         val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                         val fileName = messageSnapshot.child("FileName").getValue(String::class.java) ?: ""
-//                        if (type == "text") {
-//                            val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
-//                            val secretKey = decodeBase64ToSecretKey(base64Key)
-//
-//                            // Kiểm tra nếu `content` là null hoặc không hợp lệ
-//                            val contentStr = content?.toString() ?: "Invalid content"
-//
-//                            // Giải mã nội dung với try-catch
-//                            val txt = try {
-//                                decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
-//                            } catch (e: Exception) {
-//                                e.printStackTrace() // Log lỗi nếu có
-//                                null // Trả về null nếu xảy ra lỗi
-//                            }
-//
-//                            // Kiểm tra kết quả giải mã
-//                            if (txt != null) {
-//                                // Hiển thị nội dung nếu thành công
-//                                content = txt
-//                            } else {
-//                                // Hiển thị lỗi nếu giải mã thất bại
-//                            }
-//                        }
+
                         if (type == "text") {
                             val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
 
@@ -629,30 +584,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                     val type = messageSnapshot.child("Type").getValue(String::class.java) ?: "text"
                     val pinned = messageSnapshot.child("Pinned").getValue(Boolean::class.java) ?: false
 
-                    // Kiểm tra và mã hóa nếu type là "text"
-//                    if (type == "text") {
-//                        val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
-//                        val secretKey = decodeBase64ToSecretKey(base64Key)
-//
-//                        // Kiểm tra nếu `content` là null hoặc không hợp lệ
-//                        val contentStr = content?.toString() ?: "Invalid content"
-//
-//                        // Giải mã nội dung với try-catch
-//                        val txt = try {
-//                            decryptMessage(contentStr, secretKey) // Gọi hàm giải mã
-//                        } catch (e: Exception) {
-//                            e.printStackTrace() // Log lỗi nếu có
-//                            null // Trả về null nếu xảy ra lỗi
-//                        }
-//
-//                        // Kiểm tra kết quả giải mã
-//                        if (txt != null) {
-//                            // Hiển thị nội dung nếu thành công
-//                            content = txt
-//                        } else {
-//                            // Hiển thị lỗi nếu giải mã thất bại
-//                        }
-//                    }
+
                     if (type == "text") {
                         val base64Key = "q+xZ9yXk5F8WlKsbJb4sHg=="
                         val aesUtils = AESUtils()  // Tạo một instance của class AESUtils
@@ -891,13 +823,7 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
                                     Firebase.database.getReference("groups").child(targetUserUid).child("Status").child(user).setValue(false)
                                 }
                             }
-                            // After updating the status, push the new message
-           /*                 val chatMessage = ChatMessage(
-                                content = message,
-                                sendId = currentUserUid ?: "",
-                                recvId = targetUserUid,
-                                time = System.currentTimeMillis()
-                            )*/
+
                             message_input.text.clear()
                             val newMessage = mapOf(
                                 "Content" to message,
@@ -1590,32 +1516,5 @@ class MainChat  : HandleOnlineActivity(), OnMessageLongClickListener {
     }
 
 
-//    // Tạo khóa AES
-//    fun generateAESKey(): SecretKey {
-//        val keyGenerator = KeyGenerator.getInstance("AES")
-//        keyGenerator.init(128) // Kích thước khóa: 128 bit
-//        return keyGenerator.generateKey()
-//    }
-//
-//    fun decodeBase64ToSecretKey(base64Key: String): SecretKey {
-//        val decodedKey = Base64.decode(base64Key, Base64.DEFAULT)
-//        return SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
-//    }
-//
-//    // Mã hóa dữ liệu
-//    fun encryptMessage(message: String, secretKey: SecretKey): String {
-//        val cipher = Cipher.getInstance("AES")
-//        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-//        val encryptedBytes = cipher.doFinal(message.toByteArray())
-//        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
-//    }
-//
-//    // Giải mã dữ liệu
-//    fun decryptMessage(encryptedMessage: String, secretKey: SecretKey): String {
-//        val cipher = Cipher.getInstance("AES")
-//        cipher.init(Cipher.DECRYPT_MODE, secretKey)
-//        val decodedBytes = Base64.decode(encryptedMessage, Base64.DEFAULT)
-//        val decryptedBytes = cipher.doFinal(decodedBytes)
-//        return String(decryptedBytes)
-//    }
+
 }
